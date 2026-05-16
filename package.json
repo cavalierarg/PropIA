@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.96.0",
     "@clerk/backend": "^1.33.1",
     "@clerk/nextjs": "^6.20.0",
     "@hookform/resolvers": "^5.0.1",
