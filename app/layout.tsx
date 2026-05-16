@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PropIA — Generador de Posts Inmobiliarios",
-  description: "Generá posts para Instagram, Facebook y LinkedIn en segundos con inteligencia artificial.",
+  description: "Genera posts para Instagram, Facebook y LinkedIn en segundos con inteligencia artificial.",
 };
 
 export default function RootLayout({

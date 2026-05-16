@@ -20,7 +20,7 @@ export type PropertyData = {
 export const generarPosts = async (data: PropertyData): Promise<PostResult[]> => {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  const prompt = `Eres un experto en marketing inmobiliario en Argentina. Tu tono es profesional pero cercano, como un agente de confianza que habla con un cliente.
+  const prompt = `Eres un experto en marketing inmobiliario. Tu tono es profesional pero cercano, como un agente de confianza que habla con un cliente. Escribe en español neutro que funcione para cualquier país hispanohablante (México, España, Colombia, etc.). Usa vocabulario inclusivo: cuando menciones el tipo de inmueble usa tanto "departamento" como "apartamento" si aplica. Evita modismos regionales.
 
 Genera 5 posts en español para la siguiente propiedad:
 

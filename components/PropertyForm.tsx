@@ -48,7 +48,7 @@ export default function PropertyForm() {
     setPosts([]);
 
     if (!form.tipoPropiedad || !form.ubicacion || !form.metrosCuadrados || !form.precio) {
-      setError("Por favor completá todos los campos obligatorios.");
+      setError("Por favor completa todos los campos obligatorios.");
       return;
     }
 
@@ -57,7 +57,7 @@ export default function PropertyForm() {
       const result = await generarPosts(form);
       setPosts(result);
     } catch {
-      setError("Ocurrió un error al generar los posts. Verificá tu clave de API e intentá de nuevo.");
+      setError("Ocurrió un error al generar los posts. Verifica tu clave de API e intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -100,7 +100,7 @@ export default function PropertyForm() {
             <Input
               id="ubicacion"
               name="ubicacion"
-              placeholder="Ej: Palermo, Buenos Aires"
+              placeholder="Ej: Polanco, Ciudad de México"
               value={form.ubicacion}
               onChange={handleChange}
               required
