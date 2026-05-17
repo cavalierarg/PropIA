@@ -5,7 +5,7 @@ import { createSupabaseClient } from "@/lib/supabase";
 
 export const MONTHLY_LIMIT = 10;
 
-function getCurrentMonth(): string {
+export function getCurrentMonth(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
