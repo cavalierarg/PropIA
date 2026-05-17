@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
 import { getUsage } from "@/lib/actions/usage.actions";
-import { CheckIcon, CopyIcon, LoaderIcon, ZapIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, LoaderIcon, ZapIcon, LogInIcon } from "lucide-react";
+import Link from "next/link";
 
 const MONTHLY_LIMIT = 10;
 
@@ -60,6 +61,7 @@ export default function PropertyForm() {
   const [error, setError] = useState("");
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [unauthenticated, setUnauthenticated] = useState(false);
 
   useEffect(() => {
     getUsage().then(({ remaining }) => setRemaining(remaining));
@@ -74,6 +76,7 @@ export default function PropertyForm() {
     setError("");
     setPosts([]);
     setRecomendaciones(null);
+    setUnauthenticated(false);
 
     if (!form.tipoPropiedad || !form.ubicacion || !form.metrosCuadrados || !form.precio) {
       setError("Por favor completa todos los campos obligatorios.");
@@ -90,6 +93,8 @@ export default function PropertyForm() {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "LIMIT_REACHED") {
         setRemaining(0);
+      } else if (err instanceof Error && err.message === "UNAUTHENTICATED") {
+        setUnauthenticated(true);
       } else {
         setError(
           "Ocurrió un error al generar los posts. Verifica tu clave de API e intenta de nuevo."
@@ -176,6 +181,24 @@ export default function PropertyForm() {
             Pronto habrá planes de suscripción disponibles con generaciones ilimitadas. ¡Gracias
             por usar PropIA!
           </p>
+        </div>
+      )}
+
+      {/* Banner: sesión requerida */}
+      {unauthenticated && (
+        <div className="border border-[#0f3460]/20 bg-[#0f3460]/5 rounded-xl p-4 sm:p-5 flex flex-col gap-3">
+          <p className="font-semibold text-[#0f3460] text-sm sm:text-base">
+            Necesitás iniciar sesión para generar posts
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Creá tu cuenta gratis y accedé a 10 generaciones mensuales.
+          </p>
+          <Button asChild className="w-full sm:w-auto sm:self-start h-11 sm:h-10">
+            <Link href="/sign-in" className="flex items-center gap-2">
+              <LogInIcon className="w-4 h-4" />
+              Iniciar sesión
+            </Link>
+          </Button>
         </div>
       )}
 
