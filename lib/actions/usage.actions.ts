@@ -3,9 +3,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 
-export const MONTHLY_LIMIT = 10;
+const MONTHLY_LIMIT = 10;
 
-export function getCurrentMonth(): string {
+function getCurrentMonth(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
