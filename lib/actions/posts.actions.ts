@@ -133,22 +133,48 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
   }
 }`;
 
-  const message = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 6000,
-    messages: [{ role: "user", content: prompt }],
-  });
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error("[posts.actions] ERROR: ANTHROPIC_API_KEY no está definida en las variables de entorno");
+    throw new Error("API key no configurada");
+  }
+
+  let message;
+  try {
+    message = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 6000,
+      messages: [{ role: "user", content: prompt }],
+    });
+  } catch (apiError) {
+    console.error("[posts.actions] ERROR al llamar a la API de Anthropic:", apiError);
+    throw apiError;
+  }
 
   const rawText = message.content[0].type === "text" ? message.content[0].text : "";
-  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("La respuesta de la IA no tiene el formato esperado");
+  console.log("[posts.actions] Respuesta de Anthropic (primeros 200 chars):", rawText.slice(0, 200));
 
-  const parsed = JSON.parse(jsonMatch[0]);
+  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.error("[posts.actions] ERROR: respuesta sin JSON válido. Texto completo:", rawText);
+    throw new Error("La respuesta de la IA no tiene el formato esperado");
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch (parseError) {
+    console.error("[posts.actions] ERROR al parsear JSON:", parseError, "\nJSON recibido:", jsonMatch[0]);
+    throw parseError;
+  }
 
   const newCount = currentCount + 1;
-  await supabase
+  const { error: upsertError } = await supabase
     .from("usage")
     .upsert({ user_id: userId, month, count: newCount }, { onConflict: "user_id,month" });
+
+  if (upsertError) {
+    console.error("[posts.actions] ERROR al actualizar usage en Supabase:", upsertError);
+  }
 
   return {
     posts: parsed.posts as PostResult[],
