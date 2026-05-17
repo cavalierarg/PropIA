@@ -178,12 +178,15 @@ export default function PropertyForm() {
       {/* Resultados */}
       {posts.length > 0 && (
         <div className="flex flex-col gap-6">
-          <h2 className="text-2xl font-bold">Tus posts listos para publicar</h2>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-bold text-[#0f3460]">Tus posts listos para publicar</h2>
+            <div className="h-1 w-16 bg-[#00d4d4] rounded-full" />
+          </div>
           <div className="grid grid-cols-1 gap-5">
             {posts.map((post, index) => (
               <div
                 key={index}
-                className="border rounded-xl overflow-hidden shadow-sm"
+                className="border border-[#0f3460]/10 rounded-xl overflow-hidden shadow-sm"
               >
                 <div className={`px-4 py-2 text-sm font-semibold ${COLORES_RED[post.red]}`}>
                   {post.red}
