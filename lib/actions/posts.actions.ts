@@ -1,6 +1,15 @@
 "use server";
 
 import Anthropic from "@anthropic-ai/sdk";
+import { auth } from "@clerk/nextjs/server";
+import { createSupabaseClient } from "@/lib/supabase";
+
+const MONTHLY_LIMIT = 10;
+
+function getCurrentMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
 
 export type PostResult = {
   red: "Instagram" | "Facebook" | "LinkedIn";
@@ -17,7 +26,28 @@ export type PropertyData = {
   caracteristica3: string;
 };
 
-export const generarPosts = async (data: PropertyData): Promise<PostResult[]> => {
+export const generarPosts = async (
+  data: PropertyData
+): Promise<{ posts: PostResult[]; remaining: number }> => {
+  const { userId } = await auth();
+  if (!userId) throw new Error("UNAUTHENTICATED");
+
+  const supabase = createSupabaseClient();
+  const month = getCurrentMonth();
+
+  const { data: usageData } = await supabase
+    .from("usage")
+    .select("count")
+    .eq("user_id", userId)
+    .eq("month", month)
+    .maybeSingle();
+
+  const currentCount = usageData?.count ?? 0;
+
+  if (currentCount >= MONTHLY_LIMIT) {
+    throw new Error("LIMIT_REACHED");
+  }
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const prompt = `Eres un experto en marketing inmobiliario. Tu tono es profesional pero cercano, como un agente de confianza que habla con un cliente. Escribe en español neutro que funcione para cualquier país hispanohablante (México, España, Colombia, etc.). Usa vocabulario inclusivo: cuando menciones el tipo de inmueble usa tanto "departamento" como "apartamento" si aplica. Evita modismos regionales.
@@ -53,10 +83,18 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura, sin texto adiciona
   });
 
   const rawText = message.content[0].type === "text" ? message.content[0].text : "";
-
   const jsonMatch = rawText.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("La respuesta de la IA no tiene el formato esperado");
 
   const parsed = JSON.parse(jsonMatch[0]);
-  return parsed.posts as PostResult[];
+
+  const newCount = currentCount + 1;
+  await supabase
+    .from("usage")
+    .upsert({ user_id: userId, month, count: newCount }, { onConflict: "user_id,month" });
+
+  return {
+    posts: parsed.posts as PostResult[],
+    remaining: Math.max(0, MONTHLY_LIMIT - newCount),
+  };
 };

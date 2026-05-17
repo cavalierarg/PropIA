@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { generarPosts, PostResult } from "@/lib/actions/posts.actions";
-import { CheckIcon, CopyIcon, LoaderIcon } from "lucide-react";
+import { getUsage } from "@/lib/actions/usage.actions";
+import { CheckIcon, CopyIcon, LoaderIcon, ZapIcon } from "lucide-react";
+
+const MONTHLY_LIMIT = 10;
 
 const TIPOS_PROPIEDAD = [
   "Casa",
@@ -37,6 +40,11 @@ export default function PropertyForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [remaining, setRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    getUsage().then(({ remaining }) => setRemaining(remaining));
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -54,10 +62,15 @@ export default function PropertyForm() {
 
     setLoading(true);
     try {
-      const result = await generarPosts(form);
-      setPosts(result);
-    } catch {
-      setError("Ocurrió un error al generar los posts. Verifica tu clave de API e intenta de nuevo.");
+      const { posts: newPosts, remaining: newRemaining } = await generarPosts(form);
+      setPosts(newPosts);
+      setRemaining(newRemaining);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message === "LIMIT_REACHED") {
+        setRemaining(0);
+      } else {
+        setError("Ocurrió un error al generar los posts. Verifica tu clave de API e intenta de nuevo.");
+      }
     } finally {
       setLoading(false);
     }
@@ -69,8 +82,79 @@ export default function PropertyForm() {
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
+  const isLimitReached = remaining === 0;
+  const isWarning = remaining !== null && remaining > 0 && remaining <= 3;
+  const used = remaining !== null ? MONTHLY_LIMIT - remaining : 0;
+
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-8">
+
+      {/* Indicador de uso */}
+      {remaining !== null && (
+        <div className="flex flex-col gap-2 p-4 border rounded-xl bg-card">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-1.5">
+              <ZapIcon
+                className={`w-4 h-4 ${
+                  isLimitReached
+                    ? "text-red-500"
+                    : isWarning
+                    ? "text-amber-500"
+                    : "text-[#00d4d4]"
+                }`}
+              />
+              <span
+                className={`font-medium ${
+                  isLimitReached
+                    ? "text-red-600"
+                    : isWarning
+                    ? "text-amber-600"
+                    : "text-[#0f3460]"
+                }`}
+              >
+                {isLimitReached
+                  ? "Sin generaciones disponibles este mes"
+                  : `${remaining} generación${remaining !== 1 ? "es" : ""} disponible${
+                      remaining !== 1 ? "s" : ""
+                    } este mes`}
+              </span>
+            </div>
+            <span className="text-muted-foreground tabular-nums">
+              {used}/{MONTHLY_LIMIT} usadas
+            </span>
+          </div>
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                isLimitReached
+                  ? "bg-red-400"
+                  : isWarning
+                  ? "bg-amber-400"
+                  : "bg-[#00d4d4]"
+              }`}
+              style={{ width: `${(used / MONTHLY_LIMIT) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Mensaje de límite alcanzado */}
+      {isLimitReached && (
+        <div className="border border-amber-200 bg-amber-50 rounded-xl p-5 flex flex-col gap-2">
+          <p className="font-semibold text-amber-900">
+            Agotaste tus generaciones gratuitas del mes
+          </p>
+          <p className="text-sm text-amber-800">
+            Tus {MONTHLY_LIMIT} generaciones mensuales ya fueron utilizadas. Se renuevan
+            automáticamente el 1° del próximo mes.
+          </p>
+          <p className="text-sm text-amber-700 mt-1">
+            Pronto habrá planes de suscripción disponibles con generaciones ilimitadas. ¡Gracias
+            por usar PropIA!
+          </p>
+        </div>
+      )}
+
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -163,7 +247,11 @@ export default function PropertyForm() {
 
         {error && <p className="text-destructive text-sm">{error}</p>}
 
-        <Button type="submit" disabled={loading} className="w-full md:w-auto md:self-start px-10">
+        <Button
+          type="submit"
+          disabled={loading || isLimitReached}
+          className="w-full md:w-auto md:self-start px-10"
+        >
           {loading ? (
             <span className="flex items-center gap-2">
               <LoaderIcon className="w-4 h-4 animate-spin" />
