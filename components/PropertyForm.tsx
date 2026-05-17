@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { generarPosts, PostResult } from "@/lib/actions/posts.actions";
+import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
 import { getUsage } from "@/lib/actions/usage.actions";
 import { CheckIcon, CopyIcon, LoaderIcon, ZapIcon } from "lucide-react";
 
@@ -26,6 +26,24 @@ const COLORES_RED: Record<string, string> = {
   LinkedIn: "bg-sky-700 text-white",
 };
 
+const BADGE_CONFIG = {
+  mayor_engagement: {
+    emoji: "⭐",
+    label: "Recomendado para más engagement",
+    className: "bg-amber-50 text-amber-800 border-amber-200",
+  },
+  mayor_consultas: {
+    emoji: "🎯",
+    label: "Recomendado para más consultas",
+    className: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  },
+  inversores: {
+    emoji: "💼",
+    label: "Recomendado para inversores",
+    className: "bg-[#0f3460]/5 text-[#0f3460] border-[#0f3460]/20",
+  },
+} as const;
+
 export default function PropertyForm() {
   const [form, setForm] = useState({
     tipoPropiedad: "",
@@ -37,6 +55,7 @@ export default function PropertyForm() {
     caracteristica3: "",
   });
   const [posts, setPosts] = useState<PostResult[]>([]);
+  const [recomendaciones, setRecomendaciones] = useState<RecomendacionesResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -54,6 +73,7 @@ export default function PropertyForm() {
     e.preventDefault();
     setError("");
     setPosts([]);
+    setRecomendaciones(null);
 
     if (!form.tipoPropiedad || !form.ubicacion || !form.metrosCuadrados || !form.precio) {
       setError("Por favor completa todos los campos obligatorios.");
@@ -62,14 +82,18 @@ export default function PropertyForm() {
 
     setLoading(true);
     try {
-      const { posts: newPosts, remaining: newRemaining } = await generarPosts(form);
+      const { posts: newPosts, recomendaciones: newRecs, remaining: newRemaining } =
+        await generarPosts(form);
       setPosts(newPosts);
+      setRecomendaciones(newRecs);
       setRemaining(newRemaining);
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "LIMIT_REACHED") {
         setRemaining(0);
       } else {
-        setError("Ocurrió un error al generar los posts. Verifica tu clave de API e intenta de nuevo.");
+        setError(
+          "Ocurrió un error al generar los posts. Verifica tu clave de API e intenta de nuevo."
+        );
       }
     } finally {
       setLoading(false);
@@ -86,6 +110,19 @@ export default function PropertyForm() {
   const isWarning = remaining !== null && remaining > 0 && remaining <= 3;
   const used = remaining !== null ? MONTHLY_LIMIT - remaining : 0;
 
+  // Construye mapa de índice → badges para renderizar en cada card
+  type BadgeItem = { emoji: string; label: string; razon: string; className: string };
+  const recsBadges: Record<number, BadgeItem[]> = {};
+  if (recomendaciones) {
+    for (const key of ["mayor_engagement", "mayor_consultas", "inversores"] as const) {
+      const rec = recomendaciones[key];
+      if (rec && rec.indice >= 0 && rec.indice < posts.length) {
+        if (!recsBadges[rec.indice]) recsBadges[rec.indice] = [];
+        recsBadges[rec.indice].push({ ...BADGE_CONFIG[key], razon: rec.razon });
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col gap-8">
 
@@ -96,11 +133,7 @@ export default function PropertyForm() {
             <div className="flex items-center gap-1.5">
               <ZapIcon
                 className={`w-4 h-4 ${
-                  isLimitReached
-                    ? "text-red-500"
-                    : isWarning
-                    ? "text-amber-500"
-                    : "text-[#00d4d4]"
+                  isLimitReached ? "text-red-500" : isWarning ? "text-amber-500" : "text-[#00d4d4]"
                 }`}
               />
               <span
@@ -126,11 +159,7 @@ export default function PropertyForm() {
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
-                isLimitReached
-                  ? "bg-red-400"
-                  : isWarning
-                  ? "bg-amber-400"
-                  : "bg-[#00d4d4]"
+                isLimitReached ? "bg-red-400" : isWarning ? "bg-amber-400" : "bg-[#00d4d4]"
               }`}
               style={{ width: `${(used / MONTHLY_LIMIT) * 100}%` }}
             />
@@ -158,7 +187,6 @@ export default function PropertyForm() {
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Tipo de propiedad */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="tipoPropiedad">Tipo de propiedad *</Label>
             <select
@@ -178,7 +206,6 @@ export default function PropertyForm() {
             </select>
           </div>
 
-          {/* Ubicación */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="ubicacion">Ubicación *</Label>
             <Input
@@ -191,7 +218,6 @@ export default function PropertyForm() {
             />
           </div>
 
-          {/* Metros cuadrados */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="metrosCuadrados">Metros cuadrados *</Label>
             <Input
@@ -206,7 +232,6 @@ export default function PropertyForm() {
             />
           </div>
 
-          {/* Precio */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="precio">Precio *</Label>
             <Input
@@ -220,7 +245,6 @@ export default function PropertyForm() {
           </div>
         </div>
 
-        {/* Características */}
         <div className="flex flex-col gap-3">
           <Label>3 Características destacadas</Label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -276,9 +300,12 @@ export default function PropertyForm() {
                 key={index}
                 className="border border-[#0f3460]/10 rounded-xl overflow-hidden shadow-sm"
               >
+                {/* Header de red social */}
                 <div className={`px-4 py-2 text-sm font-semibold ${COLORES_RED[post.red]}`}>
                   {post.red}
                 </div>
+
+                {/* Contenido del post */}
                 <div className="p-4 flex flex-col gap-3 bg-card">
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-card-foreground">
                     {post.contenido}
@@ -303,6 +330,23 @@ export default function PropertyForm() {
                     )}
                   </Button>
                 </div>
+
+                {/* Badges de recomendación */}
+                {recsBadges[index] && (
+                  <div className="border-t border-[#0f3460]/10 px-4 py-3 bg-card flex flex-col gap-2">
+                    {recsBadges[index].map((badge, i) => (
+                      <div
+                        key={i}
+                        className={`rounded-lg border px-3 py-2 flex flex-col gap-0.5 ${badge.className}`}
+                      >
+                        <span className="text-xs font-semibold">
+                          {badge.emoji} {badge.label}
+                        </span>
+                        <span className="text-xs opacity-75">{badge.razon}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

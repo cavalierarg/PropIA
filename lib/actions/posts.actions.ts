@@ -16,6 +16,17 @@ export type PostResult = {
   contenido: string;
 };
 
+export type Recomendacion = {
+  indice: number;
+  razon: string;
+};
+
+export type RecomendacionesResult = {
+  mayor_engagement: Recomendacion;
+  mayor_consultas: Recomendacion;
+  inversores: Recomendacion;
+};
+
 export type PropertyData = {
   tipoPropiedad: string;
   ubicacion: string;
@@ -28,7 +39,7 @@ export type PropertyData = {
 
 export const generarPosts = async (
   data: PropertyData
-): Promise<{ posts: PostResult[]; remaining: number }> => {
+): Promise<{ posts: PostResult[]; recomendaciones: RecomendacionesResult; remaining: number }> => {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
@@ -50,22 +61,54 @@ export const generarPosts = async (
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  const prompt = `Eres un experto en marketing inmobiliario. Tu tono es profesional pero cercano, como un agente de confianza que habla con un cliente. Escribe en español neutro que funcione para cualquier país hispanohablante (México, España, Colombia, etc.). Usa vocabulario inclusivo: cuando menciones el tipo de inmueble usa tanto "departamento" como "apartamento" si aplica. Evita modismos regionales.
+  const caracteristicas = [data.caracteristica1, data.caracteristica2, data.caracteristica3]
+    .filter(Boolean)
+    .join(", ");
 
-Genera 5 posts en español para la siguiente propiedad:
+  const prompt = `Eres un experto en marketing inmobiliario digital con 10 años de experiencia vendiendo propiedades de alto valor en Latinoamérica. Tu misión es crear posts que generen consultas reales y cierren ventas. Escribís en español neutro válido para México, España y Colombia. Sin regionalismos.
 
-- Tipo de propiedad: ${data.tipoPropiedad}
+PROPIEDAD A PROMOCIONAR:
+- Tipo: ${data.tipoPropiedad}
 - Ubicación: ${data.ubicacion}
-- Metros cuadrados: ${data.metrosCuadrados} m²
+- Superficie: ${data.metrosCuadrados} m²
 - Precio: ${data.precio}
-- Características destacadas: ${data.caracteristica1}, ${data.caracteristica2}, ${data.caracteristica3}
+- Destacados: ${caracteristicas}
 
-Crea exactamente:
-- 2 posts para Instagram: con emojis, hashtags al final, máximo 300 palabras, llamada a la acción para contactar
-- 2 posts para Facebook: más detallados, narrativos, sin exceso de hashtags, máximo 400 palabras
-- 1 post para LinkedIn: tono profesional orientado a inversión, datos concretos, máximo 300 palabras
+CREÁ EXACTAMENTE 5 POSTS ORIENTADOS A VENTAS, con el tono preciso de cada red:
 
-Responde ÚNICAMENTE con un JSON válido con esta estructura, sin texto adicional:
+📸 2 POSTS PARA INSTAGRAM (visual y emocional):
+- Primera línea gancho que detenga el scroll: máx. 10 palabras de alto impacto
+- Hacé que el lector imagine vivir o invertir ahí — describí sensaciones y estilo de vida
+- Emojis estratégicos como separadores visuales, no decorativos
+- Destacá exclusividad, smart living o la oportunidad de la zona
+- CTA directa al final: "Escribinos al DM 📩" / "Consultá precio final ⬇️" / "Agendá tu visita"
+- 5-8 hashtags relevantes al sector y la ciudad al final
+- Máximo 300 palabras
+
+📘 2 POSTS PARA FACEBOOK (narrativo y persuasivo):
+- Abrí con una pregunta o afirmación que conecte emocionalmente con el lector
+- Relatá los beneficios como si describieras un día de vida real en esa propiedad
+- Mencioná ventajas concretas de la zona: conectividad, servicios, revalorización
+- Incluí un dato de valor que ancle la percepción de precio (precio/m², comparativa, potencial de renta)
+- CTA con urgencia moderada: "Consultanos hoy antes de que se vaya" / "Quedan pocas unidades disponibles"
+- Máximo 400 palabras. Máximo 3 hashtags
+
+💼 1 POST PARA LINKEDIN (ejecutivo, orientado a inversión):
+- Enmarcá la propiedad como activo de inversión, no solo como hogar
+- Mencioná potencial de renta estimada, plusvalía de zona o costo por m² vs. mercado
+- Lenguaje financiero accesible: "rendimiento", "plusvalía", "activo tangible", "flujo de caja"
+- Datos precisos generan credibilidad: precio/m², contexto del mercado local
+- Tono ejecutivo y directo, sin exageraciones
+- CTA profesional: "¿Querés más detalles? Escribime al DM" / "Conectemos"
+- 2-3 hashtags: #InversionInmobiliaria #RealEstate #Propiedades
+- Máximo 300 palabras
+
+ANÁLISIS DE EFECTIVIDAD:
+Después de crear los posts, analizá cuál es el más efectivo para cada objetivo.
+Los índices van del 0 al 4 en orden: Instagram(0), Instagram(1), Facebook(2), Facebook(3), LinkedIn(4).
+Cada recomendación debe ser para un índice diferente cuando sea posible.
+
+Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de código:
 {
   "posts": [
     {"red": "Instagram", "contenido": "..."},
@@ -73,12 +116,26 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura, sin texto adiciona
     {"red": "Facebook", "contenido": "..."},
     {"red": "Facebook", "contenido": "..."},
     {"red": "LinkedIn", "contenido": "..."}
-  ]
+  ],
+  "recomendaciones": {
+    "mayor_engagement": {
+      "indice": 0,
+      "razon": "Una sola frase explicando por qué este post generará más likes y compartidos"
+    },
+    "mayor_consultas": {
+      "indice": 2,
+      "razon": "Una sola frase explicando por qué este post generará más mensajes directos"
+    },
+    "inversores": {
+      "indice": 4,
+      "razon": "Una sola frase explicando por qué este post atrae mejor al perfil inversor"
+    }
+  }
 }`;
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 4096,
+    max_tokens: 6000,
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -95,6 +152,7 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura, sin texto adiciona
 
   return {
     posts: parsed.posts as PostResult[],
+    recomendaciones: parsed.recomendaciones as RecomendacionesResult,
     remaining: Math.max(0, MONTHLY_LIMIT - newCount),
   };
 };
