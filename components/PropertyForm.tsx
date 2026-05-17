@@ -110,7 +110,6 @@ export default function PropertyForm() {
   const isWarning = remaining !== null && remaining > 0 && remaining <= 3;
   const used = remaining !== null ? MONTHLY_LIMIT - remaining : 0;
 
-  // Construye mapa de índice → badges para renderizar en cada card
   type BadgeItem = { emoji: string; label: string; razon: string; className: string };
   const recsBadges: Record<number, BadgeItem[]> = {};
   if (recomendaciones) {
@@ -124,25 +123,21 @@ export default function PropertyForm() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6 sm:gap-8">
 
       {/* Indicador de uso */}
       {remaining !== null && (
         <div className="flex flex-col gap-2 p-4 border rounded-xl bg-card">
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <div className="flex items-center gap-2 min-w-0">
               <ZapIcon
-                className={`w-4 h-4 ${
+                className={`w-4 h-4 shrink-0 ${
                   isLimitReached ? "text-red-500" : isWarning ? "text-amber-500" : "text-[#00d4d4]"
                 }`}
               />
               <span
-                className={`font-medium ${
-                  isLimitReached
-                    ? "text-red-600"
-                    : isWarning
-                    ? "text-amber-600"
-                    : "text-[#0f3460]"
+                className={`font-medium text-sm leading-tight ${
+                  isLimitReached ? "text-red-600" : isWarning ? "text-amber-600" : "text-[#0f3460]"
                 }`}
               >
                 {isLimitReached
@@ -152,11 +147,11 @@ export default function PropertyForm() {
                     } este mes`}
               </span>
             </div>
-            <span className="text-muted-foreground tabular-nums">
-              {used}/{MONTHLY_LIMIT} usadas
+            <span className="text-muted-foreground tabular-nums shrink-0 text-xs sm:text-sm">
+              {used}/{MONTHLY_LIMIT}
             </span>
           </div>
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 isLimitReached ? "bg-red-400" : isWarning ? "bg-amber-400" : "bg-[#00d4d4]"
@@ -169,8 +164,8 @@ export default function PropertyForm() {
 
       {/* Mensaje de límite alcanzado */}
       {isLimitReached && (
-        <div className="border border-amber-200 bg-amber-50 rounded-xl p-5 flex flex-col gap-2">
-          <p className="font-semibold text-amber-900">
+        <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 sm:p-5 flex flex-col gap-2">
+          <p className="font-semibold text-amber-900 text-sm sm:text-base">
             Agotaste tus generaciones gratuitas del mes
           </p>
           <p className="text-sm text-amber-800">
@@ -185,16 +180,20 @@ export default function PropertyForm() {
       )}
 
       {/* Formulario */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+
+          {/* Tipo de propiedad */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="tipoPropiedad">Tipo de propiedad *</Label>
+            <Label htmlFor="tipoPropiedad" className="text-sm font-medium">
+              Tipo de propiedad *
+            </Label>
             <select
               id="tipoPropiedad"
               name="tipoPropiedad"
               value={form.tipoPropiedad}
               onChange={handleChange}
-              className="border border-input bg-background rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full border border-input bg-background rounded-md px-3 h-12 text-base focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
               required
             >
               <option value="">Seleccioná un tipo</option>
@@ -206,8 +205,11 @@ export default function PropertyForm() {
             </select>
           </div>
 
+          {/* Ubicación */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="ubicacion">Ubicación *</Label>
+            <Label htmlFor="ubicacion" className="text-sm font-medium">
+              Ubicación *
+            </Label>
             <Input
               id="ubicacion"
               name="ubicacion"
@@ -215,25 +217,34 @@ export default function PropertyForm() {
               value={form.ubicacion}
               onChange={handleChange}
               required
+              className="h-12 text-base"
             />
           </div>
 
+          {/* Metros cuadrados */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="metrosCuadrados">Metros cuadrados *</Label>
+            <Label htmlFor="metrosCuadrados" className="text-sm font-medium">
+              Metros cuadrados *
+            </Label>
             <Input
               id="metrosCuadrados"
               name="metrosCuadrados"
               type="number"
+              inputMode="numeric"
               placeholder="Ej: 85"
               value={form.metrosCuadrados}
               onChange={handleChange}
               required
               min={1}
+              className="h-12 text-base"
             />
           </div>
 
+          {/* Precio */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="precio">Precio *</Label>
+            <Label htmlFor="precio" className="text-sm font-medium">
+              Precio *
+            </Label>
             <Input
               id="precio"
               name="precio"
@@ -241,30 +252,35 @@ export default function PropertyForm() {
               value={form.precio}
               onChange={handleChange}
               required
+              className="h-12 text-base"
             />
           </div>
         </div>
 
+        {/* Características */}
         <div className="flex flex-col gap-3">
-          <Label>3 Características destacadas</Label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Label className="text-sm font-medium">3 Características destacadas</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <Input
               name="caracteristica1"
               placeholder="Ej: Luminoso"
               value={form.caracteristica1}
               onChange={handleChange}
+              className="h-12 text-base"
             />
             <Input
               name="caracteristica2"
               placeholder="Ej: Terraza propia"
               value={form.caracteristica2}
               onChange={handleChange}
+              className="h-12 text-base"
             />
             <Input
               name="caracteristica3"
               placeholder="Ej: A 2 cuadras del subte"
               value={form.caracteristica3}
               onChange={handleChange}
+              className="h-12 text-base"
             />
           </div>
         </div>
@@ -274,7 +290,7 @@ export default function PropertyForm() {
         <Button
           type="submit"
           disabled={loading || isLimitReached}
-          className="w-full md:w-auto md:self-start px-10"
+          className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
         >
           {loading ? (
             <span className="flex items-center gap-2">
@@ -289,41 +305,44 @@ export default function PropertyForm() {
 
       {/* Resultados */}
       {posts.length > 0 && (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5 sm:gap-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-bold text-[#0f3460]">Tus posts listos para publicar</h2>
+            <h2 className="text-xl font-bold text-[#0f3460] sm:text-2xl">
+              Tus posts listos para publicar
+            </h2>
             <div className="h-1 w-16 bg-[#00d4d4] rounded-full" />
           </div>
-          <div className="grid grid-cols-1 gap-5">
+
+          <div className="grid grid-cols-1 gap-4 sm:gap-5">
             {posts.map((post, index) => (
               <div
                 key={index}
                 className="border border-[#0f3460]/10 rounded-xl overflow-hidden shadow-sm"
               >
                 {/* Header de red social */}
-                <div className={`px-4 py-2 text-sm font-semibold ${COLORES_RED[post.red]}`}>
+                <div className={`px-4 py-2.5 text-sm font-semibold ${COLORES_RED[post.red]}`}>
                   {post.red}
                 </div>
 
                 {/* Contenido del post */}
-                <div className="p-4 flex flex-col gap-3 bg-card">
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-card-foreground">
+                <div className="p-4 flex flex-col gap-4 bg-card">
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-card-foreground break-words">
                     {post.contenido}
                   </p>
+                  {/* Botón copiar — mínimo 44px de alto para táctil cómodo */}
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
-                    className="self-end"
+                    className="self-end h-11 px-5 text-sm"
                     onClick={() => handleCopy(post.contenido, index)}
                   >
                     {copiedIndex === index ? (
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-2">
                         <CheckIcon className="w-4 h-4 text-green-600" />
                         Copiado
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-2">
                         <CopyIcon className="w-4 h-4" />
                         Copiar
                       </span>
@@ -337,12 +356,12 @@ export default function PropertyForm() {
                     {recsBadges[index].map((badge, i) => (
                       <div
                         key={i}
-                        className={`rounded-lg border px-3 py-2 flex flex-col gap-0.5 ${badge.className}`}
+                        className={`rounded-lg border px-3 py-2.5 flex flex-col gap-1 ${badge.className}`}
                       >
-                        <span className="text-xs font-semibold">
+                        <span className="text-xs font-semibold leading-tight">
                           {badge.emoji} {badge.label}
                         </span>
-                        <span className="text-xs opacity-75">{badge.razon}</span>
+                        <span className="text-xs opacity-75 leading-snug">{badge.razon}</span>
                       </div>
                     ))}
                   </div>
