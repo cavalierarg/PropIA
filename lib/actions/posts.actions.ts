@@ -39,12 +39,20 @@ export type PropertyData = {
 
 export const generarPosts = async (
   data: PropertyData
-): Promise<{ posts: PostResult[]; recomendaciones: RecomendacionesResult; remaining: number }> => {
+): Promise<{ posts: PostResult[]; recomendaciones: RecomendacionesResult; remaining: number; isPro: boolean }> => {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
   const supabase = createSupabaseClient();
   const month = getCurrentMonth();
+
+  const { data: subData } = await supabase
+    .from("subscriptions")
+    .select("plan, status")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const isPro = subData?.plan === "pro" && subData?.status === "active";
 
   const { data: usageData } = await supabase
     .from("usage")
@@ -55,7 +63,7 @@ export const generarPosts = async (
 
   const currentCount = usageData?.count ?? 0;
 
-  if (currentCount >= MONTHLY_LIMIT) {
+  if (!isPro && currentCount >= MONTHLY_LIMIT) {
     throw new Error("LIMIT_REACHED");
   }
 
@@ -179,6 +187,7 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
   return {
     posts: parsed.posts as PostResult[],
     recomendaciones: parsed.recomendaciones as RecomendacionesResult,
-    remaining: Math.max(0, MONTHLY_LIMIT - newCount),
+    remaining: isPro ? -1 : Math.max(0, MONTHLY_LIMIT - newCount),
+    isPro,
   };
 };

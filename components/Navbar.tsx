@@ -3,11 +3,24 @@
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { getUserPlan } from "@/lib/actions/subscription.actions";
+import { SparklesIcon } from "lucide-react";
 
 const Navbar = () => {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
+  const [isPro, setIsPro] = useState(false);
+
+  useEffect(() => {
+    if (isSignedIn) {
+      getUserPlan().then((plan) => setIsPro(plan === "pro"));
+    }
+  }, [isSignedIn]);
+
+  const checkoutUrl = user
+    ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][user_id]=${user.id}`
+    : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
 
   return (
     <header className="w-full sticky top-0 z-50 bg-[#0f3460] shadow-md border-b border-[#00d4d4]/20">
@@ -25,9 +38,28 @@ const Navbar = () => {
             Prop<span className="text-[#00d4d4]">IA</span>
           </span>
         </Link>
-        <div className="flex items-center shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {isSignedIn ? (
-            <UserButton />
+            <>
+              {isPro ? (
+                <span className="text-xs font-semibold bg-[#00d4d4]/20 text-[#00d4d4] border border-[#00d4d4]/40 rounded-full px-2.5 py-1 hidden sm:inline-flex items-center gap-1">
+                  <SparklesIcon className="w-3 h-3" />
+                  PRO
+                </span>
+              ) : (
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-[#00d4d4] text-[#0f3460] font-semibold hover:bg-[#00bfbf] border-0 shadow-sm h-9 px-3 text-sm hidden sm:flex items-center gap-1.5"
+                >
+                  <a href={checkoutUrl} target="_blank" rel="noopener noreferrer">
+                    <SparklesIcon className="w-3.5 h-3.5" />
+                    Upgrade a PRO
+                  </a>
+                </Button>
+              )}
+              <UserButton />
+            </>
           ) : (
             <SignInButton>
               <Button className="bg-[#00d4d4] text-[#0f3460] font-semibold hover:bg-[#00bfbf] border-0 shadow-sm h-9 px-3 text-sm sm:h-10 sm:px-4">

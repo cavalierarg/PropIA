@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
 import { getUsage } from "@/lib/actions/usage.actions";
-import { CheckIcon, CopyIcon, LoaderIcon, ZapIcon, LogInIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, LoaderIcon, ZapIcon, LogInIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 
 const MONTHLY_LIMIT = 10;
 
@@ -46,6 +47,7 @@ const BADGE_CONFIG = {
 } as const;
 
 export default function PropertyForm() {
+  const { user } = useUser();
   const [form, setForm] = useState({
     tipoPropiedad: "",
     ubicacion: "",
@@ -61,10 +63,18 @@ export default function PropertyForm() {
   const [error, setError] = useState("");
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [isPro, setIsPro] = useState(false);
   const [unauthenticated, setUnauthenticated] = useState(false);
 
+  const checkoutUrl = user
+    ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][user_id]=${user.id}`
+    : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
+
   useEffect(() => {
-    getUsage().then(({ remaining }) => setRemaining(remaining));
+    getUsage().then((usage) => {
+      setIsPro(usage.isPro);
+      setRemaining(usage.isPro ? null : usage.remaining);
+    });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -85,11 +95,12 @@ export default function PropertyForm() {
 
     setLoading(true);
     try {
-      const { posts: newPosts, recomendaciones: newRecs, remaining: newRemaining } =
+      const { posts: newPosts, recomendaciones: newRecs, remaining: newRemaining, isPro: newIsPro } =
         await generarPosts(form);
       setPosts(newPosts);
       setRecomendaciones(newRecs);
-      setRemaining(newRemaining);
+      setIsPro(newIsPro);
+      setRemaining(newIsPro ? null : newRemaining);
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "LIMIT_REACHED") {
         setRemaining(0);
@@ -111,8 +122,8 @@ export default function PropertyForm() {
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  const isLimitReached = remaining === 0;
-  const isWarning = remaining !== null && remaining > 0 && remaining <= 3;
+  const isLimitReached = !isPro && remaining === 0;
+  const isWarning = !isPro && remaining !== null && remaining > 0 && remaining <= 3;
   const used = remaining !== null ? MONTHLY_LIMIT - remaining : 0;
 
   type BadgeItem = { emoji: string; label: string; razon: string; className: string };
@@ -131,45 +142,59 @@ export default function PropertyForm() {
     <div className="flex flex-col gap-6 sm:gap-8">
 
       {/* Indicador de uso */}
-      {remaining !== null && (
+      {(remaining !== null || isPro) && (
         <div className="flex flex-col gap-2 p-4 border rounded-xl bg-card">
-          <div className="flex items-center justify-between gap-3 text-sm">
-            <div className="flex items-center gap-2 min-w-0">
-              <ZapIcon
-                className={`w-4 h-4 shrink-0 ${
-                  isLimitReached ? "text-red-500" : isWarning ? "text-amber-500" : "text-[#00d4d4]"
-                }`}
-              />
-              <span
-                className={`font-medium text-sm leading-tight ${
-                  isLimitReached ? "text-red-600" : isWarning ? "text-amber-600" : "text-[#0f3460]"
-                }`}
-              >
-                {isLimitReached
-                  ? "Sin generaciones disponibles este mes"
-                  : `${remaining} generación${remaining !== 1 ? "es" : ""} disponible${
-                      remaining !== 1 ? "s" : ""
-                    } este mes`}
+          {isPro ? (
+            <div className="flex items-center gap-2">
+              <SparklesIcon className="w-4 h-4 text-[#00d4d4] shrink-0" />
+              <span className="font-semibold text-sm text-[#0f3460]">
+                Plan PRO activo — generaciones ilimitadas
+              </span>
+              <span className="ml-auto text-xs bg-[#00d4d4]/10 text-[#0f3460] border border-[#00d4d4]/30 rounded-full px-2 py-0.5 font-semibold">
+                PRO
               </span>
             </div>
-            <span className="text-muted-foreground tabular-nums shrink-0 text-xs sm:text-sm">
-              {used}/{MONTHLY_LIMIT}
-            </span>
-          </div>
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                isLimitReached ? "bg-red-400" : isWarning ? "bg-amber-400" : "bg-[#00d4d4]"
-              }`}
-              style={{ width: `${(used / MONTHLY_LIMIT) * 100}%` }}
-            />
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <div className="flex items-center gap-2 min-w-0">
+                  <ZapIcon
+                    className={`w-4 h-4 shrink-0 ${
+                      isLimitReached ? "text-red-500" : isWarning ? "text-amber-500" : "text-[#00d4d4]"
+                    }`}
+                  />
+                  <span
+                    className={`font-medium text-sm leading-tight ${
+                      isLimitReached ? "text-red-600" : isWarning ? "text-amber-600" : "text-[#0f3460]"
+                    }`}
+                  >
+                    {isLimitReached
+                      ? "Sin generaciones disponibles este mes"
+                      : `${remaining} generación${remaining !== 1 ? "es" : ""} disponible${
+                          remaining !== 1 ? "s" : ""
+                        } este mes`}
+                  </span>
+                </div>
+                <span className="text-muted-foreground tabular-nums shrink-0 text-xs sm:text-sm">
+                  {used}/{MONTHLY_LIMIT}
+                </span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    isLimitReached ? "bg-red-400" : isWarning ? "bg-amber-400" : "bg-[#00d4d4]"
+                  }`}
+                  style={{ width: `${(used / MONTHLY_LIMIT) * 100}%` }}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
 
       {/* Mensaje de límite alcanzado */}
       {isLimitReached && (
-        <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 sm:p-5 flex flex-col gap-2">
+        <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 sm:p-5 flex flex-col gap-3">
           <p className="font-semibold text-amber-900 text-sm sm:text-base">
             Agotaste tus generaciones gratuitas del mes
           </p>
@@ -177,10 +202,18 @@ export default function PropertyForm() {
             Tus {MONTHLY_LIMIT} generaciones mensuales ya fueron utilizadas. Se renuevan
             automáticamente el 1° del próximo mes.
           </p>
-          <p className="text-sm text-amber-700 mt-1">
-            Pronto habrá planes de suscripción disponibles con generaciones ilimitadas. ¡Gracias
-            por usar PropIA!
+          <p className="text-sm text-amber-700">
+            Con el Plan PRO obtenés generaciones ilimitadas para publicar sin pausa.
           </p>
+          <Button
+            asChild
+            className="w-full sm:w-auto sm:self-start h-11 sm:h-10 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white"
+          >
+            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+              <SparklesIcon className="w-4 h-4" />
+              Upgrade a PRO — generaciones ilimitadas
+            </a>
+          </Button>
         </div>
       )}
 
@@ -352,7 +385,6 @@ export default function PropertyForm() {
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-card-foreground break-words">
                     {post.contenido}
                   </p>
-                  {/* Botón copiar — mínimo 44px de alto para táctil cómodo */}
                   <Button
                     type="button"
                     variant="outline"

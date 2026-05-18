@@ -12,3 +12,11 @@ export const createSupabaseClient = () => {
     }
   );
 };
+
+// Admin client que bypasea RLS — solo para uso server-side (webhooks)
+export const createSupabaseAdminClient = () => {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+};
