@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import PropertyForm from "@/components/PropertyForm";
 
 export default function Home() {
@@ -13,7 +14,9 @@ export default function Home() {
         <div className="h-1 w-16 bg-[#00d4d4] rounded-full sm:w-20" />
       </section>
 
-      <PropertyForm />
+      <Suspense fallback={null}>
+        <PropertyForm />
+      </Suspense>
     </main>
   );
 }

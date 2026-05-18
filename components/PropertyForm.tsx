@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
 import { getUsage } from "@/lib/actions/usage.actions";
-import { CheckIcon, CopyIcon, LoaderIcon, ZapIcon, LogInIcon, SparklesIcon } from "lucide-react";
+import { saveProperty } from "@/lib/actions/properties.actions";
+import PostsView from "@/components/PostsView";
+import { LoaderIcon, ZapIcon, LogInIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 
@@ -22,49 +25,29 @@ const TIPOS_PROPIEDAD = [
   "Cochera",
 ];
 
-const COLORES_RED: Record<string, string> = {
-  Instagram: "bg-gradient-to-r from-purple-500 to-pink-500 text-white",
-  Facebook: "bg-blue-600 text-white",
-  LinkedIn: "bg-sky-700 text-white",
-};
-
-const BADGE_CONFIG = {
-  mayor_engagement: {
-    emoji: "⭐",
-    label: "Recomendado para más engagement",
-    className: "bg-amber-50 text-amber-800 border-amber-200",
-  },
-  mayor_consultas: {
-    emoji: "🎯",
-    label: "Recomendado para más consultas",
-    className: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  },
-  inversores: {
-    emoji: "💼",
-    label: "Recomendado para inversores",
-    className: "bg-[#0f3460]/5 text-[#0f3460] border-[#0f3460]/20",
-  },
-} as const;
-
 export default function PropertyForm() {
   const { user } = useUser();
+  const searchParams = useSearchParams();
+
   const [form, setForm] = useState({
-    tipoPropiedad: "",
-    ubicacion: "",
-    metrosCuadrados: "",
-    precio: "",
-    caracteristica1: "",
-    caracteristica2: "",
-    caracteristica3: "",
+    tipoPropiedad: searchParams.get("tipoPropiedad") ?? "",
+    ubicacion: searchParams.get("ubicacion") ?? "",
+    metrosCuadrados: searchParams.get("metrosCuadrados") ?? "",
+    precio: searchParams.get("precio") ?? "",
+    caracteristica1: searchParams.get("caracteristica1") ?? "",
+    caracteristica2: searchParams.get("caracteristica2") ?? "",
+    caracteristica3: searchParams.get("caracteristica3") ?? "",
   });
+
   const [posts, setPosts] = useState<PostResult[]>([]);
   const [recomendaciones, setRecomendaciones] = useState<RecomendacionesResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [unauthenticated, setUnauthenticated] = useState(false);
+
+  const isRegenerando = searchParams.get("regenerar") === "1";
 
   const checkoutUrl = user
     ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][user_id]=${user.id}`
@@ -97,10 +80,24 @@ export default function PropertyForm() {
     try {
       const { posts: newPosts, recomendaciones: newRecs, remaining: newRemaining, isPro: newIsPro } =
         await generarPosts(form);
+
       setPosts(newPosts);
       setRecomendaciones(newRecs);
       setIsPro(newIsPro);
       setRemaining(newIsPro ? null : newRemaining);
+
+      // Guardar en historial (silencioso)
+      saveProperty({
+        tipo_propiedad: form.tipoPropiedad,
+        ubicacion: form.ubicacion,
+        metros_cuadrados: form.metrosCuadrados,
+        precio: form.precio,
+        caracteristica1: form.caracteristica1,
+        caracteristica2: form.caracteristica2,
+        caracteristica3: form.caracteristica3,
+        posts: newPosts,
+        recomendaciones: newRecs,
+      }).catch(() => {});
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "LIMIT_REACHED") {
         setRemaining(0);
@@ -116,30 +113,22 @@ export default function PropertyForm() {
     }
   };
 
-  const handleCopy = async (text: string, index: number) => {
-    await navigator.clipboard.writeText(text);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
-  };
-
   const isLimitReached = !isPro && remaining === 0;
   const isWarning = !isPro && remaining !== null && remaining > 0 && remaining <= 3;
   const used = remaining !== null ? MONTHLY_LIMIT - remaining : 0;
 
-  type BadgeItem = { emoji: string; label: string; razon: string; className: string };
-  const recsBadges: Record<number, BadgeItem[]> = {};
-  if (recomendaciones) {
-    for (const key of ["mayor_engagement", "mayor_consultas", "inversores"] as const) {
-      const rec = recomendaciones[key];
-      if (rec && rec.indice >= 0 && rec.indice < posts.length) {
-        if (!recsBadges[rec.indice]) recsBadges[rec.indice] = [];
-        recsBadges[rec.indice].push({ ...BADGE_CONFIG[key], razon: rec.razon });
-      }
-    }
-  }
-
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
+
+      {/* Banner: regenerando desde historial */}
+      {isRegenerando && (
+        <div className="border border-[#00d4d4]/30 bg-[#00d4d4]/5 rounded-xl p-3 sm:p-4 flex items-center gap-3">
+          <SparklesIcon className="w-4 h-4 text-[#00d4d4] shrink-0" />
+          <p className="text-sm text-[#0f3460]">
+            Formulario pre-cargado desde tu historial. Modificá lo que quieras y generá nuevos posts.
+          </p>
+        </div>
+      )}
 
       {/* Indicador de uso */}
       {(remaining !== null || isPro) && (
@@ -170,9 +159,7 @@ export default function PropertyForm() {
                   >
                     {isLimitReached
                       ? "Sin generaciones disponibles este mes"
-                      : `${remaining} generación${remaining !== 1 ? "es" : ""} disponible${
-                          remaining !== 1 ? "s" : ""
-                        } este mes`}
+                      : `${remaining} generación${remaining !== 1 ? "es" : ""} disponible${remaining !== 1 ? "s" : ""} este mes`}
                   </span>
                 </div>
                 <span className="text-muted-foreground tabular-nums shrink-0 text-xs sm:text-sm">
@@ -363,67 +350,20 @@ export default function PropertyForm() {
       {posts.length > 0 && (
         <div className="flex flex-col gap-5 sm:gap-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-xl font-bold text-[#0f3460] sm:text-2xl">
-              Tus posts listos para publicar
-            </h2>
+            <div className="flex items-center justify-between gap-4">
+              <h2 className="text-xl font-bold text-[#0f3460] sm:text-2xl">
+                Tus posts listos para publicar
+              </h2>
+              <Link
+                href="/mis-propiedades"
+                className="text-sm text-[#00d4d4] hover:text-[#00bfbf] font-medium transition-colors shrink-0"
+              >
+                Ver historial →
+              </Link>
+            </div>
             <div className="h-1 w-16 bg-[#00d4d4] rounded-full" />
           </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:gap-5">
-            {posts.map((post, index) => (
-              <div
-                key={index}
-                className="border border-[#0f3460]/10 rounded-xl overflow-hidden shadow-sm"
-              >
-                {/* Header de red social */}
-                <div className={`px-4 py-2.5 text-sm font-semibold ${COLORES_RED[post.red]}`}>
-                  {post.red}
-                </div>
-
-                {/* Contenido del post */}
-                <div className="p-4 flex flex-col gap-4 bg-card">
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-card-foreground break-words">
-                    {post.contenido}
-                  </p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="self-end h-11 px-5 text-sm"
-                    onClick={() => handleCopy(post.contenido, index)}
-                  >
-                    {copiedIndex === index ? (
-                      <span className="flex items-center gap-2">
-                        <CheckIcon className="w-4 h-4 text-green-600" />
-                        Copiado
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        <CopyIcon className="w-4 h-4" />
-                        Copiar
-                      </span>
-                    )}
-                  </Button>
-                </div>
-
-                {/* Badges de recomendación */}
-                {recsBadges[index] && (
-                  <div className="border-t border-[#0f3460]/10 px-4 py-3 bg-card flex flex-col gap-2">
-                    {recsBadges[index].map((badge, i) => (
-                      <div
-                        key={i}
-                        className={`rounded-lg border px-3 py-2.5 flex flex-col gap-1 ${badge.className}`}
-                      >
-                        <span className="text-xs font-semibold leading-tight">
-                          {badge.emoji} {badge.label}
-                        </span>
-                        <span className="text-xs opacity-75 leading-snug">{badge.razon}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <PostsView posts={posts} recomendaciones={recomendaciones} />
         </div>
       )}
     </div>
