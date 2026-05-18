@@ -39,6 +39,12 @@ const Navbar = () => {
           </span>
         </Link>
         <div className="flex items-center gap-2 shrink-0">
+          <Link
+            href="/pricing"
+            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white transition-colors px-2"
+          >
+            Precios
+          </Link>
           {isSignedIn ? (
             <>
               <Link
