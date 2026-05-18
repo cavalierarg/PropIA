@@ -71,6 +71,12 @@ const Navbar = () => {
               >
                 Reels
               </Link>
+              <Link
+                href="/tendencias"
+                className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-white/80 hover:text-white transition-colors px-2"
+              >
+                Tendencias
+              </Link>
               {isPro ? (
                 <span className="text-xs font-semibold bg-[#00d4d4]/20 text-[#00d4d4] border border-[#00d4d4]/40 rounded-full px-2.5 py-1 hidden sm:inline-flex items-center gap-1">
                   <SparklesIcon className="w-3 h-3" />
