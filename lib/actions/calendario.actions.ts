@@ -81,7 +81,7 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: isPro ? 8000 : 2500,
+    max_tokens: isPro ? 16000 : 2500,
     messages: [{ role: "user", content: prompt }],
   });
 
