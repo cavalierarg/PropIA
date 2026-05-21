@@ -114,7 +114,7 @@ const Navbar = () => {
           </Link>
           {isSignedIn && (
             <>
-              <Link href="/" onClick={() => setMenuOpen(false)} className="text-sm font-medium text-white/80 hover:text-white py-2.5 border-b border-white/10 transition-colors">
+              <Link href="/posts" onClick={() => setMenuOpen(false)} className="text-sm font-medium text-white/80 hover:text-white py-2.5 border-b border-white/10 transition-colors">
                 Generador de Posts
               </Link>
               <Link href="/mis-propiedades" onClick={() => setMenuOpen(false)} className="text-sm font-medium text-white/80 hover:text-white py-2.5 border-b border-white/10 transition-colors">

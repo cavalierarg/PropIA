@@ -32,7 +32,7 @@ export default async function MisPropiedadesPage() {
             </p>
           </div>
           <Button asChild className="shrink-0 h-10 px-4 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white hidden sm:flex items-center gap-2">
-            <Link href="/">
+            <Link href="/posts">
               <PlusIcon className="w-4 h-4" />
               Nueva propiedad
             </Link>
@@ -53,7 +53,7 @@ export default async function MisPropiedadesPage() {
             </p>
           </div>
           <Button asChild className="bg-[#0f3460] hover:bg-[#0f3460]/90 text-white">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/posts" className="flex items-center gap-2">
               <PlusIcon className="w-4 h-4" />
               Generar primera propiedad
             </Link>
@@ -133,7 +133,7 @@ export default async function MisPropiedadesPage() {
       {/* Mobile CTA */}
       {properties.length > 0 && (
         <Button asChild className="sm:hidden w-full h-12 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white">
-          <Link href="/" className="flex items-center justify-center gap-2">
+          <Link href="/posts" className="flex items-center justify-center gap-2">
             <PlusIcon className="w-4 h-4" />
             Nueva propiedad
           </Link>
