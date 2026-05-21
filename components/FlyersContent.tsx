@@ -12,6 +12,7 @@ import {
   SparklesIcon,
   DownloadIcon,
   LockIcon,
+  ShuffleIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,29 +22,52 @@ const PRO_MAX_CHECKOUT =
 type FlyerType = "feed" | "story" | "banner";
 
 const FLYER_INFO: Record<FlyerType, { label: string; dims: string; proMaxOnly: boolean }> = {
-  feed:   { label: "Feed cuadrado",    dims: "1080 × 1080 px", proMaxOnly: false },
-  story:  { label: "Story vertical",   dims: "1080 × 1920 px", proMaxOnly: true  },
-  banner: { label: "Banner Facebook",  dims: "1200 × 628 px",  proMaxOnly: true  },
+  feed:   { label: "Feed cuadrado",   dims: "1080 × 1080 px", proMaxOnly: false },
+  story:  { label: "Story vertical",  dims: "1080 × 1920 px", proMaxOnly: true  },
+  banner: { label: "Banner Facebook", dims: "1200 × 628 px",  proMaxOnly: true  },
 };
 
 const FLYER_ORDER: FlyerType[] = ["feed", "story", "banner"];
+
+const PALETAS = [
+  { primary: "#1a2744", accent: "#c9a227" },
+  { primary: "#0d3d30", accent: "#2ecf8a" },
+  { primary: "#2d1f3d", accent: "#c084fc" },
+  { primary: "#3d1a1a", accent: "#f87171" },
+  { primary: "#1a3a4a", accent: "#38bdf8" },
+  { primary: "#2d2d2d", accent: "#fb923c" },
+  { primary: "#1a3d1a", accent: "#86efac" },
+  { primary: "#3d2d0d", accent: "#fcd34d" },
+  { primary: "#1a1a3d", accent: "#f472b6" },
+  { primary: "#0d2d3d", accent: "#67e8f9" },
+  { primary: "#3d0d2d", accent: "#f9a8d4" },
+  { primary: "#1e3a1a", accent: "#a3e635" },
+];
+
+function pickRandomPalette() {
+  return PALETAS[Math.floor(Math.random() * PALETAS.length)];
+}
 
 export default function FlyersContent({ plan }: { plan: "pro" | "pro_max" }) {
   const { user } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [imageFile, setImageFile]     = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState("");
-  const [precio, setPrecio]           = useState("");
-  const [zona, setZona]               = useState("");
-  const [metros, setMetros]           = useState("");
-  const [car1, setCar1]               = useState("");
-  const [car2, setCar2]               = useState("");
-  const [agente, setAgente]           = useState("");
+  const initialPalette = pickRandomPalette();
+  const [primaryColor, setPrimaryColor] = useState(initialPalette.primary);
+  const [accentColor, setAccentColor]   = useState(initialPalette.accent);
 
-  const [uploading, setUploading]     = useState(false);
-  const [generating, setGenerating]   = useState(false);
-  const [flyers, setFlyers]           = useState<Partial<Record<FlyerType, string>>>({});
+  const [imageFile, setImageFile]       = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [precio, setPrecio]             = useState("");
+  const [zona, setZona]                 = useState("");
+  const [metros, setMetros]             = useState("");
+  const [car1, setCar1]                 = useState("");
+  const [car2, setCar2]                 = useState("");
+  const [agente, setAgente]             = useState("");
+
+  const [uploading, setUploading]   = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [flyers, setFlyers]         = useState<Partial<Record<FlyerType, string>>>({});
 
   const isProMax = plan === "pro_max";
   const checkoutUrl = user
@@ -63,12 +87,23 @@ export default function FlyersContent({ plan }: { plan: "pro" | "pro_max" }) {
     if (file?.type.startsWith("image/")) applyFile(file);
   };
 
+  const randomizePalette = () => {
+    const p = pickRandomPalette();
+    setPrimaryColor(p.primary);
+    setAccentColor(p.accent);
+    setFlyers({});
+  };
+
   /* ── Generar ────────────────────────────────────────────── */
   const generateFlyer = async (type: FlyerType, uploadedUrl: string): Promise<string> => {
     const res = await fetch("/api/generate-flyer", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, imageUrl: uploadedUrl, precio, zona, metros, car1, car2, agente }),
+      body: JSON.stringify({
+        type, imageUrl: uploadedUrl,
+        precio, zona, metros, car1, car2, agente,
+        primaryColor, accentColor,
+      }),
     });
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const blob = await res.blob();
@@ -112,7 +147,7 @@ export default function FlyersContent({ plan }: { plan: "pro" | "pro_max" }) {
 
       setFlyers(newFlyers);
       const count = Object.keys(newFlyers).length;
-      if (count > 0) toast.success(`${count} flyer${count > 1 ? "s" : ""} generado${count > 1 ? "s" : ""} correctamente`);
+      if (count > 0) toast.success(`${count} flyer${count > 1 ? "s" : ""} generado${count > 1 ? "s" : ""}`);
       else toast.error("No se pudo generar ningún flyer. Intentá de nuevo.");
     } catch {
       toast.error("Error al generar los flyers. Intentá de nuevo.");
@@ -124,12 +159,12 @@ export default function FlyersContent({ plan }: { plan: "pro" | "pro_max" }) {
   const handleDownload = (url: string, type: FlyerType) => {
     const a = document.createElement("a");
     a.href = url;
-    a.download = `flyer-${type}-propia.png`;
+    a.download = `flyer-${type}.png`;
     a.click();
   };
 
-  const isLoading   = uploading || generating;
-  const hasResults  = Object.keys(flyers).length > 0;
+  const isLoading  = uploading || generating;
+  const hasResults = Object.keys(flyers).length > 0;
 
   /* ── Render ─────────────────────────────────────────────── */
   return (
@@ -150,15 +185,9 @@ export default function FlyersContent({ plan }: { plan: "pro" | "pro_max" }) {
             {imagePreview ? (
               <div className="relative group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imagePreview}
-                  alt="Preview de la propiedad"
-                  className="w-full max-h-72 object-cover"
-                />
+                <img src={imagePreview} alt="Preview" className="w-full max-h-72 object-cover" />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
-                  <span className="text-white text-sm font-semibold bg-black/40 px-4 py-2 rounded-full">
-                    Cambiar imagen
-                  </span>
+                  <span className="text-white text-sm font-semibold bg-black/40 px-4 py-2 rounded-full">Cambiar imagen</span>
                 </div>
               </div>
             ) : (
@@ -180,6 +209,46 @@ export default function FlyersContent({ plan }: { plan: "pro" | "pro_max" }) {
             className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) applyFile(f); }}
           />
+        </div>
+
+        {/* Colores */}
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm font-medium">Colores del flyer</Label>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Fondo</span>
+              <input
+                type="color"
+                value={primaryColor}
+                onChange={(e) => { setPrimaryColor(e.target.value); setFlyers({}); }}
+                className="w-10 h-10 rounded-lg cursor-pointer border border-input p-0.5 bg-white"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Acento</span>
+              <input
+                type="color"
+                value={accentColor}
+                onChange={(e) => { setAccentColor(e.target.value); setFlyers({}); }}
+                className="w-10 h-10 rounded-lg cursor-pointer border border-input p-0.5 bg-white"
+              />
+            </div>
+            {/* Preview de colores */}
+            <div className="flex items-center gap-1.5">
+              <div className="w-8 h-8 rounded-lg border border-black/10" style={{ backgroundColor: primaryColor }} />
+              <div className="w-8 h-8 rounded-lg border border-black/10" style={{ backgroundColor: accentColor }} />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={randomizePalette}
+              className="h-10 gap-2"
+            >
+              <ShuffleIcon className="w-3.5 h-3.5" />
+              Aleatorio
+            </Button>
+          </div>
         </div>
 
         {/* Campos del formulario */}
@@ -256,36 +325,25 @@ export default function FlyersContent({ plan }: { plan: "pro" | "pro_max" }) {
               return (
                 <div key={type} className="flex flex-col gap-3">
                   <div className="border border-[#0f3460]/10 rounded-xl overflow-hidden shadow-sm">
-                    {/* Header */}
                     <div className="px-4 py-3 bg-[#0f3460]/5 border-b border-[#0f3460]/10 flex items-center justify-between">
                       <div>
                         <p className="text-sm font-semibold text-[#0f3460]">{info.label}</p>
                         <p className="text-xs text-muted-foreground">{info.dims}</p>
                       </div>
-                      <span className="text-xs font-semibold bg-[#00c9c9]/10 text-[#0f3460] border border-[#00c9c9]/25 rounded-full px-2.5 py-0.5">
-                        Pro
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-4 h-4 rounded-full border border-black/10" style={{ backgroundColor: primaryColor }} />
+                        <div className="w-4 h-4 rounded-full border border-black/10" style={{ backgroundColor: accentColor }} />
+                      </div>
                     </div>
-                    {/* Imagen */}
                     {flyerUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={flyerUrl}
-                        alt={`Flyer ${info.label}`}
-                        className="w-full object-contain bg-slate-100 max-h-80"
-                      />
+                      <img src={flyerUrl} alt={`Flyer ${info.label}`} className="w-full object-contain bg-slate-100 max-h-80" />
                     ) : (
-                      <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">
-                        Error al generar
-                      </div>
+                      <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">Error al generar</div>
                     )}
                   </div>
                   {flyerUrl && (
-                    <Button
-                      variant="outline"
-                      onClick={() => handleDownload(flyerUrl, type)}
-                      className="w-full h-11 text-sm"
-                    >
+                    <Button variant="outline" onClick={() => handleDownload(flyerUrl, type)} className="w-full h-11 text-sm">
                       <DownloadIcon className="w-4 h-4" />
                       Descargar PNG
                     </Button>
@@ -301,17 +359,10 @@ export default function FlyersContent({ plan }: { plan: "pro" | "pro_max" }) {
 }
 
 /* ── Tarjeta bloqueada ──────────────────────────────────────── */
-function LockedFlyer({
-  info,
-  checkoutUrl,
-}: {
-  info: { label: string; dims: string };
-  checkoutUrl: string;
-}) {
+function LockedFlyer({ info, checkoutUrl }: { info: { label: string; dims: string }; checkoutUrl: string }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="border border-[#0f3460]/10 rounded-xl overflow-hidden shadow-sm relative">
-        {/* Fondo borroso */}
         <div className="blur-sm pointer-events-none select-none" aria-hidden>
           <div className="px-4 py-3 bg-[#0f3460]/5 border-b border-[#0f3460]/10">
             <div className="h-4 w-28 bg-[#0f3460]/15 rounded-full mb-1.5" />
@@ -319,8 +370,6 @@ function LockedFlyer({
           </div>
           <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-200" />
         </div>
-
-        {/* Overlay de bloqueo */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-white/80 backdrop-blur-[2px] rounded-xl p-6 text-center">
           <div className="w-12 h-12 rounded-2xl bg-[#f59e0b]/10 border border-[#f59e0b]/25 flex items-center justify-center">
             <LockIcon className="w-5 h-5 text-[#f59e0b]" />
@@ -330,12 +379,8 @@ function LockedFlyer({
             <p className="text-xs text-muted-foreground">{info.dims}</p>
             <p className="text-xs text-slate-500 mt-1">Exclusivo del plan Pro Max</p>
           </div>
-          <a
-            href={checkoutUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#f59e0b] text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-[#e08e00] transition-colors"
-          >
+          <a href={checkoutUrl} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#f59e0b] text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-[#e08e00] transition-colors">
             <SparklesIcon className="w-3.5 h-3.5" />
             Upgrade a Pro Max
           </a>
