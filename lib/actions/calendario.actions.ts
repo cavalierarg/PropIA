@@ -12,6 +12,115 @@ export type CalendarDay = {
   copy: string;
 };
 
+const TIPOS_CONTENIDO = [
+  "Propiedad destacada",
+  "Consejo para compradores",
+  "Dato del mercado",
+  "Historia de éxito",
+  "Pregunta interactiva",
+  "Guía de inversión",
+  "Consejo para vendedores",
+  "Comparativa de zonas",
+  "Tendencia inmobiliaria",
+  "Behind the scenes",
+  "Testimonio de cliente",
+  "Oportunidad del mes",
+];
+
+function buildPrompt(
+  nicho: string,
+  zona: string,
+  startDateStr: string,
+  diasAGenerar: number,
+  offsetDia: number
+): string {
+  return `Sos un experto en marketing inmobiliario digital con 10 años de experiencia generando contenido que convierte en Latinoamérica.
+
+DATOS DEL AGENTE:
+- Nicho: ${nicho}
+- Zona de trabajo: ${zona}
+- El día ${offsetDia + 1} del calendario comienza el: ${startDateStr}
+
+TU TAREA: Creá un calendario de contenido para ${diasAGenerar} días consecutivos comenzando en el día ${offsetDia + 1}.
+
+REDES SOCIALES Y TONO:
+- Instagram: visual y emocional, primera línea que detenga el scroll, emojis como separadores, CTA directa, 5 hashtags al final. Máx 120 palabras.
+- Facebook: narrativo, abrí con pregunta o dato, beneficios concretos, CTA con urgencia moderada, máx 2 hashtags. Máx 150 palabras.
+- LinkedIn: ejecutivo, lenguaje de inversión, datos precisos, CTA profesional, 2 hashtags. Máx 100 palabras.
+
+DISTRIBUCIÓN para ${diasAGenerar} días: repartí entre Instagram, Facebook y LinkedIn de forma variada.
+
+TIPOS DE CONTENIDO a rotar: ${TIPOS_CONTENIDO.join(", ")}
+
+IMPORTANTE:
+- Cada copy listo para pegar y publicar
+- Español neutro (válido para Argentina, México, España)
+- Numerá los días desde ${offsetDia + 1} hasta ${offsetDia + diasAGenerar}
+- Calculá fechas reales consecutivas a partir de ${startDateStr}
+
+Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de código markdown:
+{
+  "dias": [
+    {
+      "dia": ${offsetDia + 1},
+      "fecha": "Lunes 2 de junio",
+      "red": "Instagram",
+      "tipo_contenido": "Propiedad destacada",
+      "copy": "copy completo listo para publicar"
+    }
+  ]
+}`;
+}
+
+async function generarBatch(
+  client: Anthropic,
+  nicho: string,
+  zona: string,
+  startDate: Date,
+  diasAGenerar: number,
+  offsetDia: number
+): Promise<CalendarDay[]> {
+  const fecha = new Date(startDate);
+  fecha.setDate(fecha.getDate() + offsetDia);
+  const startDateStr = fecha.toLocaleDateString("es-AR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const prompt = buildPrompt(nicho, zona, startDateStr, diasAGenerar, offsetDia);
+
+  let message;
+  try {
+    message = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 6000,
+      messages: [{ role: "user", content: prompt }],
+    });
+  } catch (apiError) {
+    console.error(`[calendario.actions] Error API (offset=${offsetDia}):`, apiError);
+    throw apiError;
+  }
+
+  const rawText = message.content[0].type === "text" ? message.content[0].text : "";
+  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    console.error("[calendario.actions] Respuesta sin JSON:", rawText.slice(0, 300));
+    throw new Error("Formato de respuesta inválido");
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch (e) {
+    console.error("[calendario.actions] Error parseando JSON:", e, "\nJSON:", jsonMatch[0].slice(0, 300));
+    throw new Error("Error al procesar la respuesta de la IA");
+  }
+
+  return parsed.dias as CalendarDay[];
+}
+
 export async function generarCalendario(data: {
   nicho: string;
   zona: string;
@@ -27,78 +136,25 @@ export async function generarCalendario(data: {
     .maybeSingle();
 
   const isPro = subData?.plan === "pro" && subData?.status === "active";
-  const diasAGenerar = isPro ? 30 : 3;
-
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const startDateStr = tomorrow.toLocaleDateString("es-AR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  const prompt = `Sos un experto en marketing inmobiliario digital con 10 años de experiencia generando contenido que convierte en Latinoamérica.
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() + 1);
 
-DATOS DEL AGENTE:
-- Nicho: ${data.nicho}
-- Zona de trabajo: ${data.zona}
-- El calendario comienza el: ${startDateStr}
+  let dias: CalendarDay[];
 
-TU TAREA: Creá un calendario de contenido para ${diasAGenerar} días consecutivos.
-
-REDES SOCIALES Y TONO:
-- Instagram: visual y emocional, emojis estratégicos como separadores, primera línea que detenga el scroll, CTA directa, 5-7 hashtags al final, máx 280 palabras
-- Facebook: narrativo y persuasivo, abrí con pregunta o dato que conecte, describí beneficios concretos, CTA con urgencia moderada, máx 3 hashtags, máx 350 palabras
-- LinkedIn: ejecutivo, enmarcar la propiedad como activo de inversión, lenguaje financiero accesible, datos precisos, CTA profesional, 2-3 hashtags, máx 280 palabras
-
-DISTRIBUCIÓN (para 30 días: 13 Instagram, 10 Facebook, 7 LinkedIn — para 3 días: 1 de cada red)
-
-TIPOS DE CONTENIDO — variá al máximo usando estos:
-"Propiedad destacada", "Consejo para compradores", "Dato del mercado", "Historia de éxito", "Pregunta interactiva", "Guía de inversión", "Consejo para vendedores", "Comparativa de zonas", "Tendencia inmobiliaria", "Behind the scenes", "Testimonio de cliente", "Oportunidad del mes"
-
-REGLAS PARA LOS COPIES:
-- Español neutro válido en Argentina, México, Colombia y España (sin regionalismos)
-- Cada copy 100% listo para pegar y publicar
-- Emojis como separadores visuales, no decorativos
-- CTA clara en cada post
-- Calculá las fechas reales a partir del ${startDateStr} (${diasAGenerar} días consecutivos)
-
-Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de código markdown:
-{
-  "dias": [
-    {
-      "dia": 1,
-      "fecha": "Lunes 2 de junio",
-      "red": "Instagram",
-      "tipo_contenido": "Propiedad destacada",
-      "copy": "copy completo listo para publicar"
-    }
-  ]
-}`;
-
-  const message = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: isPro ? 16000 : 2500,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const rawText = message.content[0].type === "text" ? message.content[0].text : "";
-  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    console.error("[calendario.actions] Respuesta sin JSON:", rawText.slice(0, 200));
-    throw new Error("Formato de respuesta inválido");
+  if (!isPro) {
+    // Free: 3 días en una sola llamada
+    dias = await generarBatch(client, data.nicho, data.zona, startDate, 3, 0);
+  } else {
+    // Pro: 30 días en dos batches de 15 para no exceder el límite de tokens
+    const [batch1, batch2] = await Promise.all([
+      generarBatch(client, data.nicho, data.zona, startDate, 15, 0),
+      generarBatch(client, data.nicho, data.zona, startDate, 15, 15),
+    ]);
+    dias = [...batch1, ...batch2];
   }
 
-  let parsed;
-  try {
-    parsed = JSON.parse(jsonMatch[0]);
-  } catch (e) {
-    console.error("[calendario.actions] Error parseando JSON:", e);
-    throw new Error("Error al procesar la respuesta de la IA");
-  }
-
-  return { dias: parsed.dias as CalendarDay[], isPro };
+  return { dias, isPro };
 }
