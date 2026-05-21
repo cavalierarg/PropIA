@@ -15,8 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 const CHECKOUT_URL_PRO =
-  "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2";
-const CHECKOUT_URL_PRO_MAX = CHECKOUT_URL_PRO; // placeholder hasta configurar el nuevo producto
+  "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2?checkout[custom][plan]=pro";
+const CHECKOUT_URL_PRO_MAX =
+  "https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d?checkout[custom][plan]=pro_max";
 
 const PRO_MONTHLY = 49;
 const PRO_MAX_MONTHLY = 99;

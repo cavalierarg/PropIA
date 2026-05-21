@@ -35,13 +35,16 @@ export async function POST(req: NextRequest) {
   const eventName = meta?.event_name as string | undefined;
   const customData = meta?.custom_data as Record<string, unknown> | undefined;
   const userId = customData?.user_id as string | undefined;
+  const planCustom = customData?.plan as string | undefined;
 
-  console.log("[webhook] Evento recibido:", eventName, "| user_id:", userId);
+  console.log("[webhook] Evento recibido:", eventName, "| user_id:", userId, "| plan:", planCustom);
 
   if (!userId) {
     console.warn("[webhook] Sin user_id en custom_data, ignorando");
     return NextResponse.json({ received: true });
   }
+
+  const plan = planCustom === "pro_max" ? "pro_max" : "pro";
 
   const supabase = createSupabaseAdminClient();
 
@@ -51,7 +54,7 @@ export async function POST(req: NextRequest) {
       .upsert(
         {
           user_id: userId,
-          plan: "pro",
+          plan,
           status: "active",
           updated_at: new Date().toISOString(),
         },
@@ -63,7 +66,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "DB error" }, { status: 500 });
     }
 
-    console.log("[webhook] Usuario", userId, "actualizado a PRO");
+    console.log("[webhook] Usuario", userId, "actualizado a", plan.toUpperCase());
   } else if (
     eventName === "subscription_cancelled" ||
     eventName === "subscription_expired" ||
