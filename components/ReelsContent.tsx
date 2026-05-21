@@ -25,6 +25,7 @@ import {
   TrendingUpIcon,
   VideoIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 const TIPOS_PROPIEDAD = [
   "Casa",
@@ -141,12 +142,14 @@ export default function ReelsContent() {
     await navigator.clipboard.writeText(text);
     setCopiedEscena(idx);
     setTimeout(() => setCopiedEscena(null), 2000);
+    toast.success("Copiado al portapapeles");
   };
 
   const handleCopySlide = async (text: string, idx: number) => {
     await navigator.clipboard.writeText(text);
     setCopiedSlide(idx);
     setTimeout(() => setCopiedSlide(null), 2000);
+    toast.success("Copiado al portapapeles");
   };
 
   return (
@@ -274,19 +277,10 @@ export default function ReelsContent() {
           <Button
             onClick={handleInvestigar}
             disabled={loadingFormatos || !isFormValid}
-            className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm bg-[#0f3460] hover:bg-[#0f3460]/90 text-white"
+            className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
           >
-            {loadingFormatos ? (
-              <span className="flex items-center gap-2">
-                <LoaderIcon className="w-4 h-4 animate-spin" />
-                Investigando tendencias...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <TrendingUpIcon className="w-4 h-4" />
-                Investigar formatos trending
-              </span>
-            )}
+            <TrendingUpIcon className="w-4 h-4" />
+            {loadingFormatos ? "Investigando tendencias..." : "Investigar formatos trending"}
           </Button>
         )}
       </div>

@@ -15,6 +15,8 @@ import {
   SparklesIcon,
   CalendarIcon,
 } from "lucide-react";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const NICHOS = [
   "Casas",
@@ -81,6 +83,7 @@ export default function CalendarioContent() {
     await navigator.clipboard.writeText(text);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
+    toast.success("Copiado al portapapeles");
   };
 
   return (
@@ -132,24 +135,36 @@ export default function CalendarioContent() {
         <Button
           onClick={handleGenerar}
           disabled={loading || !nicho || !zona}
-          className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm bg-[#0f3460] hover:bg-[#0f3460]/90 text-white"
+          className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
         >
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <LoaderIcon className="w-4 h-4 animate-spin" />
-              {isPro ? "Generando 30 días de contenido..." : "Generando preview de 3 días..."}
-            </span>
-          ) : (
-            <span className="flex items-center gap-2">
-              <SparklesIcon className="w-4 h-4" />
-              Generar calendario
-            </span>
-          )}
+          <SparklesIcon className="w-4 h-4" />
+          {loading
+            ? isPro
+              ? "Generando 30 días..."
+              : "Generando preview..."
+            : "Generar calendario"}
         </Button>
       </div>
 
+      {/* Skeleton de carga */}
+      {loading && (
+        <div className="flex flex-col gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border border-slate-100 rounded-xl overflow-hidden">
+              <Skeleton className="h-10 w-full rounded-none" />
+              <div className="p-4 flex flex-col gap-3 bg-white">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-9 w-24 self-end rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Resultados */}
-      {dias.length > 0 && (
+      {dias.length > 0 && !loading && (
         <div className="flex flex-col gap-5 sm:gap-6">
           {/* Header */}
           <div className="flex flex-col gap-2">

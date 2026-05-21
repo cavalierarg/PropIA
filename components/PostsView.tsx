@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
@@ -41,6 +42,7 @@ export default function PostsView({ posts, recomendaciones }: PostsViewProps) {
     await navigator.clipboard.writeText(text);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
+    toast.success("Copiado al portapapeles");
   };
 
   type BadgeItem = { emoji: string; label: string; razon: string; className: string };

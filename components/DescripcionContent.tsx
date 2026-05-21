@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckIcon, CopyIcon, LoaderIcon, LockIcon, SparklesIcon } from "lucide-react";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TIPOS_PROPIEDAD = [
   "Casa",
@@ -72,6 +74,7 @@ export default function DescripcionContent() {
 
   const handleCopy = async (text: string, type: "short" | "long") => {
     await navigator.clipboard.writeText(text);
+    toast.success("Copiado al portapapeles");
     if (type === "short") {
       setCopiedShort(true);
       setTimeout(() => setCopiedShort(false), 2000);
@@ -187,21 +190,35 @@ export default function DescripcionContent() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm bg-[#0f3460] hover:bg-[#0f3460]/90 text-white"
+          className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
         >
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <LoaderIcon className="w-4 h-4 animate-spin" />
-              Generando descripción...
-            </span>
-          ) : (
-            "Generar descripción"
-          )}
+          <SparklesIcon className="w-4 h-4" />
+          {loading ? "Generando descripción..." : "Generar descripción"}
         </Button>
       </form>
 
+      {/* Skeleton de carga */}
+      {loading && (
+        <div className="flex flex-col gap-5">
+          {[1, 2].map((i) => (
+            <div key={i} className="border border-slate-100 rounded-xl overflow-hidden">
+              <Skeleton className="h-10 w-full rounded-none" />
+              <div className="p-5 flex flex-col gap-3 bg-white">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-11/12" />
+                <Skeleton className="h-4 w-4/5" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-9 w-24 self-end rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Resultados */}
-      {result && (
+      {result && !loading && (
         <div className="flex flex-col gap-5 sm:gap-6">
           <div className="flex flex-col gap-2">
             <h2 className="text-xl font-bold text-[#0f3460] sm:text-2xl">

@@ -9,6 +9,7 @@ import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/p
 import { getUsage } from "@/lib/actions/usage.actions";
 import { saveProperty } from "@/lib/actions/properties.actions";
 import PostsView from "@/components/PostsView";
+import PostsSkeleton from "@/components/PostsSkeleton";
 import { LoaderIcon, ZapIcon, LogInIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
@@ -335,19 +336,16 @@ export default function PropertyForm() {
           disabled={loading || isLimitReached}
           className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
         >
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <LoaderIcon className="w-4 h-4 animate-spin" />
-              Generando posts...
-            </span>
-          ) : (
-            "Generar posts"
-          )}
+          <ZapIcon className="w-4 h-4" />
+          {loading ? "Generando con IA..." : "Generar 5 posts"}
         </Button>
       </form>
 
+      {/* Skeleton de carga */}
+      {loading && <PostsSkeleton />}
+
       {/* Resultados */}
-      {posts.length > 0 && (
+      {posts.length > 0 && !loading && (
         <div className="flex flex-col gap-5 sm:gap-6">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-4">

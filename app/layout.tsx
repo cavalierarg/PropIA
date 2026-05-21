@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import Navbar from "@/components/Navbar";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,6 +38,7 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <Navbar />
+          <Toaster richColors position="bottom-right" />
           {children}
         </body>
       </html>
