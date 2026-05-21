@@ -14,48 +14,41 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const CHECKOUT_URL =
+const CHECKOUT_URL_PRO =
   "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2";
+const CHECKOUT_URL_PRO_MAX = CHECKOUT_URL_PRO; // placeholder hasta configurar el nuevo producto
 
-const MONTHLY_PRICE = 49;
-const ANNUAL_MONTHLY_PRICE = Math.round(MONTHLY_PRICE * 0.8); // $39/mes
-const ANNUAL_TOTAL = ANNUAL_MONTHLY_PRICE * 12;
-const ANNUAL_SAVINGS = MONTHLY_PRICE * 12 - ANNUAL_TOTAL;
+const PRO_MONTHLY = 49;
+const PRO_MAX_MONTHLY = 99;
+const PRO_ANNUAL_MONTHLY = Math.round(PRO_MONTHLY * 0.8); // $39/mes
+const PRO_MAX_ANNUAL_MONTHLY = Math.round(PRO_MAX_MONTHLY * 0.8); // $79/mes
+const PRO_ANNUAL_SAVINGS = PRO_MONTHLY * 12 - PRO_ANNUAL_MONTHLY * 12;
+const PRO_MAX_ANNUAL_SAVINGS = PRO_MAX_MONTHLY * 12 - PRO_MAX_ANNUAL_MONTHLY * 12;
 
 type FeatureValue = boolean | string;
 
-const FEATURES: { text: string; free: FeatureValue; pro: FeatureValue }[] = [
-  { text: "Posts generados por mes", free: "10 posts", pro: "Ilimitados" },
-  {
-    text: "Formatos de post (Instagram, Facebook, LinkedIn)",
-    free: true,
-    pro: true,
-  },
-  { text: "Historial de propiedades guardadas", free: true, pro: true },
-  { text: "Descripción para portal — versión corta", free: true, pro: true },
-  {
-    text: "Descripción para portal — versión larga (~400 palabras)",
-    free: false,
-    pro: true,
-  },
-  {
-    text: "Calendario de contenido",
-    free: "Preview 3 días",
-    pro: "30 días completo",
-  },
-  {
-    text: "Guion para Reels con tendencias en tiempo real",
-    free: false,
-    pro: true,
-  },
-  { text: "Análisis de tendencias del mercado", free: false, pro: true },
-  { text: "Soporte prioritario por email", free: false, pro: true },
+const FEATURES: {
+  text: string;
+  free: FeatureValue;
+  pro: FeatureValue;
+  proMax: FeatureValue;
+}[] = [
+  { text: "Posts generados por mes", free: "10 posts", pro: "Ilimitados", proMax: "Ilimitados" },
+  { text: "Formatos de post (Instagram, Facebook, LinkedIn)", free: true, pro: true, proMax: true },
+  { text: "Historial de propiedades guardadas", free: true, pro: true, proMax: true },
+  { text: "Descripción para portal — versión corta", free: true, pro: true, proMax: true },
+  { text: "Descripción para portal — versión larga (~400 palabras)", free: false, pro: true, proMax: true },
+  { text: "Calendario de contenido", free: "Preview 3 días", pro: "30 días completo", proMax: "30 días completo" },
+  { text: "Guion para Reels con tendencias en tiempo real", free: false, pro: true, proMax: true },
+  { text: "Análisis de tendencias del mercado", free: false, pro: true, proMax: true },
+  { text: "Generador de Flyers para Meta Ads", free: false, pro: false, proMax: "3 formatos (feed, story, banner)" },
+  { text: "Soporte prioritario por email", free: false, pro: true, proMax: true },
 ];
 
 const FAQ: { q: string; a: string }[] = [
   {
     q: "¿Puedo cancelar mi suscripción cuando quiera?",
-    a: "Sí, podés cancelar en cualquier momento desde tu cuenta en Lemon Squeezy. No hay permanencia mínima ni cargos adicionales por cancelación. Tu plan PRO sigue activo hasta el final del período ya pagado.",
+    a: "Sí, podés cancelar en cualquier momento desde tu cuenta en Lemon Squeezy. No hay permanencia mínima ni cargos adicionales por cancelación. Tu plan sigue activo hasta el final del período ya pagado.",
   },
   {
     q: "¿Los textos funcionan para el mercado latinoamericano?",
@@ -71,11 +64,23 @@ const FAQ: { q: string; a: string }[] = [
   },
 ];
 
-function FeatureCell({ value, isPro }: { value: FeatureValue; isPro: boolean }) {
+function FeatureCell({
+  value,
+  variant,
+}: {
+  value: FeatureValue;
+  variant: "free" | "pro" | "proMax";
+}) {
   if (value === true) {
     return (
       <CheckIcon
-        className={`w-5 h-5 mx-auto ${isPro ? "text-emerald-500" : "text-emerald-400"}`}
+        className={`w-5 h-5 mx-auto ${
+          variant === "proMax"
+            ? "text-amber-500"
+            : variant === "pro"
+            ? "text-emerald-500"
+            : "text-emerald-400"
+        }`}
       />
     );
   }
@@ -85,7 +90,11 @@ function FeatureCell({ value, isPro }: { value: FeatureValue; isPro: boolean }) 
   return (
     <span
       className={`text-xs font-semibold ${
-        isPro ? "text-[#00c9c9]" : "text-slate-500"
+        variant === "proMax"
+          ? "text-amber-600"
+          : variant === "pro"
+          ? "text-[#00c9c9]"
+          : "text-slate-500"
       }`}
     >
       {value}
@@ -97,7 +106,8 @@ export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const proPrice = isAnnual ? ANNUAL_MONTHLY_PRICE : MONTHLY_PRICE;
+  const proPrice = isAnnual ? PRO_ANNUAL_MONTHLY : PRO_MONTHLY;
+  const proMaxPrice = isAnnual ? PRO_MAX_ANNUAL_MONTHLY : PRO_MAX_MONTHLY;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -179,7 +189,7 @@ export default function PricingPage() {
           TOGGLE + CARDS
       ══════════════════════════════════════════════ */}
       <section className="bg-slate-50 py-12 sm:py-16 px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
 
           {/* Toggle mensual / anual */}
           <div className="flex items-center justify-center gap-3 mb-10">
@@ -221,24 +231,24 @@ export default function PricingPage() {
 
           {isAnnual && (
             <p className="text-center text-sm text-emerald-600 font-medium -mt-6 mb-8">
-              Ahorrás{" "}
-              <span className="font-bold">${ANNUAL_SAVINGS}/año</span>{" "}
+              Ahorrás hasta{" "}
+              <span className="font-bold">${PRO_MAX_ANNUAL_SAVINGS}/año</span>{" "}
               con el plan anual
             </p>
           )}
 
           {/* ── Tarjetas de plan ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 items-start">
 
             {/* Plan Free */}
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-              <div className="p-6 sm:p-8 flex flex-col gap-6">
+              <div className="p-5 sm:p-6 flex flex-col gap-5">
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                     Plan Free
                   </span>
                   <div className="flex items-baseline gap-1.5 mt-1">
-                    <span className="text-5xl font-extrabold text-[#0f3460]">
+                    <span className="text-4xl font-extrabold text-[#0f3460]">
                       $0
                     </span>
                     <span className="text-slate-400 text-base">/mes</span>
@@ -251,16 +261,16 @@ export default function PricingPage() {
                 <Button
                   asChild
                   variant="outline"
-                  className="h-12 text-sm font-semibold border-[#0f3460]/20 text-[#0f3460] hover:bg-[#0f3460]/5 hover:border-[#0f3460]/40"
+                  className="h-11 text-sm font-semibold border-[#0f3460]/20 text-[#0f3460] hover:bg-[#0f3460]/5 hover:border-[#0f3460]/40"
                 >
                   <Link href="/sign-in">Empezar gratis</Link>
                 </Button>
 
                 <div className="h-px bg-slate-100" />
 
-                <ul className="flex flex-col gap-3">
+                <ul className="flex flex-col gap-2.5">
                   {FEATURES.map((f) => (
-                    <li key={f.text} className="flex items-start gap-3">
+                    <li key={f.text} className="flex items-start gap-2.5">
                       {f.free === true ? (
                         <CheckIcon className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                       ) : f.free === false ? (
@@ -269,7 +279,7 @@ export default function PricingPage() {
                         <CheckIcon className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                       )}
                       <span
-                        className={`text-sm leading-snug ${
+                        className={`text-xs leading-snug ${
                           f.free !== false ? "text-slate-700" : "text-slate-400"
                         }`}
                       >
@@ -296,25 +306,25 @@ export default function PricingPage() {
               {/* Top glow */}
               <div className="h-1.5 w-full bg-gradient-to-r from-[#00c9c9]/60 via-[#00c9c9] to-[#00c9c9]/60 rounded-t-[14px]" />
 
-              <div className="p-6 sm:p-8 flex flex-col gap-6">
+              <div className="p-5 sm:p-6 flex flex-col gap-5">
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-bold text-[#00c9c9] uppercase tracking-widest">
                     Plan PRO
                   </span>
                   <div className="flex items-baseline gap-1.5 mt-1">
-                    <span className="text-5xl font-extrabold text-[#0f3460]">
+                    <span className="text-4xl font-extrabold text-[#0f3460]">
                       ${proPrice}
                     </span>
                     <span className="text-slate-400 text-base">/mes</span>
                     {isAnnual && (
                       <span className="ml-1 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full self-center">
-                        Antes ${MONTHLY_PRICE}
+                        Antes ${PRO_MONTHLY}
                       </span>
                     )}
                   </div>
                   {isAnnual && (
-                    <p className="text-xs text-slate-400 mt-1">
-                      Facturado como ${ANNUAL_TOTAL}/año
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Ahorrás ${PRO_ANNUAL_SAVINGS}/año
                     </p>
                   )}
                   <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
@@ -325,9 +335,9 @@ export default function PricingPage() {
                 <div className="flex flex-col gap-2">
                   <Button
                     asChild
-                    className="h-12 text-sm font-semibold bg-[#0f3460] hover:bg-[#0f3460]/90 text-white shadow-md"
+                    className="h-11 text-sm font-semibold bg-[#0f3460] hover:bg-[#0f3460]/90 text-white shadow-md"
                   >
-                    <a href={CHECKOUT_URL} target="_blank" rel="noopener noreferrer">
+                    <a href={CHECKOUT_URL_PRO} target="_blank" rel="noopener noreferrer">
                       Comenzar prueba gratis 7 días
                     </a>
                   </Button>
@@ -338,13 +348,93 @@ export default function PricingPage() {
 
                 <div className="h-px bg-slate-100" />
 
-                <ul className="flex flex-col gap-3">
-                  {FEATURES.map((f) => (
-                    <li key={f.text} className="flex items-start gap-3">
+                <ul className="flex flex-col gap-2.5">
+                  {FEATURES.filter((f) => f.text !== "Generador de Flyers para Meta Ads").map((f) => (
+                    <li key={f.text} className="flex items-start gap-2.5">
                       <CheckIcon className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                      <span className="text-sm text-slate-700 leading-snug">
+                      <span className="text-xs text-slate-700 leading-snug">
                         {typeof f.pro === "string"
                           ? `${f.text}: ${f.pro}`
+                          : f.text}
+                      </span>
+                    </li>
+                  ))}
+                  <li className="flex items-start gap-2.5">
+                    <XIcon className="w-4 h-4 text-slate-300 shrink-0 mt-0.5" />
+                    <span className="text-xs text-slate-400 leading-snug">
+                      Generador de Flyers para Meta Ads
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Plan PRO MAX */}
+            <div className="bg-white rounded-2xl border-2 border-[#f59e0b] shadow-xl flex flex-col relative mt-5 sm:mt-0">
+              {/* "Más completo" badge */}
+              <div className="absolute -top-4 left-0 right-0 flex justify-center">
+                <span className="inline-flex items-center gap-1.5 bg-[#f59e0b] text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md">
+                  <SparklesIcon className="w-3.5 h-3.5" />
+                  Más completo
+                </span>
+              </div>
+
+              {/* Top glow */}
+              <div className="h-1.5 w-full bg-gradient-to-r from-[#f59e0b]/60 via-[#f59e0b] to-[#f59e0b]/60 rounded-t-[14px]" />
+
+              <div className="p-5 sm:p-6 flex flex-col gap-5">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">
+                    Plan PRO MAX
+                  </span>
+                  <div className="flex items-baseline gap-1.5 mt-1">
+                    <span className="text-4xl font-extrabold text-[#0f3460]">
+                      ${proMaxPrice}
+                    </span>
+                    <span className="text-slate-400 text-base">/mes</span>
+                    {isAnnual && (
+                      <span className="ml-1 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full self-center">
+                        Antes ${PRO_MAX_MONTHLY}
+                      </span>
+                    )}
+                  </div>
+                  {isAnnual && (
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Ahorrás ${PRO_MAX_ANNUAL_SAVINGS}/año
+                    </p>
+                  )}
+                  <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
+                    Todo lo del plan PRO más flyers profesionales para Meta Ads.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <Button
+                    asChild
+                    className="h-11 text-sm font-semibold bg-[#f59e0b] hover:bg-[#e08e00] text-white shadow-md border-0"
+                  >
+                    <a href={CHECKOUT_URL_PRO_MAX} target="_blank" rel="noopener noreferrer">
+                      Comenzar prueba gratis 7 días
+                    </a>
+                  </Button>
+                  <p className="text-center text-xs text-slate-400">
+                    Sin cargo hasta que terminen los 7 días
+                  </p>
+                </div>
+
+                <div className="h-px bg-slate-100" />
+
+                <ul className="flex flex-col gap-2.5">
+                  {FEATURES.map((f) => (
+                    <li key={f.text} className="flex items-start gap-2.5">
+                      <CheckIcon className={`w-4 h-4 shrink-0 mt-0.5 ${
+                        f.text === "Generador de Flyers para Meta Ads"
+                          ? "text-amber-500"
+                          : "text-emerald-500"
+                      }`} />
+                      <span className="text-xs text-slate-700 leading-snug">
+                        {typeof f.proMax === "string"
+                          ? `${f.text}: ${f.proMax}`
                           : f.text}
                       </span>
                     </li>
@@ -361,7 +451,7 @@ export default function PricingPage() {
           COMPARACIÓN DE FEATURES
       ══════════════════════════════════════════════ */}
       <section className="bg-white border-t border-slate-100 py-14 sm:py-16 px-4">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-[#0f3460] text-center mb-2">
             Comparación detallada
           </h2>
@@ -371,15 +461,18 @@ export default function PricingPage() {
 
           <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
             {/* Header */}
-            <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-200">
+            <div className="grid grid-cols-[1fr_auto_auto_auto] bg-slate-50 border-b border-slate-200">
               <div className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest">
                 Feature
               </div>
-              <div className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest text-center border-l border-slate-200">
+              <div className="px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-widest text-center border-l border-slate-200 w-24">
                 Free
               </div>
-              <div className="px-4 py-3 text-xs font-bold text-[#00c9c9] uppercase tracking-widest text-center border-l border-slate-200 bg-[#00c9c9]/5">
+              <div className="px-5 py-3 text-xs font-bold text-[#00c9c9] uppercase tracking-widest text-center border-l border-slate-200 bg-[#00c9c9]/5 w-28">
                 PRO ✦
+              </div>
+              <div className="px-5 py-3 text-xs font-bold text-[#f59e0b] uppercase tracking-widest text-center border-l border-slate-200 bg-[#f59e0b]/5 w-32">
+                PRO MAX ✦
               </div>
             </div>
 
@@ -387,18 +480,21 @@ export default function PricingPage() {
             {FEATURES.map((f, idx) => (
               <div
                 key={f.text}
-                className={`grid grid-cols-3 ${
+                className={`grid grid-cols-[1fr_auto_auto_auto] ${
                   idx < FEATURES.length - 1 ? "border-b border-slate-100" : ""
                 } ${idx % 2 === 1 ? "bg-slate-50/50" : "bg-white"}`}
               >
                 <div className="px-4 py-3.5 text-sm text-slate-700 font-medium flex items-center">
                   {f.text}
                 </div>
-                <div className="px-4 py-3.5 flex items-center justify-center border-l border-slate-100">
-                  <FeatureCell value={f.free} isPro={false} />
+                <div className="px-5 py-3.5 flex items-center justify-center border-l border-slate-100 w-24">
+                  <FeatureCell value={f.free} variant="free" />
                 </div>
-                <div className="px-4 py-3.5 flex items-center justify-center border-l border-slate-100 bg-[#00c9c9]/5">
-                  <FeatureCell value={f.pro} isPro={true} />
+                <div className="px-5 py-3.5 flex items-center justify-center border-l border-slate-100 bg-[#00c9c9]/5 w-28">
+                  <FeatureCell value={f.pro} variant="pro" />
+                </div>
+                <div className="px-5 py-3.5 flex items-center justify-center border-l border-slate-100 bg-[#f59e0b]/5 w-32">
+                  <FeatureCell value={f.proMax} variant="proMax" />
                 </div>
               </div>
             ))}
@@ -423,8 +519,8 @@ export default function PricingPage() {
               </h3>
               <p className="text-sm text-slate-500 leading-relaxed">
                 Si dentro de los primeros{" "}
-                <strong className="text-slate-700">7 días</strong> el plan PRO
-                no cumple tus expectativas, te devolvemos el dinero sin hacer
+                <strong className="text-slate-700">7 días</strong> el plan no
+                cumple tus expectativas, te devolvemos el dinero sin hacer
                 preguntas. Podés cancelar en cualquier momento.
               </p>
             </div>
@@ -563,7 +659,7 @@ export default function PricingPage() {
               asChild
               className="h-11 px-8 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white font-semibold text-sm"
             >
-              <a href={CHECKOUT_URL} target="_blank" rel="noopener noreferrer">
+              <a href={CHECKOUT_URL_PRO} target="_blank" rel="noopener noreferrer">
                 <SparklesIcon className="w-4 h-4 mr-2" />
                 Empezar prueba gratis 7 días
               </a>

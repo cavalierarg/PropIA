@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 
-export async function getUserPlan(): Promise<"free" | "pro"> {
+export async function getUserPlan(): Promise<"free" | "pro" | "pro_max"> {
   const { userId } = await auth();
   if (!userId) return "free";
 
@@ -14,6 +14,9 @@ export async function getUserPlan(): Promise<"free" | "pro"> {
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (data?.plan === "pro" && data?.status === "active") return "pro";
+  if (data?.status === "active") {
+    if (data.plan === "pro_max") return "pro_max";
+    if (data.plan === "pro") return "pro";
+  }
   return "free";
 }

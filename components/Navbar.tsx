@@ -19,12 +19,12 @@ const NAV_LINKS = [
 
 const Navbar = () => {
   const { isSignedIn, user } = useUser();
-  const [isPro, setIsPro] = useState(false);
+  const [plan, setPlan] = useState<"free" | "pro" | "pro_max">("free");
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isSignedIn) {
-      getUserPlan().then((plan) => setIsPro(plan === "pro"));
+      getUserPlan().then(setPlan);
     }
   }, [isSignedIn]);
 
@@ -79,7 +79,12 @@ const Navbar = () => {
         <div className="hidden sm:flex items-center gap-2 shrink-0">
           {isSignedIn ? (
             <>
-              {isPro ? (
+              {plan === "pro_max" ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/35 rounded-full px-3 py-1">
+                  <SparklesIcon className="w-3 h-3" />
+                  PRO MAX
+                </span>
+              ) : plan === "pro" ? (
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#00c9c9]/15 text-[#00c9c9] border border-[#00c9c9]/35 rounded-full px-3 py-1">
                   <SparklesIcon className="w-3 h-3" />
                   PRO
@@ -166,7 +171,12 @@ const Navbar = () => {
 
               {/* Plan badge en mobile */}
               <div className="pt-3 pb-1">
-                {isPro ? (
+                {plan === "pro_max" ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/35 rounded-full px-3 py-1.5">
+                    <SparklesIcon className="w-3 h-3" />
+                    Plan PRO MAX activo
+                  </span>
+                ) : plan === "pro" ? (
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold bg-[#00c9c9]/15 text-[#00c9c9] border border-[#00c9c9]/35 rounded-full px-3 py-1.5">
                     <SparklesIcon className="w-3 h-3" />
                     Plan PRO activo
