@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: "/descripcion", label: "Descripción" },
   { href: "/reels", label: "Reels" },
   { href: "/tendencias", label: "Tendencias" },
+  { href: "/flyers", label: "Flyers" },
   { href: "/mis-propiedades", label: "Mis propiedades" },
 ];
 
