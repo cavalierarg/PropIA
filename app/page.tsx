@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getUsage } from "@/lib/actions/usage.actions";
 import { getUserProperties, type SavedProperty } from "@/lib/actions/properties.actions";
 import { FileText, CalendarDays, Home, Video, Sparkles, ArrowRight, Clock } from "lucide-react";
+import LandingPage from "@/components/LandingPage";
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -22,19 +23,22 @@ function formatDate(dateStr: string): string {
 
 export default async function DashboardPage() {
   const { userId } = await auth();
-  const user = await currentUser();
 
+  // Usuario no logueado → mostrar landing page
+  if (!userId) {
+    const checkoutUrl =
+      process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ??
+      "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2";
+    return <LandingPage checkoutUrl={checkoutUrl} />;
+  }
+
+  const user = await currentUser();
   const firstName = user?.firstName || "Usuario";
 
-  let usage = { count: 0, remaining: 10, limit: 10, isPro: false };
-  let recentProperties: SavedProperty[] = [];
-
-  if (userId) {
-    [usage, recentProperties] = await Promise.all([
-      getUsage(),
-      getUserProperties().then((p) => p.slice(0, 3)),
-    ]);
-  }
+  const [usage, recentProperties] = await Promise.all([
+    getUsage(),
+    getUserProperties().then((p) => p.slice(0, 3)),
+  ]);
 
   const checkoutUrl = user
     ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][user_id]=${user.id}`
