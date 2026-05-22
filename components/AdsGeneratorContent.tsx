@@ -14,32 +14,69 @@ import {
   DownloadIcon,
   XIcon,
   GlobeIcon,
-  CheckIcon,
   StarIcon,
   ZapIcon,
   ImageIcon,
+  PaletteIcon,
+  TagIcon,
+  DollarSignIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 
 const PRO_MAX_CHECKOUT =
   "https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d?checkout[custom][plan]=pro_max";
 
-type AdType = "feed" | "story" | "banner";
-type Phase = "idle" | "researching" | "trends_ready" | "generating" | "complete";
+type AdType   = "feed" | "story" | "banner";
+type AdStyle  = "luxury" | "moderno" | "bold" | "profesional";
+type Phase    = "idle" | "researching" | "trends_ready" | "generating" | "complete";
 
-type GeneratedAd = {
-  photoIndex: number;
-  type: AdType;
-  url: string;
-};
+type GeneratedAd = { photoIndex: number; type: AdType; url: string };
 
 const AD_INFO: Record<AdType, { label: string; dims: string }> = {
   feed:   { label: "Feed cuadrado",   dims: "1080 × 1080 px" },
   story:  { label: "Story vertical",  dims: "1080 × 1920 px" },
   banner: { label: "Banner Facebook", dims: "1200 × 628 px"  },
 };
-
 const AD_ORDER: AdType[] = ["feed", "story", "banner"];
+
+const STYLES: { id: AdStyle; label: string; desc: string; palette: string[] }[] = [
+  {
+    id: "luxury",
+    label: "Luxury",
+    desc: "Fondo negro, detalles dorados, tipografía elegante",
+    palette: ["#0a0a0a", "#c9a84c", "#ffffff"],
+  },
+  {
+    id: "moderno",
+    label: "Moderno",
+    desc: "Fondo blanco, foto redondeada, diseño minimalista",
+    palette: ["#ffffff", "#111111", "#e5e5e5"],
+  },
+  {
+    id: "bold",
+    label: "Bold",
+    desc: "Foto full con overlay, precio superpuesto enorme",
+    palette: ["#000000", "#ffffff", "#555555"],
+  },
+  {
+    id: "profesional",
+    label: "Profesional",
+    desc: "Fondo de color de marca, franja lateral con foto",
+    palette: ["brand", "#ffffff", "#cccccc"],
+  },
+];
+
+const CURRENCIES = ["USD", "EUR", "ARS"] as const;
+const BADGES = ["En Venta", "Alquiler", "Oportunidad", "Recién Llegada", "Última Unidad", "Precio Rebajado"] as const;
+
+const BADGE_COLORS: Record<string, string> = {
+  "En Venta":        "#16a34a",
+  "Alquiler":        "#2563eb",
+  "Oportunidad":     "#ea580c",
+  "Recién Llegada":  "#7c3aed",
+  "Última Unidad":   "#dc2626",
+  "Precio Rebajado": "#d97706",
+};
 
 const TIPS_RESEARCH = [
   "Buscando tendencias en Meta Ads...",
@@ -47,11 +84,10 @@ const TIPS_RESEARCH = [
   "Investigando mejores prácticas actuales...",
   "Elaborando recomendación personalizada...",
 ];
-
 const TIPS_GENERATE = [
   "Subiendo fotos a la nube...",
   "Generando ads en alta resolución...",
-  "Aplicando diseño profesional PropIA...",
+  "Aplicando diseño profesional...",
   "Preparando formatos para Meta Ads...",
 ];
 
@@ -59,63 +95,60 @@ export default function AdsGeneratorContent() {
   const { user } = useUser();
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null]);
 
-  const [images, setImages]   = useState<(File | null)[]>([null, null, null]);
+  const [images,   setImages]   = useState<(File | null)[]>([null, null, null]);
   const [previews, setPreviews] = useState<(string | null)[]>([null, null, null]);
 
-  const [precio, setPrecio] = useState("");
-  const [zona, setZona]     = useState("");
-  const [metros, setMetros] = useState("");
-  const [car1, setCar1]     = useState("");
-  const [car2, setCar2]     = useState("");
-  const [agente, setAgente] = useState("");
+  const [precio,  setPrecio]  = useState("");
+  const [zona,    setZona]    = useState("");
+  const [metros,  setMetros]  = useState("");
+  const [car1,    setCar1]    = useState("");
+  const [car2,    setCar2]    = useState("");
+  const [agente,  setAgente]  = useState("");
 
-  const [phase, setPhase]         = useState<Phase>("idle");
+  // New design selectors
+  const [estilo,     setEstilo]     = useState<AdStyle>("moderno");
+  const [colorMarca, setColorMarca] = useState("#0f3460");
+  const [moneda,     setMoneda]     = useState<string>("USD");
+  const [badge,      setBadge]      = useState<string>("En Venta");
+
+  const [phase,      setPhase]      = useState<Phase>("idle");
   const [loadingTip, setLoadingTip] = useState(0);
-  const [error, setError]         = useState("");
-  const [trends, setTrends]       = useState<AdTrend[]>([]);
-  const [ads, setAds]             = useState<GeneratedAd[]>([]);
+  const [error,      setError]      = useState("");
+  const [trends,     setTrends]     = useState<AdTrend[]>([]);
+  const [ads,        setAds]        = useState<GeneratedAd[]>([]);
 
   const checkoutUrl = user
     ? `${PRO_MAX_CHECKOUT}&checkout[custom][user_id]=${user.id}`
     : PRO_MAX_CHECKOUT;
+  void checkoutUrl;
 
-  const activeCount = images.filter(Boolean).length;
-  const isLoading = phase === "researching" || phase === "generating";
-  const currentTips = phase === "researching" ? TIPS_RESEARCH : TIPS_GENERATE;
+  const activeCount  = images.filter(Boolean).length;
+  const isLoading    = phase === "researching" || phase === "generating";
+  const currentTips  = phase === "researching" ? TIPS_RESEARCH : TIPS_GENERATE;
 
   useEffect(() => {
     if (!isLoading) return;
-    const interval = setInterval(() => {
-      setLoadingTip((p) => (p + 1) % currentTips.length);
-    }, 3500);
-    return () => clearInterval(interval);
+    const id = setInterval(() => setLoadingTip((p) => (p + 1) % currentTips.length), 3500);
+    return () => clearInterval(id);
   }, [isLoading, currentTips.length]);
 
-  /* ── Imagen handlers ── */
+  /* ── Image handlers ── */
   const applyFile = (index: number, file: File) => {
     if (!file.type.startsWith("image/")) return;
-    const newImages = [...images];
-    newImages[index] = file;
-    setImages(newImages);
-
-    const newPreviews = [...previews];
-    if (newPreviews[index]) URL.revokeObjectURL(newPreviews[index]!);
-    newPreviews[index] = URL.createObjectURL(file);
-    setPreviews(newPreviews);
-
+    const ni = [...images];   ni[index] = file;   setImages(ni);
+    const np = [...previews];
+    if (np[index]) URL.revokeObjectURL(np[index]!);
+    np[index] = URL.createObjectURL(file);
+    setPreviews(np);
     setAds([]);
     if (phase === "complete") setPhase("trends_ready");
   };
 
   const removeImage = (index: number) => {
-    const newImages = [...images];
-    newImages[index] = null;
-    setImages(newImages);
-
-    const newPreviews = [...previews];
-    if (newPreviews[index]) URL.revokeObjectURL(newPreviews[index]!);
-    newPreviews[index] = null;
-    setPreviews(newPreviews);
+    const ni = [...images];   ni[index] = null;  setImages(ni);
+    const np = [...previews];
+    if (np[index]) URL.revokeObjectURL(np[index]!);
+    np[index] = null; setPreviews(np);
   };
 
   const handleDrop = (index: number, e: React.DragEvent) => {
@@ -124,61 +157,49 @@ export default function AdsGeneratorContent() {
     if (file) applyFile(index, file);
   };
 
-  /* ── Investigar tendencias ── */
+  /* ── Research ── */
   const handleResearch = async () => {
-    if (activeCount === 0) {
-      toast.error("Subí al menos una foto antes de investigar tendencias.");
-      return;
-    }
-    if (!precio || !zona || !metros) {
-      toast.error("Completá precio, zona y metros cuadrados primero.");
-      return;
-    }
-
-    setError("");
-    setPhase("researching");
-    setLoadingTip(0);
-
+    if (activeCount === 0) { toast.error("Subí al menos una foto antes de investigar tendencias."); return; }
+    if (!precio || !zona || !metros) { toast.error("Completá precio, zona y metros cuadrados primero."); return; }
+    setError(""); setPhase("researching"); setLoadingTip(0);
     try {
       const result = await investigarTendenciasAds();
       setTrends(result.tendencias);
       setPhase("trends_ready");
     } catch (err) {
-      console.error("[ads-trends] Error:", err);
+      console.error("[ads-trends]", err);
       setError("Error al investigar tendencias. Intentá de nuevo.");
       setPhase("idle");
     }
   };
 
-  /* ── Generar ads ── */
+  /* ── Generate ── */
   const handleGenerate = async () => {
-    setError("");
-    setPhase("generating");
-    setLoadingTip(0);
-    setAds([]);
-
+    setError(""); setPhase("generating"); setLoadingTip(0); setAds([]);
     try {
-      const uploadResults: { photoIndex: number; url: string }[] = [];
-
+      const uploaded: { photoIndex: number; url: string }[] = [];
       for (let i = 0; i < 3; i++) {
         const img = images[i];
         if (!img) continue;
         const fd = new FormData();
         fd.append("image", img);
         const url = await uploadPropertyImage(fd);
-        uploadResults.push({ photoIndex: i, url });
+        uploaded.push({ photoIndex: i, url });
       }
 
-      const adTasks = uploadResults.flatMap(({ photoIndex, url }) =>
+      const tasks = uploaded.flatMap(({ photoIndex, url }) =>
         AD_ORDER.map((type) => ({ photoIndex, url, type }))
       );
 
       const results = await Promise.allSettled(
-        adTasks.map(async ({ photoIndex, url, type }) => {
+        tasks.map(async ({ photoIndex, url, type }) => {
           const res = await fetch("/api/generate-ad", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ type, imageUrl: url, precio, zona, metros, car1, car2, agente }),
+            body: JSON.stringify({
+              type, imageUrl: url, precio, zona, metros, car1, car2, agente,
+              estilo, colorMarca, moneda, badge,
+            }),
           });
           if (!res.ok) throw new Error(`API error ${res.status}`);
           const blob = await res.blob();
@@ -189,11 +210,10 @@ export default function AdsGeneratorContent() {
       const generated: GeneratedAd[] = [];
       results.forEach((r) => {
         if (r.status === "fulfilled") generated.push(r.value);
-        else console.error("[ads] Error:", r.reason);
+        else console.error("[ads]", r.reason);
       });
 
       setAds(generated);
-
       if (generated.length > 0) {
         toast.success(`${generated.length} ad${generated.length !== 1 ? "s" : ""} generado${generated.length !== 1 ? "s" : ""}`);
         setPhase("complete");
@@ -210,7 +230,7 @@ export default function AdsGeneratorContent() {
   const handleDownload = (url: string, photoIndex: number, type: AdType) => {
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ad-${type}-foto${photoIndex + 1}.png`;
+    a.download = `ad-${estilo}-${type}-foto${photoIndex + 1}.png`;
     a.click();
   };
 
@@ -218,10 +238,10 @@ export default function AdsGeneratorContent() {
   return (
     <div className="flex flex-col gap-8">
 
-      {/* ── Formulario ── */}
-      <div className="border border-[#0f3460]/10 rounded-xl p-5 sm:p-6 bg-card flex flex-col gap-6">
+      {/* ── Formulario principal ── */}
+      <div className="border border-[#0f3460]/10 rounded-xl p-5 sm:p-6 bg-card flex flex-col gap-7">
 
-        {/* Upload de hasta 3 fotos */}
+        {/* Fotos */}
         <div className="flex flex-col gap-2">
           <Label className="text-sm font-medium">
             Fotos de la propiedad
@@ -243,15 +263,15 @@ export default function AdsGeneratorContent() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            Cada foto genera 3 formatos (Feed, Story, Banner) · JPG, PNG o WEBP · Máx 10 MB
+            Cada foto genera 3 formatos (Feed · Story · Banner) · JPG, PNG o WEBP · Máx 10 MB
           </p>
         </div>
 
-        {/* Campos */}
+        {/* Datos de la propiedad */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Precio *</Label>
-            <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="Ej: USD 185.000" className="h-12 text-base" />
+            <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="Ej: 185.000" className="h-12 text-base" />
           </div>
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Zona *</Label>
@@ -275,6 +295,154 @@ export default function AdsGeneratorContent() {
           </div>
         </div>
 
+        {/* Separador */}
+        <div className="border-t border-[#0f3460]/8" />
+
+        {/* ── Sección de diseño ── */}
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-[#0f3460]/8 border border-[#0f3460]/15 flex items-center justify-center">
+              <PaletteIcon className="w-3.5 h-3.5 text-[#0f3460]/60" />
+            </div>
+            <p className="text-sm font-semibold text-[#0f3460]">Diseño del ad</p>
+          </div>
+
+          {/* Selector de estilo */}
+          <div className="flex flex-col gap-2.5">
+            <Label className="text-sm font-medium">Estilo de plantilla</Label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {STYLES.map((s) => {
+                const active = estilo === s.id;
+                const showBrand = s.id === "profesional";
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setEstilo(s.id)}
+                    className={`flex flex-col gap-2.5 rounded-xl border-2 p-3.5 text-left transition-all cursor-pointer ${
+                      active
+                        ? "border-[#0f3460] bg-[#0f3460]/5 shadow-sm"
+                        : "border-[#0f3460]/12 bg-card hover:border-[#0f3460]/30 hover:bg-[#0f3460]/3"
+                    }`}
+                  >
+                    {/* Mini paleta de colores */}
+                    <div className="flex gap-1.5">
+                      {s.palette.map((c, idx) => (
+                        <div
+                          key={idx}
+                          className="w-5 h-5 rounded-full border border-black/10 flex-shrink-0"
+                          style={{ backgroundColor: (showBrand && c === "brand") ? colorMarca : c }}
+                        />
+                      ))}
+                    </div>
+                    <div>
+                      <p className={`text-sm font-bold leading-tight ${active ? "text-[#0f3460]" : "text-foreground"}`}>
+                        {s.label}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{s.desc}</p>
+                    </div>
+                    {active && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <div className="w-3 h-3 rounded-full bg-[#0f3460] flex items-center justify-center">
+                          <svg width="7" height="5" viewBox="0 0 7 5" fill="none">
+                            <path d="M1 2.5L2.8 4L6 1" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                        <span className="text-[10px] font-semibold text-[#0f3460]">Seleccionado</span>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Fila inferior: color + moneda + badge */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+            {/* Color de marca */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium flex items-center gap-1.5">
+                <PaletteIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                Color de marca
+              </Label>
+              <div className="flex items-center gap-3 h-12 border border-input rounded-lg px-3 bg-background">
+                <div
+                  className="w-7 h-7 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                  style={{ backgroundColor: colorMarca }}
+                />
+                <input
+                  type="color"
+                  value={colorMarca}
+                  onChange={(e) => setColorMarca(e.target.value)}
+                  className="w-0 h-0 opacity-0 absolute"
+                  id="color-picker"
+                />
+                <label htmlFor="color-picker" className="flex-1 text-sm text-muted-foreground cursor-pointer">
+                  {colorMarca.toUpperCase()}
+                </label>
+                <label htmlFor="color-picker" className="text-xs text-[#0f3460] font-medium cursor-pointer hover:underline">
+                  Cambiar
+                </label>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Se aplica a acentos y detalles según el estilo</p>
+            </div>
+
+            {/* Moneda */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium flex items-center gap-1.5">
+                <DollarSignIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                Moneda
+              </Label>
+              <div className="flex gap-2">
+                {CURRENCIES.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMoneda(m)}
+                    className={`flex-1 h-12 rounded-lg border-2 text-sm font-semibold transition-all cursor-pointer ${
+                      moneda === m
+                        ? "border-[#0f3460] bg-[#0f3460] text-white"
+                        : "border-[#0f3460]/15 bg-card text-muted-foreground hover:border-[#0f3460]/40 hover:text-[#0f3460]"
+                    }`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground">Formato del precio en el ad</p>
+            </div>
+
+            {/* Badge */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-medium flex items-center gap-1.5">
+                <TagIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                Etiqueta
+              </Label>
+              <div className="relative">
+                <select
+                  value={badge}
+                  onChange={(e) => setBadge(e.target.value)}
+                  className="w-full h-12 rounded-lg border-2 border-[#0f3460]/15 bg-card text-sm font-medium px-3 pr-9 appearance-none cursor-pointer focus:outline-none focus:border-[#0f3460]/50 transition-colors"
+                  style={{ color: BADGE_COLORS[badge] ?? "#111" }}
+                >
+                  {BADGES.map((b) => (
+                    <option key={b} value={b} style={{ color: BADGE_COLORS[b] }}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#888" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground">Aparece en el ad como badge de estado</p>
+            </div>
+          </div>
+        </div>
+
         {error && <p className="text-destructive text-sm">{error}</p>}
 
         <Button
@@ -289,11 +457,7 @@ export default function AdsGeneratorContent() {
 
       {/* ── Loading ── */}
       {isLoading && (
-        <LoadingPanel
-          tip={currentTips[loadingTip]}
-          phase={phase}
-          photoCount={activeCount}
-        />
+        <LoadingPanel tip={currentTips[loadingTip]} phase={phase} photoCount={activeCount} />
       )}
 
       {/* ── Tendencias ── */}
@@ -302,10 +466,12 @@ export default function AdsGeneratorContent() {
           trends={trends}
           onGenerate={handleGenerate}
           alreadyGenerated={phase === "complete"}
+          estilo={estilo}
+          badge={badge}
         />
       )}
 
-      {/* ── Generating skeletons ── */}
+      {/* ── Skeletons mientras genera ── */}
       {phase === "generating" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {Array.from({ length: activeCount * 3 }).map((_, i) => (
@@ -324,17 +490,15 @@ export default function AdsGeneratorContent() {
           <div className="flex flex-col gap-2">
             <h2 className="text-xl font-bold text-[#0f3460] sm:text-2xl">Ads generados</h2>
             <p className="text-sm text-muted-foreground">
-              {ads.length} ad{ads.length !== 1 ? "s" : ""} en alta resolución listos para Meta Ads.
+              {ads.length} ad{ads.length !== 1 ? "s" : ""} · Estilo <span className="font-semibold capitalize">{estilo}</span> · listos para Meta Ads.
             </p>
             <div className="h-1 w-16 bg-[#00c9c9] rounded-full" />
           </div>
 
-          {/* Agrupar por foto */}
           {[0, 1, 2].map((photoIndex) => {
             const photoAds = ads.filter((a) => a.photoIndex === photoIndex);
-            if (photoAds.length === 0) return null;
+            if (!photoAds.length) return null;
             const preview = previews[photoIndex];
-
             return (
               <div key={photoIndex} className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
@@ -398,16 +562,9 @@ export default function AdsGeneratorContent() {
   );
 }
 
-/* ── Slot de imagen ── */
+/* ── Image slot ── */
 function ImageSlot({
-  index,
-  preview,
-  onFile,
-  onDrop,
-  onRemove,
-  onClickRef,
-  inputRef,
-  required,
+  index, preview, onFile, onDrop, onRemove, onClickRef, inputRef, required,
 }: {
   index: number;
   preview: string | null;
@@ -434,9 +591,7 @@ function ImageSlot({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={preview} alt="Preview" className="w-full h-36 object-cover" />
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-              <span className="text-white text-xs font-semibold bg-black/40 px-3 py-1.5 rounded-full">
-                Cambiar
-              </span>
+              <span className="text-white text-xs font-semibold bg-black/40 px-3 py-1.5 rounded-full">Cambiar</span>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onRemove(); }}
@@ -475,11 +630,9 @@ function LoadingPanel({ tip, phase, photoCount }: { tip: string; phase: Phase; p
         <div className="absolute inset-0 rounded-full border-4 border-[#0f3460]/10" />
         <div className="absolute inset-0 rounded-full border-4 border-t-[#00c9c9] animate-spin" />
         <div className="absolute inset-0 flex items-center justify-center">
-          {isGenerating ? (
-            <SparklesIcon className="w-6 h-6 text-[#0f3460]" />
-          ) : (
-            <GlobeIcon className="w-6 h-6 text-[#0f3460]" />
-          )}
+          {isGenerating
+            ? <SparklesIcon className="w-6 h-6 text-[#0f3460]" />
+            : <GlobeIcon className="w-6 h-6 text-[#0f3460]" />}
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
@@ -497,16 +650,19 @@ function LoadingPanel({ tip, phase, photoCount }: { tip: string; phase: Phase; p
   );
 }
 
-/* ── Sección de tendencias ── */
+/* ── Trends section ── */
 function TrendsSection({
-  trends,
-  onGenerate,
-  alreadyGenerated,
+  trends, onGenerate, alreadyGenerated, estilo, badge,
 }: {
   trends: AdTrend[];
   onGenerate: () => void;
   alreadyGenerated: boolean;
+  estilo: AdStyle;
+  badge: string;
 }) {
+  const styleLabel: Record<AdStyle, string> = {
+    luxury: "Luxury", moderno: "Moderno", bold: "Bold", profesional: "Profesional",
+  };
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
@@ -525,12 +681,17 @@ function TrendsSection({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {trends.map((trend) => (
-          <TrendCard key={trend.numero} trend={trend} />
-        ))}
+        {trends.map((t) => <TrendCard key={t.numero} trend={t} />)}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-2">
+      {/* Summary of chosen settings */}
+      <div className="flex items-center gap-3 px-4 py-3 bg-[#0f3460]/5 border border-[#0f3460]/10 rounded-xl text-xs text-[#0f3460]/70 flex-wrap">
+        <span className="font-semibold text-[#0f3460]">Configuración elegida:</span>
+        <span className="bg-[#0f3460] text-white px-2.5 py-1 rounded-full font-semibold">{styleLabel[estilo]}</span>
+        <span className="bg-white border border-[#0f3460]/15 px-2.5 py-1 rounded-full" style={{ color: BADGE_COLORS[badge] ?? "#111" }}>{badge}</span>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-1">
         <Button
           onClick={onGenerate}
           className="w-full sm:w-auto h-12 sm:h-11 px-8 text-base sm:text-sm bg-[#f59e0b] hover:bg-[#e08e00] text-white border-0 shadow-md font-bold"
@@ -539,24 +700,20 @@ function TrendsSection({
           {alreadyGenerated ? "Regenerar ads" : "Generar ads ahora"}
         </Button>
         <p className="text-xs text-muted-foreground">
-          Se generarán los 3 formatos para cada foto subida
+          3 formatos por cada foto · PNG en alta resolución
         </p>
       </div>
     </div>
   );
 }
 
-/* ── Tarjeta de tendencia ── */
+/* ── Trend card ── */
 function TrendCard({ trend }: { trend: AdTrend }) {
   return (
     <div className={`border rounded-xl overflow-hidden shadow-sm flex flex-col ${
-      trend.recomendado
-        ? "border-[#00c9c9]/50 shadow-[#00c9c9]/10"
-        : "border-[#0f3460]/10"
+      trend.recomendado ? "border-[#00c9c9]/50 shadow-[#00c9c9]/10" : "border-[#0f3460]/10"
     }`}>
-      {trend.recomendado && (
-        <div className="h-1 bg-gradient-to-r from-[#00c9c9]/60 via-[#00c9c9] to-[#00c9c9]/60" />
-      )}
+      {trend.recomendado && <div className="h-1 bg-gradient-to-r from-[#00c9c9]/60 via-[#00c9c9] to-[#00c9c9]/60" />}
       <div className={`px-4 py-3 border-b flex items-center justify-between gap-2 ${
         trend.recomendado ? "bg-[#00c9c9]/8 border-[#00c9c9]/20" : "bg-[#0f3460]/5 border-[#0f3460]/10"
       }`}>
@@ -576,9 +733,7 @@ function TrendCard({ trend }: { trend: AdTrend }) {
       <div className="p-4 flex flex-col gap-3 bg-card flex-1">
         <p className="text-xs text-slate-600 leading-relaxed">{trend.descripcion}</p>
         <div className="border-t border-[#0f3460]/8 pt-3 flex flex-col gap-1.5">
-          <span className="text-[10px] font-bold text-[#00c9c9] uppercase tracking-wide">
-            Por qué funciona ahora
-          </span>
+          <span className="text-[10px] font-bold text-[#00c9c9] uppercase tracking-wide">Por qué funciona ahora</span>
           <p className="text-xs text-muted-foreground leading-relaxed">{trend.por_que_funciona}</p>
         </div>
       </div>
