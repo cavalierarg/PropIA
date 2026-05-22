@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 
-const MONTHLY_LIMIT = 10;
+const MONTHLY_LIMIT = 5;
 
 function getCurrentMonth(): string {
   const now = new Date();

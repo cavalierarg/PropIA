@@ -19,8 +19,8 @@ const CHECKOUT_URL_PRO =
 const CHECKOUT_URL_PRO_MAX =
   "https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d?checkout[custom][plan]=pro_max";
 
-const PRO_MONTHLY = 49;
-const PRO_MAX_MONTHLY = 99;
+const PRO_MONTHLY = 29;
+const PRO_MAX_MONTHLY = 59;
 const PRO_ANNUAL_MONTHLY = Math.round(PRO_MONTHLY * 0.8); // $39/mes
 const PRO_MAX_ANNUAL_MONTHLY = Math.round(PRO_MAX_MONTHLY * 0.8); // $79/mes
 const PRO_ANNUAL_SAVINGS = PRO_MONTHLY * 12 - PRO_ANNUAL_MONTHLY * 12;
@@ -34,7 +34,7 @@ const FEATURES: {
   pro: FeatureValue;
   proMax: FeatureValue;
 }[] = [
-  { text: "Posts generados por mes", free: "10 posts", pro: "Ilimitados", proMax: "Ilimitados" },
+  { text: "Posts generados por mes", free: "5 posts gratis", pro: "Ilimitados", proMax: "Ilimitados" },
   { text: "Formatos de post (Instagram, Facebook, LinkedIn)", free: true, pro: true, proMax: true },
   { text: "Historial de propiedades guardadas", free: true, pro: true, proMax: true },
   { text: "Descripción para portal — versión corta", free: true, pro: true, proMax: true },
@@ -42,7 +42,7 @@ const FEATURES: {
   { text: "Calendario de contenido", free: "Preview 3 días", pro: "30 días completo", proMax: "30 días completo" },
   { text: "Guion para Reels con tendencias en tiempo real", free: false, pro: true, proMax: true },
   { text: "Análisis de tendencias del mercado", free: false, pro: true, proMax: true },
-  { text: "Generador de Flyers para Meta Ads", free: false, pro: false, proMax: "3 formatos (feed, story, banner)" },
+  { text: "Generador de Ads para Meta Ads", free: false, pro: false, proMax: "3 formatos × hasta 3 fotos = 9 ads" },
   { text: "Soporte prioritario por email", free: false, pro: true, proMax: true },
 ];
 
@@ -255,7 +255,7 @@ export default function PricingPage() {
                     <span className="text-slate-400 text-base">/mes</span>
                   </div>
                   <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                    Para empezar a generar contenido inmobiliario con IA.
+                    5 generaciones gratuitas para empezar.
                   </p>
                 </div>
 
@@ -350,7 +350,7 @@ export default function PricingPage() {
                 <div className="h-px bg-slate-100" />
 
                 <ul className="flex flex-col gap-2.5">
-                  {FEATURES.filter((f) => f.text !== "Generador de Flyers para Meta Ads").map((f) => (
+                  {FEATURES.filter((f) => f.text !== "Generador de Ads para Meta Ads").map((f) => (
                     <li key={f.text} className="flex items-start gap-2.5">
                       <CheckIcon className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                       <span className="text-xs text-slate-700 leading-snug">
@@ -363,7 +363,7 @@ export default function PricingPage() {
                   <li className="flex items-start gap-2.5">
                     <XIcon className="w-4 h-4 text-slate-300 shrink-0 mt-0.5" />
                     <span className="text-xs text-slate-400 leading-snug">
-                      Generador de Flyers para Meta Ads
+                      Generador de Ads para Meta Ads
                     </span>
                   </li>
                 </ul>
@@ -405,7 +405,7 @@ export default function PricingPage() {
                     </p>
                   )}
                   <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                    Todo lo del plan PRO más flyers profesionales para Meta Ads.
+                    Todo lo del plan PRO más ads profesionales con IA para Meta Ads.
                   </p>
                 </div>
 
@@ -429,7 +429,7 @@ export default function PricingPage() {
                   {FEATURES.map((f) => (
                     <li key={f.text} className="flex items-start gap-2.5">
                       <CheckIcon className={`w-4 h-4 shrink-0 mt-0.5 ${
-                        f.text === "Generador de Flyers para Meta Ads"
+                        f.text === "Generador de Ads para Meta Ads"
                           ? "text-amber-500"
                           : "text-emerald-500"
                       }`} />
