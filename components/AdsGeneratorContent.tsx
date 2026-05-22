@@ -60,11 +60,12 @@ const STYLES: { id: AdStyle; label: string; desc: string; palette: string[] }[] 
 ];
 
 const CURRENCIES = ["USD", "EUR", "ARS"] as const;
-const BADGES = ["En Venta", "Alquiler", "Oportunidad", "Recién Llegada", "Última Unidad", "Precio Rebajado"] as const;
+const BADGES = ["En Venta", "Alquiler", "Alquiler temporal", "Oportunidad", "Recién Llegada", "Última Unidad", "Precio Rebajado"] as const;
 
 const BADGE_COLORS: Record<string, string> = {
   "En Venta":        "#16a34a",
   "Alquiler":        "#2563eb",
+  "Alquiler temporal": "#0891b2",
   "Oportunidad":     "#ea580c",
   "Recién Llegada":  "#7c3aed",
   "Última Unidad":   "#dc2626",
@@ -107,7 +108,6 @@ export default function AdsGeneratorContent() {
   const [dormitorios,    setDormitorios]    = useState("");
   const [banios,         setBanios]         = useState("");
   const [cocheras,       setCocheras]       = useState("");
-  const [tipoOperacion,  setTipoOperacion]  = useState("");
   const [amenities,      setAmenities]      = useState<string[]>([]);
   const [agenteWhatsapp, setAgenteWhatsapp] = useState("");
   const [agenteInstagram,setAgenteInstagram]= useState("");
@@ -187,7 +187,7 @@ export default function AdsGeneratorContent() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               type, imageUrl: url, precio, zona, metros, car1, car2, agente,
-              dormitorios, banios, cocheras,
+              dormitorios, banios, cocheras, amenities, agenteWhatsapp,
               estilo, colorMarca, moneda, badge,
             }),
           });
@@ -294,22 +294,13 @@ export default function AdsGeneratorContent() {
           >
             <div className="flex items-center gap-2.5">
               <span className="text-sm font-semibold text-[#0f3460]">Datos de la propiedad</span>
-              <span className="hidden sm:inline text-xs text-slate-400 font-normal">dormitorios, baños, tipo de operación…</span>
+              <span className="hidden sm:inline text-xs text-slate-400 font-normal">dormitorios, baños, cocheras…</span>
             </div>
             <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${showDatos ? "rotate-180" : ""}`} />
           </button>
           {showDatos && (
             <div className="p-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 gap-4">
               <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Tipo de operación</Label>
-                <select value={tipoOperacion} onChange={(e) => setTipoOperacion(e.target.value)} className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none">
-                  <option value="">Seleccionar</option>
-                  <option value="Venta">Venta</option>
-                  <option value="Alquiler">Alquiler</option>
-                  <option value="Alquiler temporal">Alquiler temporal</option>
-                </select>
-              </div>
               <div className="flex flex-col gap-2">
                 <Label className="text-sm font-medium text-slate-600">Dormitorios</Label>
                 <select value={dormitorios} onChange={(e) => setDormitorios(e.target.value)} className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none">
@@ -352,7 +343,7 @@ export default function AdsGeneratorContent() {
             className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
           >
             <div className="flex items-center gap-2.5">
-              <span className="text-sm font-semibold text-[#0f3460]">Amenities</span>
+              <span className="text-sm font-semibold text-[#0f3460]">Características adicionales</span>
               {amenities.length > 0 ? (
                 <span className="text-xs bg-[#0f3460] text-white px-2 py-0.5 rounded-full font-semibold">
                   {amenities.length} seleccionado{amenities.length !== 1 ? "s" : ""}

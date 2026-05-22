@@ -45,7 +45,6 @@ export default function DescripcionContent() {
     caracteristica1: "",
     caracteristica2: "",
     caracteristica3: "",
-    tipoOperacion: "",
     dormitorios: "",
     banios: "",
     cocheras: "",
@@ -247,7 +246,7 @@ export default function DescripcionContent() {
             <div className="flex items-center gap-2.5">
               <span className="text-sm font-semibold text-[#0f3460]">Datos de la propiedad</span>
               <span className="hidden sm:inline text-xs text-slate-400 font-normal">
-                dormitorios, baños, tipo de operación…
+                dormitorios, baños, cocheras…
               </span>
             </div>
             <ChevronDown
@@ -260,21 +259,6 @@ export default function DescripcionContent() {
           {showDatos && (
             <div className="p-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 gap-4">
               <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Tipo de operación</Label>
-                <select
-                  name="tipoOperacion"
-                  value={form.tipoOperacion}
-                  onChange={handleChange}
-                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
-                >
-                  <option value="">Seleccionar</option>
-                  <option value="Venta">Venta</option>
-                  <option value="Alquiler">Alquiler</option>
-                  <option value="Alquiler temporal">Alquiler temporal</option>
-                </select>
-              </div>
-
               <div className="flex flex-col gap-2">
                 <Label className="text-sm font-medium text-slate-600">Dormitorios</Label>
                 <select
@@ -377,7 +361,7 @@ export default function DescripcionContent() {
             className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
           >
             <div className="flex items-center gap-2.5">
-              <span className="text-sm font-semibold text-[#0f3460]">Amenities</span>
+              <span className="text-sm font-semibold text-[#0f3460]">Características adicionales</span>
               {amenities.length > 0 ? (
                 <span className="text-xs bg-[#0f3460] text-white px-2 py-0.5 rounded-full font-semibold">
                   {amenities.length} seleccionado{amenities.length !== 1 ? "s" : ""}

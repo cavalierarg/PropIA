@@ -12,7 +12,6 @@ export type PropertyInput = {
   caracteristica1: string;
   caracteristica2: string;
   caracteristica3: string;
-  tipoOperacion?: string;
   dormitorios?: string;
   banios?: string;
   cocheras?: string;
@@ -78,7 +77,6 @@ function buildPropiedadStr(data: PropertyInput): string {
     .filter(Boolean)
     .join(", ");
   const extras = [
-    data.tipoOperacion ? `- Operación: ${data.tipoOperacion}` : "",
     data.dormitorios ? `- Dormitorios: ${data.dormitorios}` : "",
     data.banios ? `- Baños: ${data.banios}` : "",
     data.cocheras ? `- Cocheras: ${data.cocheras}` : "",

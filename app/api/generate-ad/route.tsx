@@ -32,8 +32,8 @@ function formatPrice(precio: string, moneda: string): string {
 
 function buildSpecs(metros: string, dormitorios: string, banios: string): string {
   const parts: string[] = [];
-  if (dormitorios) parts.push(`${dormitorios} dorm`);
-  if (banios) parts.push(`${banios} baños`);
+  if (dormitorios) parts.push(`🛏 ${dormitorios}`);
+  if (banios) parts.push(`🚿 ${banios}`);
   parts.push(`${metros} m²`);
   return parts.join(" · ");
 }
@@ -42,6 +42,7 @@ function badgeColor(badge: string): { bg: string; text: string } {
   const m: Record<string, { bg: string; text: string }> = {
     "En Venta":        { bg: "#16a34a", text: "#fff" },
     "Alquiler":        { bg: "#2563eb", text: "#fff" },
+    "Alquiler temporal": { bg: "#0891b2", text: "#fff" },
     "Oportunidad":     { bg: "#ea580c", text: "#fff" },
     "Recién Llegada":  { bg: "#7c3aed", text: "#fff" },
     "Última Unidad":   { bg: "#dc2626", text: "#fff" },
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
     precio: string; zona: string; metros: string;
     car1?: string; car2?: string; agente?: string;
     dormitorios?: string; banios?: string; cocheras?: string;
+    amenities?: string[]; agenteWhatsapp?: string;
     colorMarca: string; moneda: string; badge: string;
   };
   try { body = await req.json(); }
@@ -69,6 +71,7 @@ export async function POST(req: NextRequest) {
     precio, zona, metros,
     car1 = "", car2 = "", agente = "",
     dormitorios = "", banios = "",
+    amenities = [] as string[], agenteWhatsapp = "",
     colorMarca = "#0f3460", moneda = "USD", badge = "En Venta",
   } = body;
 
@@ -83,6 +86,7 @@ export async function POST(req: NextRequest) {
   const specs = buildSpecs(metros, dormitorios, banios);
   const bc    = badgeColor(badge);
   const ff    = FONT_STACK[estilo];
+  const amenitiesStr = amenities.length > 0 ? amenities.slice(0, 3).join(" · ") : "";
   const imgOpts = { width, height };
 
   try {
@@ -106,6 +110,8 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:28, color:W, marginTop:14, opacity:0.65, letterSpacing:"0.1em", fontWeight:300 }}>{zona.toUpperCase()}&nbsp;·&nbsp;{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:22, color:W, opacity:0.55, marginTop:18 }}>— {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:22, color:W, opacity:0.55, marginTop:8 }}>— {car2}</div> : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:18, color:W, opacity:0.45, marginTop:10 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:18, color:"#4ade80", marginTop:10, fontWeight:600 }}>WA: {agenteWhatsapp}</div> : null}
             <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:14 }}>
               <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55 }} />
               <div style={{ display:"flex", justifyContent:"flex-end", fontSize:15, color:W, opacity:0.3 }}>Creado con PropIA</div>
@@ -129,6 +135,8 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:30, color:W, marginTop:8, opacity:0.45 }}>{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:28, color:W, opacity:0.6, marginTop:36 }}>— {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:28, color:W, opacity:0.6, marginTop:14 }}>— {car2}</div> : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:24, color:W, opacity:0.45, marginTop:12 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:24, color:"#4ade80", marginTop:12, fontWeight:600 }}>WA: {agenteWhatsapp}</div> : null}
             <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:18 }}>
               <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55 }} />
               <div style={{ display:"flex", justifyContent:"flex-end", fontSize:18, color:W, opacity:0.3 }}>Creado con PropIA</div>
@@ -150,6 +158,8 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:22, color:W, marginTop:12, opacity:0.65, letterSpacing:"0.1em", fontWeight:300 }}>{zona.toUpperCase()}&nbsp;·&nbsp;{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:18, color:W, opacity:0.5, marginTop:16 }}>— {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:18, color:W, opacity:0.5, marginTop:8 }}>— {car2}</div> : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:15, color:W, opacity:0.4, marginTop:8 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:15, color:"#4ade80", marginTop:8, fontWeight:600 }}>WA: {agenteWhatsapp}</div> : null}
             <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:12 }}>
               <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55 }} />
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
@@ -196,6 +206,8 @@ export async function POST(req: NextRequest) {
                 ) : null}
               </div>
             ) : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:18, color:"#666666", marginTop:12 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:18, color:"#22c55e", marginTop:10, fontWeight:700 }}>WA: {agenteWhatsapp}</div> : null}
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto" }}>
               {agente ? <div style={{ display:"flex", fontSize:22, fontWeight:600, color:A }}>{agente}</div> : <div style={{ display:"flex" }} />}
               <div style={{ display:"flex", fontSize:15, color:"#cccccc" }}>Creado con PropIA</div>
@@ -229,6 +241,8 @@ export async function POST(req: NextRequest) {
                 <div style={{ display:"flex", fontSize:28, color:"#444444" }}>{car2}</div>
               </div>
             ) : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:24, color:"#888888", marginTop:12 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:24, color:"#22c55e", marginTop:12, fontWeight:700 }}>WA: {agenteWhatsapp}</div> : null}
             <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:14 }}>
               {agente ? <div style={{ display:"flex", fontSize:28, fontWeight:600, color:A }}>{agente}</div> : null}
               <div style={{ display:"flex", fontSize:18, color:"#cccccc" }}>Creado con PropIA</div>
@@ -260,6 +274,8 @@ export async function POST(req: NextRequest) {
                 <div style={{ display:"flex", fontSize:18, color:"#555555" }}>{car2}</div>
               </div>
             ) : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:16, color:"#666666", marginTop:10 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:16, color:"#22c55e", marginTop:8, fontWeight:700 }}>WA: {agenteWhatsapp}</div> : null}
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto" }}>
               {agente ? <div style={{ display:"flex", fontSize:20, fontWeight:600, color:A }}>{agente}</div> : <div style={{ display:"flex" }} />}
               <div style={{ display:"flex", fontSize:13, color:"#cccccc" }}>Creado con PropIA</div>
@@ -284,6 +300,8 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:34, color:W, opacity:0.85, marginTop:14 }}>{zona}&nbsp;·&nbsp;{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:24, color:W, opacity:0.75, marginTop:16 }}>✓ {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:24, color:W, opacity:0.75, marginTop:10 }}>✓ {car2}</div> : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.65, marginTop:10 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:20, color:"#4ade80", marginTop:10 }}>WA: {agenteWhatsapp}</div> : null}
           </div>
           <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:6, backgroundColor:colorMarca }} />
           <div style={{ display:"flex", position:"absolute", bottom:28, right:40, fontSize:16, color:W, opacity:0.3 }}>Creado con PropIA</div>
@@ -302,6 +320,8 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:36, color:W, opacity:0.65, marginTop:8 }}>{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8, marginTop:28 }}>✓ {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8, marginTop:14 }}>✓ {car2}</div> : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:24, color:W, opacity:0.65, marginTop:12 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:24, color:"#4ade80", marginTop:12 }}>WA: {agenteWhatsapp}</div> : null}
           </div>
           <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:6, backgroundColor:colorMarca }} />
           <div style={{ display:"flex", position:"absolute", bottom:38, right:60, fontSize:20, color:W, opacity:0.3 }}>Creado con PropIA</div>
@@ -319,6 +339,8 @@ export async function POST(req: NextRequest) {
             {car1 ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.7, marginTop:14 }}>✓ {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.7, marginTop:8 }}>✓ {car2}</div> : null}
             {agente ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.55, marginTop:20, fontWeight:700 }}>{agente}</div> : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:16, color:W, opacity:0.6, marginTop:10 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:16, color:"#4ade80", marginTop:8 }}>WA: {agenteWhatsapp}</div> : null}
           </div>
           <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:5, backgroundColor:colorMarca }} />
           <div style={{ display:"flex", position:"absolute", bottom:18, right:38, fontSize:13, color:W, opacity:0.3 }}>Creado con PropIA</div>
@@ -344,6 +366,8 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:22, opacity:0.6 }}>{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:20, opacity:0.78, marginTop:22 }}>· {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:20, opacity:0.78, marginTop:10 }}>· {car2}</div> : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:17, opacity:0.65, marginTop:12 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:17, color:"#86efac", marginTop:10 }}>WA: {agenteWhatsapp}</div> : null}
             <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:14 }}>
               <div style={{ display:"flex", backgroundColor:W, color:P, fontSize:21, fontWeight:800, paddingTop:16, paddingRight:30, paddingBottom:16, paddingLeft:30, borderRadius:100, alignSelf:"flex-start" }}>Consultá ahora</div>
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
@@ -367,6 +391,8 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:34, opacity:0.88 }}>{zona}&nbsp;·&nbsp;{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:26, opacity:0.72, marginTop:18 }}>· {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:26, opacity:0.72, marginTop:12 }}>· {car2}</div> : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:22, opacity:0.65, marginTop:14 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:22, color:"#86efac", marginTop:12 }}>WA: {agenteWhatsapp}</div> : null}
             <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:18 }}>
               <div style={{ display:"flex", backgroundColor:W, color:P, fontSize:32, fontWeight:800, paddingTop:22, paddingRight:60, paddingBottom:22, paddingLeft:60, borderRadius:100, alignSelf:"center" }}>Consultá ahora</div>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
@@ -390,6 +416,8 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:22, opacity:0.88 }}>{zona}&nbsp;·&nbsp;{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:17, opacity:0.72, marginTop:10 }}>· {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:17, opacity:0.72, marginTop:6 }}>· {car2}</div> : null}
+            {amenitiesStr ? <div style={{ display:"flex", fontSize:14, opacity:0.6, marginTop:8 }}>{amenitiesStr}</div> : null}
+            {agenteWhatsapp ? <div style={{ display:"flex", fontSize:14, color:"#86efac", marginTop:6 }}>WA: {agenteWhatsapp}</div> : null}
             <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:11 }}>
               <div style={{ display:"flex", backgroundColor:W, color:P, fontSize:19, fontWeight:800, paddingTop:13, paddingRight:30, paddingBottom:13, paddingLeft:30, borderRadius:100, alignSelf:"flex-start" }}>Consultá ahora</div>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
