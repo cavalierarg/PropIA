@@ -10,7 +10,11 @@ import {
   Zap,
   Sparkles,
   Copy,
+  Layers,
 } from "lucide-react";
+
+const PRO_MAX_CHECKOUT =
+  "https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d?checkout[custom][plan]=pro_max";
 
 interface LandingPageProps {
   checkoutUrl: string;
@@ -36,17 +40,37 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight max-w-4xl mx-auto">
-            Generá{" "}
-            <span className="text-[#00c9c9]">5 posts inmobiliarios</span>
-            <br className="hidden sm:block" />
-            {" "}en 60 segundos
+            Tu asistente IA para{" "}
+            <span className="text-[#00c9c9]">marketing inmobiliario</span>
           </h1>
 
           <p className="text-xl sm:text-2xl text-white/65 mt-6 max-w-xl mx-auto leading-relaxed">
-            La IA escribe por vos. Vos cerrás ventas.
+            Posts, ads y contenido profesional generados en segundos. La IA trabaja, vos cerrás ventas.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-10">
+          {/* Feature chips */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
+            {[
+              { icon: <FileText className="w-3.5 h-3.5" />, label: "Posts para redes" },
+              { icon: <CalendarDays className="w-3.5 h-3.5" />, label: "Calendario 30 días" },
+              { icon: <Layers className="w-3.5 h-3.5" />, label: "Ads para Meta", highlight: true },
+              { icon: <Video className="w-3.5 h-3.5" />, label: "Guiones para Reels" },
+            ].map((chip) => (
+              <span
+                key={chip.label}
+                className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full border ${
+                  chip.highlight
+                    ? "bg-[#f59e0b]/20 border-[#f59e0b]/40 text-[#f59e0b]"
+                    : "bg-white/10 border-white/20 text-white/80"
+                }`}
+              >
+                {chip.icon}
+                {chip.label}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
             <Link
               href="/sign-in"
               className="inline-flex items-center justify-center gap-2 bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-bold px-8 py-4 rounded-xl text-base transition-colors shadow-lg shadow-[#00c9c9]/20"
@@ -149,7 +173,7 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col gap-4 hover:shadow-md hover:border-[#00c9c9]/30 transition-all">
               <div className="bg-[#0f3460]/10 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
@@ -199,6 +223,26 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
               </div>
             </div>
 
+            {/* Generador de Ads — PRO MAX */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#f59e0b]/30 flex flex-col gap-4 hover:shadow-md hover:border-[#f59e0b]/50 transition-all relative overflow-hidden sm:col-span-2 lg:col-span-2">
+              <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 rounded-full bg-[#f59e0b]/5 blur-2xl -translate-y-1/2 translate-x-1/4" />
+              <div className="flex items-start justify-between gap-3 relative">
+                <div className="bg-[#f59e0b]/10 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+                  <Layers className="w-6 h-6 text-[#f59e0b]" />
+                </div>
+                <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/30 rounded-full px-2.5 py-1 shrink-0">
+                  <Sparkles className="w-3 h-3" />
+                  PRO MAX
+                </span>
+              </div>
+              <div className="relative">
+                <h3 className="text-base font-bold text-[#0f3460]">Generador de Ads para Meta</h3>
+                <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
+                  Subí hasta 3 fotos de tu propiedad y la IA genera ads profesionales listos para Meta Ads en 3 formatos: Feed, Story y Banner.
+                </p>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -217,11 +261,11 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-5xl mx-auto items-start">
 
             {/* Plan Free */}
             <div className="border border-slate-200 rounded-2xl overflow-hidden flex flex-col">
-              <div className="px-6 sm:px-8 pt-7 pb-6 bg-slate-50 border-b border-slate-200">
+              <div className="px-6 pt-7 pb-6 bg-slate-50 border-b border-slate-200">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
                   Free
                 </p>
@@ -231,10 +275,10 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
                 </div>
               </div>
 
-              <div className="px-6 sm:px-8 py-6 flex flex-col gap-5 flex-1">
+              <div className="px-6 py-6 flex flex-col gap-5 flex-1">
                 <ul className="flex flex-col gap-3">
                   {[
-                    "10 generaciones por mes",
+                    "5 generaciones gratis",
                     "Posts para Instagram, Facebook y LinkedIn",
                     "Historial de propiedades guardadas",
                     "Vista previa de 3 días del calendario",
@@ -259,7 +303,7 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
             <div className="bg-[#0f3460] rounded-2xl overflow-hidden flex flex-col relative">
               <div className="pointer-events-none absolute top-0 right-0 w-40 h-40 rounded-full bg-[#00c9c9]/10 blur-2xl -translate-y-1/2 translate-x-1/3" />
 
-              <div className="px-6 sm:px-8 pt-7 pb-6 border-b border-white/10 relative">
+              <div className="px-6 pt-7 pb-6 border-b border-white/10 relative">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-bold text-white/50 uppercase tracking-widest">Pro</p>
                   <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#00c9c9] text-[#0f3460] px-2.5 py-1 rounded-full">
@@ -268,12 +312,12 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
                   </span>
                 </div>
                 <div className="flex items-end gap-2">
-                  <span className="text-4xl font-bold text-white">$49</span>
+                  <span className="text-4xl font-bold text-white">$29</span>
                   <span className="text-white/40 text-sm pb-1">/ mes</span>
                 </div>
               </div>
 
-              <div className="px-6 sm:px-8 py-6 flex flex-col gap-5 flex-1 relative">
+              <div className="px-6 py-6 flex flex-col gap-5 flex-1 relative">
                 <ul className="flex flex-col gap-3">
                   {[
                     "Generaciones ilimitadas",
@@ -297,6 +341,52 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
                   className="mt-auto block text-center bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-bold px-5 py-3 rounded-xl transition-colors text-sm"
                 >
                   Probar PRO 7 días gratis
+                </a>
+              </div>
+            </div>
+
+            {/* Plan PRO MAX */}
+            <div className="rounded-2xl overflow-hidden flex flex-col relative border-2 border-[#f59e0b]">
+              <div className="pointer-events-none absolute top-0 right-0 w-40 h-40 rounded-full bg-[#f59e0b]/10 blur-2xl -translate-y-1/2 translate-x-1/3" />
+              <div className="h-1 bg-gradient-to-r from-[#f59e0b]/60 via-[#f59e0b] to-[#f59e0b]/60" />
+
+              <div className="px-6 pt-6 pb-6 border-b border-[#f59e0b]/15 relative bg-white">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Pro Max</p>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#f59e0b] text-white px-2.5 py-1 rounded-full">
+                    <Sparkles className="w-3 h-3" />
+                    Más completo
+                  </span>
+                </div>
+                <div className="flex items-end gap-2">
+                  <span className="text-4xl font-bold text-[#0f3460]">$59</span>
+                  <span className="text-slate-400 text-sm pb-1">/ mes</span>
+                </div>
+              </div>
+
+              <div className="px-6 py-6 flex flex-col gap-5 flex-1 bg-white relative">
+                <ul className="flex flex-col gap-3">
+                  {[
+                    "Todo lo del plan PRO",
+                    "Generador de Ads para Meta Ads",
+                    "Hasta 3 fotos → 9 ads en 3 formatos",
+                    "IA investiga tendencias antes de generar",
+                    "Descarga en PNG alta resolución",
+                  ].map((feat, i) => (
+                    <li key={feat} className="flex items-start gap-2.5 text-sm text-slate-700">
+                      <Check className={`w-4 h-4 shrink-0 mt-0.5 ${i >= 1 ? "text-[#f59e0b]" : "text-emerald-500"}`} />
+                      {feat}
+                    </li>
+                  ))}
+                </ul>
+
+                <a
+                  href={PRO_MAX_CHECKOUT}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto block text-center bg-[#f59e0b] hover:bg-[#e08e00] text-white font-bold px-5 py-3 rounded-xl transition-colors text-sm border-0"
+                >
+                  Probar PRO MAX 7 días gratis
                 </a>
               </div>
             </div>

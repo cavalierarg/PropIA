@@ -2,7 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { getUsage } from "@/lib/actions/usage.actions";
 import { getUserProperties, type SavedProperty } from "@/lib/actions/properties.actions";
-import { FileText, CalendarDays, Home, Video, Sparkles, ArrowRight, Clock } from "lucide-react";
+import { FileText, CalendarDays, Home, Video, Sparkles, ArrowRight, Clock, Layers } from "lucide-react";
 import LandingPage from "@/components/LandingPage";
 
 function formatDate(dateStr: string): string {
@@ -176,6 +176,28 @@ export default async function DashboardPage() {
               </p>
               <div className="flex items-center gap-1 mt-5 text-[#00c9c9] text-sm font-semibold group-hover:gap-2 transition-all">
                 Ir a reels <ArrowRight className="w-4 h-4" />
+              </div>
+            </Link>
+
+            <Link
+              href="/ads-generator"
+              className="group bg-white rounded-2xl shadow-sm border border-[#f59e0b]/25 p-6 hover:shadow-md hover:border-[#f59e0b]/50 transition-all duration-200 relative overflow-hidden"
+            >
+              <div className="pointer-events-none absolute top-0 right-0 w-28 h-28 rounded-full bg-[#f59e0b]/5 blur-2xl -translate-y-1/2 translate-x-1/4" />
+              <div className="flex items-start justify-between gap-4 relative">
+                <div className="bg-[#f59e0b]/10 p-3 rounded-xl">
+                  <Layers className="w-6 h-6 text-[#f59e0b]" />
+                </div>
+                <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/30 rounded-full shrink-0">
+                  <Sparkles className="w-3 h-3" /> PRO MAX
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-[#0f3460] mt-4 relative">Generador de Ads</h3>
+              <p className="text-sm text-slate-500 mt-1 leading-relaxed relative">
+                Ads profesionales para Meta Ads con tus fotos.
+              </p>
+              <div className="flex items-center gap-1 mt-5 text-[#f59e0b] text-sm font-semibold group-hover:gap-2 transition-all relative">
+                Ir al generador <ArrowRight className="w-4 h-4" />
               </div>
             </Link>
 
