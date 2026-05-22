@@ -34,7 +34,7 @@ function buildSpecs(metros: string, dormitorios: string, banios: string): string
   const parts: string[] = [];
   if (dormitorios) parts.push(`${dormitorios} dorm`);
   if (banios) parts.push(`${banios} baños`);
-  parts.push(`${specs}`);
+  parts.push(`${metros} m²`);
   return parts.join(" · ");
 }
 
