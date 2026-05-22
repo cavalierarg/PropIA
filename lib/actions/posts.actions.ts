@@ -102,6 +102,8 @@ export const generarPosts = async (
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder. Los datos del usuario pueden tener pequeños errores tipográficos — corregalos implícitamente.
 
+DATOS: Usá únicamente los datos proporcionados. No inventes ni asumas características que no fueron especificadas.
+
 PROPIEDAD A PROMOCIONAR:
 - Tipo: ${data.tipoPropiedad}
 - Ubicación: ${data.ubicacion}

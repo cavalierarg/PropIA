@@ -50,6 +50,8 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
 
+DATOS: Usá únicamente los datos proporcionados. No inventes ni asumas características que no fueron especificadas.
+
 PROPIEDAD:
 ${propiedad}
 
@@ -79,6 +81,8 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     : `Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
+
+DATOS: Usá únicamente los datos proporcionados. No inventes ni asumas características que no fueron especificadas.
 
 PROPIEDAD:
 ${propiedad}

@@ -352,6 +352,7 @@ export default function PropertyForm() {
         {/* Características */}
         <div className="flex flex-col gap-3">
           <Label className="text-sm font-medium">3 Características destacadas</Label>
+          <p className="text-xs text-muted-foreground -mt-1">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <Input
               name="caracteristica1"
@@ -399,6 +400,7 @@ export default function PropertyForm() {
 
           {showDatos && (
             <div className="p-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
               <div className="flex flex-col gap-2">
                 <Label className="text-sm font-medium text-slate-600">Tipo de operación</Label>
                 <select
@@ -422,7 +424,7 @@ export default function PropertyForm() {
                   onChange={handleChange}
                   className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
                 >
-                  <option value="">—</option>
+                  <option value="">No tiene</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -439,7 +441,7 @@ export default function PropertyForm() {
                   onChange={handleChange}
                   className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
                 >
-                  <option value="">—</option>
+                  <option value="">No tiene</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
@@ -455,8 +457,7 @@ export default function PropertyForm() {
                   onChange={handleChange}
                   className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
                 >
-                  <option value="">—</option>
-                  <option value="Sin cochera">Sin cochera</option>
+                  <option value="">No tiene</option>
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3+">3+</option>
@@ -487,7 +488,7 @@ export default function PropertyForm() {
                 </Label>
                 <Input
                   name="piso"
-                  placeholder="Ej: 4° A"
+                  placeholder="Opcional — dejar vacío si no aplica"
                   value={form.piso}
                   onChange={handleChange}
                   className="h-10 text-sm"
@@ -501,7 +502,7 @@ export default function PropertyForm() {
                 </Label>
                 <Input
                   name="expensas"
-                  placeholder="Ej: $35.000/mes"
+                  placeholder="Opcional — dejar vacío si no aplica"
                   value={form.expensas}
                   onChange={handleChange}
                   className="h-10 text-sm"
@@ -539,6 +540,7 @@ export default function PropertyForm() {
 
           {showAmenities && (
             <div className="p-4 border-t border-slate-100">
+              <p className="text-xs text-muted-foreground mb-3">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {AMENITIES_LIST.map((amenity) => (
                   <label key={amenity} className="flex items-center gap-2 cursor-pointer group">
@@ -580,11 +582,12 @@ export default function PropertyForm() {
 
           {showContacto && (
             <div className="p-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
               <div className="flex flex-col gap-2">
                 <Label className="text-sm font-medium text-slate-600">WhatsApp</Label>
                 <Input
                   name="agenteWhatsapp"
-                  placeholder="Ej: +54 9 11 1234-5678"
+                  placeholder="Opcional — dejar vacío si no aplica"
                   value={form.agenteWhatsapp}
                   onChange={handleChange}
                   className="h-10 text-sm"
@@ -594,7 +597,7 @@ export default function PropertyForm() {
                 <Label className="text-sm font-medium text-slate-600">Instagram</Label>
                 <Input
                   name="agenteInstagram"
-                  placeholder="Ej: @nombre"
+                  placeholder="Opcional — dejar vacío si no aplica"
                   value={form.agenteInstagram}
                   onChange={handleChange}
                   className="h-10 text-sm"
@@ -604,7 +607,7 @@ export default function PropertyForm() {
                 <Label className="text-sm font-medium text-slate-600">Sitio web</Label>
                 <Input
                   name="agenteSitioWeb"
-                  placeholder="Ej: www.agente.com"
+                  placeholder="Opcional — dejar vacío si no aplica"
                   value={form.agenteSitioWeb}
                   onChange={handleChange}
                   className="h-10 text-sm"

@@ -242,17 +242,18 @@ export default function AdsGeneratorContent() {
             <Label className="text-sm font-medium">Metros cuadrados *</Label>
             <Input type="number" value={metros} onChange={(e) => setMetros(e.target.value)} placeholder="Ej: 85" className="h-12 text-base" min={1} />
           </div>
+          <p className="text-xs text-muted-foreground sm:col-span-2 -mb-1">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Nombre o agencia</Label>
-            <Input value={agente} onChange={(e) => setAgente(e.target.value)} placeholder="Ej: García Propiedades" className="h-12 text-base" />
+            <Input value={agente} onChange={(e) => setAgente(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-12 text-base" />
           </div>
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Característica 1</Label>
-            <Input value={car1} onChange={(e) => setCar1(e.target.value)} placeholder="Ej: Luminoso con vista al parque" className="h-12 text-base" />
+            <Input value={car1} onChange={(e) => setCar1(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-12 text-base" />
           </div>
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Característica 2</Label>
-            <Input value={car2} onChange={(e) => setCar2(e.target.value)} placeholder="Ej: Cochera cubierta incluida" className="h-12 text-base" />
+            <Input value={car2} onChange={(e) => setCar2(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-12 text-base" />
           </div>
         </div>
 

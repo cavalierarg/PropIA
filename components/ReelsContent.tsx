@@ -236,6 +236,7 @@ export default function ReelsContent() {
 
         <div className="flex flex-col gap-2">
           <Label className="text-sm font-medium">3 características destacadas</Label>
+          <p className="text-xs text-muted-foreground">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
               name="caracteristica1"

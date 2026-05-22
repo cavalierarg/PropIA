@@ -93,6 +93,8 @@ export async function buscarFormatosTrending(
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
 
+DATOS: Usá únicamente los datos proporcionados. No inventes ni asumas características que no fueron especificadas.
+
 Buscá información sobre: "real estate reels trends 2025", "trending real estate video formats instagram tiktok", "viral real estate content ideas 2025".
 
 Luego elegí los 3 formatos más efectivos y adaptálos para esta propiedad específica:
@@ -174,6 +176,8 @@ export async function generarGuion(
   const prompt = `Sos un director de contenido especialista en video marketing inmobiliario. Generá un guion completo y detallado para un Reel de Instagram usando el siguiente formato trending.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
+
+DATOS: Usá únicamente los datos proporcionados. No inventes ni asumas características que no fueron especificadas.
 
 FORMATO ELEGIDO: ${formato.nombre}
 Descripción: ${formato.descripcion}
