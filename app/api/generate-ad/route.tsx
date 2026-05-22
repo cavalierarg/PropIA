@@ -7,31 +7,13 @@ export const runtime = "nodejs";
 type AdType  = "feed" | "story" | "banner";
 type AdStyle = "luxury" | "moderno" | "bold" | "profesional";
 
-const fontCache = new Map<string, ArrayBuffer>();
-
-async function fetchGoogleFont(family: string, weight: number): Promise<ArrayBuffer | null> {
-  const key = `${family}-${weight}`;
-  if (fontCache.has(key)) return fontCache.get(key)!;
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8000);
-    const css = await fetch(
-      `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weight}&display=swap`,
-      {
-        headers: { "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36" },
-        signal: controller.signal,
-      }
-    ).then((r) => r.text());
-    clearTimeout(timer);
-    const match = css.match(/src: url\(([^)]+)\) format\('woff2'\)/);
-    if (!match) return null;
-    const data = await fetch(match[1], { signal: AbortSignal.timeout(8000) }).then((r) => r.arrayBuffer());
-    fontCache.set(key, data);
-    return data;
-  } catch {
-    return null;
-  }
-}
+// System font stacks per style — no remote fetching to avoid hanging routes
+const FONT_STACK: Record<AdStyle, string> = {
+  luxury:      "Georgia, 'Times New Roman', serif",
+  moderno:     "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  bold:        "'Arial Black', 'Impact', sans-serif",
+  profesional: "'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif",
+};
 
 async function fetchImageAsDataUrl(url: string): Promise<string> {
   const res = await fetch(url, { cache: "no-store" });
@@ -89,16 +71,8 @@ export async function POST(req: NextRequest) {
 
   const price = formatPrice(precio, moneda);
   const bc    = badgeColor(badge);
-
-  const fontFamilies: Record<AdStyle, string> = {
-    luxury: "Playfair Display", moderno: "Inter", bold: "Oswald", profesional: "Montserrat",
-  };
-  const fontFamily = fontFamilies[estilo];
-  const fontData   = await fetchGoogleFont(fontFamily, 700);
-  const imgOpts    = fontData
-    ? { width, height, fonts: [{ name: fontFamily, data: fontData, weight: 700 as const, style: "normal" as const }] }
-    : { width, height };
-  const ff = fontData ? fontFamily : "sans-serif";
+  const ff    = FONT_STACK[estilo];
+  const imgOpts = { width, height };
 
   try {
     // ── LUXURY ────────────────────────────────────────────────────────────
