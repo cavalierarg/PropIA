@@ -143,7 +143,8 @@ export default function AdsGeneratorContent() {
       const result = await investigarTendenciasAds();
       setTrends(result.tendencias);
       setPhase("trends_ready");
-    } catch {
+    } catch (err) {
+      console.error("[ads-trends] Error:", err);
       setError("Error al investigar tendencias. Intentá de nuevo.");
       setPhase("idle");
     }
