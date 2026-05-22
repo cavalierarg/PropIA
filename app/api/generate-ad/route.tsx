@@ -76,19 +76,16 @@ export async function POST(req: NextRequest) {
             <div style={{ display: "flex", fontSize: 34, color: WHITE, marginTop: 12, opacity: 0.9 }}>
               {zona}&nbsp;·&nbsp;{metros} m²
             </div>
-            {/* Fila inferior: CTA izquierda, agencia + logo derecha */}
+            {/* Fila inferior: CTA izquierda, agencia derecha */}
             <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", width: "100%", marginTop: "auto" }}>
               <div style={{ display: "flex", backgroundColor: CYAN, color: BLUE, fontSize: 28, fontWeight: 800, padding: "14px 38px", borderRadius: 100 }}>
                 Consultá ahora
               </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
-                {agente ? (
-                  <div style={{ display: "flex", fontSize: 18, color: "rgba(255,255,255,0.45)" }}>{agente}</div>
-                ) : null}
-                <div style={{ display: "flex", fontSize: 24, fontWeight: 900, color: WHITE }}>
-                  Prop<span style={{ color: CYAN }}>IA</span>
+              {agente ? (
+                <div style={{ display: "flex", fontSize: 26, fontWeight: 700, color: WHITE }}>
+                  {agente}
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -137,19 +134,16 @@ export async function POST(req: NextRequest) {
               </div>
             ) : null}
 
-            {/* CTA + logo abajo */}
+            {/* CTA + agencia centrada abajo */}
             <div style={{ display: "flex", flexDirection: "column", marginTop: "auto", alignItems: "center", gap: 24 }}>
               <div style={{ display: "flex", backgroundColor: CYAN, color: BLUE, fontSize: 44, fontWeight: 800, padding: "22px 80px", borderRadius: 100 }}>
                 Consultá ahora
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                {agente ? (
-                  <div style={{ display: "flex", fontSize: 26, color: "rgba(255,255,255,0.38)" }}>{agente}&nbsp;·&nbsp;</div>
-                ) : null}
-                <div style={{ display: "flex", fontSize: 30, fontWeight: 900, color: WHITE }}>
-                  Prop<span style={{ color: CYAN }}>IA</span>
+              {agente ? (
+                <div style={{ display: "flex", justifyContent: "center", fontSize: 32, fontWeight: 700, color: WHITE }}>
+                  {agente}
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -170,13 +164,6 @@ export async function POST(req: NextRequest) {
 
         {/* Panel azul derecho — 55% = 660px */}
         <div style={{ display: "flex", flexDirection: "column", width: 660, height: 628, backgroundColor: BLUE, padding: "36px 50px 40px", flexShrink: 0 }}>
-          {/* Logo PropIA arriba derecha */}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 20 }}>
-            <div style={{ display: "flex", fontSize: 26, fontWeight: 900, color: WHITE }}>
-              Prop<span style={{ color: CYAN }}>IA</span>
-            </div>
-          </div>
-
           {/* Precio */}
           <div style={{ display: "flex", fontSize: 60, fontWeight: 900, color: CYAN, lineHeight: 1, letterSpacing: "-2px" }}>
             {precio}
@@ -200,16 +187,18 @@ export async function POST(req: NextRequest) {
             </div>
           ) : null}
 
-          {/* CTA + agencia */}
-          <div style={{ display: "flex", flexDirection: "column", marginTop: "auto", gap: 10 }}>
-            {agente ? (
-              <div style={{ display: "flex", fontSize: 16, color: "rgba(255,255,255,0.38)" }}>{agente}</div>
-            ) : null}
+          {/* CTA + agencia abajo derecha */}
+          <div style={{ display: "flex", flexDirection: "column", marginTop: "auto", gap: 12 }}>
             <div style={{ display: "flex" }}>
               <div style={{ display: "flex", backgroundColor: CYAN, color: BLUE, fontSize: 22, fontWeight: 800, padding: "14px 36px", borderRadius: 100 }}>
                 Consultá ahora
               </div>
             </div>
+            {agente ? (
+              <div style={{ display: "flex", justifyContent: "flex-end", fontSize: 20, fontWeight: 700, color: WHITE }}>
+                {agente}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
