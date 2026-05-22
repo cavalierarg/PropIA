@@ -35,6 +35,17 @@ export type PropertyData = {
   caracteristica1: string;
   caracteristica2: string;
   caracteristica3: string;
+  tipoOperacion?: string;
+  dormitorios?: string;
+  banios?: string;
+  cocheras?: string;
+  antiguedad?: string;
+  piso?: string;
+  expensas?: string;
+  amenities?: string[];
+  agenteWhatsapp?: string;
+  agenteInstagram?: string;
+  agenteSitioWeb?: string;
 };
 
 export const generarPosts = async (
@@ -73,14 +84,30 @@ export const generarPosts = async (
     .filter(Boolean)
     .join(", ");
 
+  const extras = [
+    data.tipoOperacion ? `- Operación: ${data.tipoOperacion}` : "",
+    data.dormitorios ? `- Dormitorios: ${data.dormitorios}` : "",
+    data.banios ? `- Baños: ${data.banios}` : "",
+    data.cocheras ? `- Cocheras: ${data.cocheras}` : "",
+    data.antiguedad ? `- Antigüedad: ${data.antiguedad}` : "",
+    data.piso ? `- Piso: ${data.piso}` : "",
+    data.expensas ? `- Expensas: ${data.expensas}` : "",
+    data.amenities?.length ? `- Amenities: ${data.amenities.join(", ")}` : "",
+    data.agenteWhatsapp ? `- WhatsApp del agente: ${data.agenteWhatsapp}` : "",
+    data.agenteInstagram ? `- Instagram del agente: @${data.agenteInstagram.replace(/^@/, "")}` : "",
+    data.agenteSitioWeb ? `- Sitio web: ${data.agenteSitioWeb}` : "",
+  ].filter(Boolean).join("\n");
+
   const prompt = `Eres un experto en marketing inmobiliario digital con 10 años de experiencia vendiendo propiedades de alto valor en Latinoamérica. Tu misión es crear posts que generen consultas reales y cierren ventas. Escribís en español neutro válido para México, España y Colombia. Sin regionalismos.
+
+CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder. Los datos del usuario pueden tener pequeños errores tipográficos — corregalos implícitamente.
 
 PROPIEDAD A PROMOCIONAR:
 - Tipo: ${data.tipoPropiedad}
 - Ubicación: ${data.ubicacion}
 - Superficie: ${data.metrosCuadrados} m²
 - Precio: ${data.precio}
-- Destacados: ${caracteristicas}
+${extras ? extras + "\n" : ""}- Destacados: ${caracteristicas || "ninguno especificado"}
 
 CREÁ EXACTAMENTE 5 POSTS ORIENTADOS A VENTAS, con el tono preciso de cada red:
 
@@ -89,7 +116,7 @@ CREÁ EXACTAMENTE 5 POSTS ORIENTADOS A VENTAS, con el tono preciso de cada red:
 - Hacé que el lector imagine vivir o invertir ahí — describí sensaciones y estilo de vida
 - Emojis estratégicos como separadores visuales, no decorativos
 - Destacá exclusividad, smart living o la oportunidad de la zona
-- CTA directa al final: "Escribinos al DM 📩" / "Consultá precio final ⬇️" / "Agendá tu visita"
+- CTA directa al final: si hay WhatsApp del agente usalo ("Escribinos al [número]"), si no: "Escribinos al DM 📩" / "Consultá precio final ⬇️" / "Agendá tu visita"
 - 5-8 hashtags relevantes al sector y la ciudad al final
 - Máximo 300 palabras
 

@@ -238,7 +238,7 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
               <div className="relative">
                 <h3 className="text-base font-bold text-[#0f3460]">Generador de Ads para Meta</h3>
                 <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                  Subí hasta 3 fotos de tu propiedad y la IA genera ads profesionales listos para Meta Ads en 3 formatos: Feed, Story y Banner.
+                  Subí hasta 3 fotos y generá ads en 4 estilos (Luxury, Moderno, Bold, Profesional) con tu color de marca, en 3 formatos: Feed, Story y Banner.
                 </p>
               </div>
             </div>
@@ -368,9 +368,11 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
                 <ul className="flex flex-col gap-3">
                   {[
                     "Todo lo del plan PRO",
-                    "Generador de Ads para Meta Ads",
-                    "Hasta 3 fotos → 9 ads en 3 formatos",
-                    "IA investiga tendencias antes de generar",
+                    "Generador de Ads profesional para Meta Ads",
+                    "4 estilos: Luxury, Moderno, Bold, Profesional",
+                    "Selector de color de marca personalizado",
+                    "3 formatos: Feed, Story y Banner",
+                    "Formulario completo: dormitorios, amenities, contacto del agente",
                     "Descarga en PNG alta resolución",
                   ].map((feat, i) => (
                     <li key={feat} className="flex items-start gap-2.5 text-sm text-slate-700">

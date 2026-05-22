@@ -48,6 +48,8 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
   const prompt = isPro
     ? `Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre. Tu texto posiciona bien en buscadores y persuade al comprador a contactar.
 
+CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
+
 PROPIEDAD:
 ${propiedad}
 
@@ -75,6 +77,8 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
   "version_larga": "texto completo versión larga"
 }`
     : `Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre.
+
+CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
 
 PROPIEDAD:
 ${propiedad}

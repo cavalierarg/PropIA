@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
   try {
     // ── LUXURY ────────────────────────────────────────────────────────────
     if (estilo === "luxury") {
-      const GOLD = "#c9a84c"; const BG = "#0a0a0a"; const W = "#ffffff";
+      const GOLD = colorMarca; const BG = "#0a0a0a"; const W = "#ffffff";
 
       if (type === "feed") return new ImageResponse(
         <div style={{ display:"flex", flexDirection:"column", width:1080, height:1080, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
@@ -274,6 +274,7 @@ export async function POST(req: NextRequest) {
             {car1 ? <div style={{ display:"flex", fontSize:24, color:W, opacity:0.75, marginTop:16 }}>✓ {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:24, color:W, opacity:0.75, marginTop:10 }}>✓ {car2}</div> : null}
           </div>
+          <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:6, backgroundColor:colorMarca }} />
           <div style={{ display:"flex", position:"absolute", bottom:28, right:40, fontSize:16, color:W, opacity:0.3 }}>Creado con PropIA</div>
         </div>, imgOpts
       );
@@ -291,6 +292,7 @@ export async function POST(req: NextRequest) {
             {car1 ? <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8, marginTop:28 }}>✓ {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8, marginTop:14 }}>✓ {car2}</div> : null}
           </div>
+          <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:6, backgroundColor:colorMarca }} />
           <div style={{ display:"flex", position:"absolute", bottom:38, right:60, fontSize:20, color:W, opacity:0.3 }}>Creado con PropIA</div>
         </div>, imgOpts
       );
@@ -307,6 +309,7 @@ export async function POST(req: NextRequest) {
             {car2 ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.7, marginTop:8 }}>✓ {car2}</div> : null}
             {agente ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.55, marginTop:20, fontWeight:700 }}>{agente}</div> : null}
           </div>
+          <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:5, backgroundColor:colorMarca }} />
           <div style={{ display:"flex", position:"absolute", bottom:18, right:38, fontSize:13, color:W, opacity:0.3 }}>Creado con PropIA</div>
         </div>, imgOpts
       );

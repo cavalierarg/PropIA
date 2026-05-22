@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\valen\\\\saas-template\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"const lr = require\\('lucide-react'\\); console.log\\(Object.keys\\(lr\\).filter\\(k => k.includes\\('Shield'\\) || k.includes\\('User'\\) || k.includes\\('Star'\\) || k.includes\\('Badge'\\) || k.includes\\('Brain'\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const lr = require\\('lucide-react'\\); console.log\\(Object.keys\\(lr\\).filter\\(k => \\(k.includes\\('Shield'\\) || k.includes\\('Users'\\) || k.includes\\('Star'\\) || k.includes\\('Brain'\\) || k.includes\\('Toggle'\\)\\) && !k.endsWith\\('Icon'\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const lr = require\\('lucide-react'\\); const icons=['CheckIcon','XIcon','SparklesIcon','ZapIcon','ShieldCheckIcon','UsersRoundIcon','BrainCircuitIcon','StarIcon']; icons.forEach\\(i => console.log\\(i, !!lr[i]\\)\\)\")",
+      "Bash(npm install *)",
+      "Bash(git reset *)",
+      "mcp__plugin_vercel_vercel__list_deployments",
+      "mcp__plugin_vercel_vercel__get_project",
+      "Bash(curl -s https://api.clerk.com/v1/users?email_address=cavalierarg%40gmail.com -H 'Authorization: Bearer sk_test_IgLmI38tPROG8PPGarzYqAVYToq8aMpJaprb2vSYLG')",
+      "Bash(curl *)",
+      "Bash(git pull *)",
+      "PowerShell(Get-ChildItem -Path C:\\\\Users\\\\valen\\\\saas-template -Force | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}} | Format-Table -AutoSize)",
+      "PowerShell(head *)",
+      "Bash(npx next *)",
+      "Bash(node -e ' *)",
+      "Bash(npx -y dotenv-cli node -e ' *)",
+      "Bash(node --env-file=.env.local -e ' *)",
+      "Bash(git commit *)"
+    ]
+  }
+}

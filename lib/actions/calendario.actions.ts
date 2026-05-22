@@ -36,6 +36,8 @@ function buildPrompt(
 ): string {
   return `Sos un experto en marketing inmobiliario digital con 10 años de experiencia generando contenido que convierte en Latinoamérica.
 
+CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
+
 DATOS DEL AGENTE:
 - Nicho: ${nicho}
 - Zona de trabajo: ${zona}

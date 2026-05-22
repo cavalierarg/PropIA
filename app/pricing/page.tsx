@@ -42,7 +42,7 @@ const FEATURES: {
   { text: "Calendario de contenido", free: "Preview 3 días", pro: "30 días completo", proMax: "30 días completo" },
   { text: "Guion para Reels con tendencias en tiempo real", free: false, pro: true, proMax: true },
   { text: "Análisis de tendencias del mercado", free: false, pro: true, proMax: true },
-  { text: "Generador de Ads para Meta Ads", free: false, pro: false, proMax: "3 formatos × hasta 3 fotos = 9 ads" },
+  { text: "Generador de Ads profesional para Meta Ads", free: false, pro: false, proMax: "4 estilos · 3 formatos · color de marca · hasta 3 fotos" },
   { text: "Soporte prioritario por email", free: false, pro: true, proMax: true },
 ];
 
@@ -405,7 +405,7 @@ export default function PricingPage() {
                     </p>
                   )}
                   <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                    Todo lo del plan PRO más ads profesionales con IA para Meta Ads.
+                    Todo lo del plan PRO más ads profesionales para Meta Ads con 4 estilos de diseño y color de marca personalizado.
                   </p>
                 </div>
 
