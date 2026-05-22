@@ -32,8 +32,8 @@ function formatPrice(precio: string, moneda: string): string {
 
 function buildSpecs(metros: string, dormitorios: string, banios: string): string {
   const parts: string[] = [];
-  if (dormitorios) parts.push(`🛏 ${dormitorios}`);
-  if (banios) parts.push(`🚿 ${banios}`);
+  if (dormitorios) parts.push(`Dorm: ${dormitorios}`);
+  if (banios) parts.push(`Baños: ${banios}`);
   parts.push(`${metros} m²`);
   return parts.join(" · ");
 }

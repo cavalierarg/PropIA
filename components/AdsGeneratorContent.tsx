@@ -270,11 +270,14 @@ export default function AdsGeneratorContent() {
             <Label className="text-sm font-medium">Metros cuadrados *</Label>
             <Input type="number" value={metros} onChange={(e) => setMetros(e.target.value)} placeholder="Ej: 85" className="h-12 text-base" min={1} />
           </div>
-          <p className="text-xs text-muted-foreground sm:col-span-2 -mb-1">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium">Nombre o agencia</Label>
-            <Input value={agente} onChange={(e) => setAgente(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-12 text-base" />
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <Label className="text-sm font-medium flex items-center gap-2">
+              Referencia de ubicación
+              <span className="text-xs font-normal bg-[#0f3460]/10 text-[#0f3460] px-2 py-0.5 rounded-full">aparece en el ad</span>
+            </Label>
+            <Input value={agente} onChange={(e) => setAgente(e.target.value)} placeholder="Ej: A 1 cuadra de Av. Roca, esquina con Belgrano" className="h-12 text-base" />
           </div>
+          <p className="text-xs text-muted-foreground sm:col-span-2 -mb-1">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Característica 1</Label>
             <Input value={car1} onChange={(e) => setCar1(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-12 text-base" />
