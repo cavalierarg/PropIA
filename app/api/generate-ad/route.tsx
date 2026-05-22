@@ -4,28 +4,38 @@ import { auth } from "@clerk/nextjs/server";
 
 export const runtime = "nodejs";
 
-type AdType = "feed" | "story" | "banner";
+type AdType  = "feed" | "story" | "banner";
 type AdStyle = "luxury" | "moderno" | "bold" | "profesional";
 
 const fontCache = new Map<string, ArrayBuffer>();
 
-async function fetchGoogleFont(family: string, weight: number): Promise<ArrayBuffer> {
+async function fetchGoogleFont(family: string, weight: number): Promise<ArrayBuffer | null> {
   const key = `${family}-${weight}`;
   if (fontCache.has(key)) return fontCache.get(key)!;
-  const css = await fetch(
-    `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weight}&display=swap`,
-    { headers: { "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36" } }
-  ).then((r) => r.text());
-  const match = css.match(/src: url\((.+?)\) format\('woff2'\)/);
-  if (!match) throw new Error(`Font URL not found: ${family}`);
-  const data = await fetch(match[1]).then((r) => r.arrayBuffer());
-  fontCache.set(key, data);
-  return data;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const css = await fetch(
+      `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weight}&display=swap`,
+      {
+        headers: { "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36" },
+        signal: controller.signal,
+      }
+    ).then((r) => r.text());
+    clearTimeout(timer);
+    const match = css.match(/src: url\(([^)]+)\) format\('woff2'\)/);
+    if (!match) return null;
+    const data = await fetch(match[1], { signal: AbortSignal.timeout(8000) }).then((r) => r.arrayBuffer());
+    fontCache.set(key, data);
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchImageAsDataUrl(url: string): Promise<string> {
   const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Failed to fetch image: ${res.status}`);
+  if (!res.ok) throw new Error(`Image fetch failed: ${res.status}`);
   const buffer = Buffer.from(await res.arrayBuffer());
   const mime = res.headers.get("content-type") || "image/jpeg";
   return `data:${mime};base64,${buffer.toString("base64")}`;
@@ -38,16 +48,16 @@ function formatPrice(precio: string, moneda: string): string {
   return t.startsWith("$") || t.startsWith("ARS") ? t : `$${t}`;
 }
 
-function badgeColors(badge: string): { bg: string; text: string } {
-  const map: Record<string, { bg: string; text: string }> = {
-    "En Venta":       { bg: "#16a34a", text: "#ffffff" },
-    "Alquiler":       { bg: "#2563eb", text: "#ffffff" },
-    "Oportunidad":    { bg: "#ea580c", text: "#ffffff" },
-    "Recién Llegada": { bg: "#7c3aed", text: "#ffffff" },
-    "Última Unidad":  { bg: "#dc2626", text: "#ffffff" },
-    "Precio Rebajado":{ bg: "#d97706", text: "#ffffff" },
+function badgeColor(badge: string): { bg: string; text: string } {
+  const m: Record<string, { bg: string; text: string }> = {
+    "En Venta":        { bg: "#16a34a", text: "#fff" },
+    "Alquiler":        { bg: "#2563eb", text: "#fff" },
+    "Oportunidad":     { bg: "#ea580c", text: "#fff" },
+    "Recién Llegada":  { bg: "#7c3aed", text: "#fff" },
+    "Última Unidad":   { bg: "#dc2626", text: "#fff" },
+    "Precio Rebajado": { bg: "#d97706", text: "#fff" },
   };
-  return map[badge] ?? { bg: "#16a34a", text: "#ffffff" };
+  return m[badge] ?? { bg: "#16a34a", text: "#fff" };
 }
 
 export async function POST(req: NextRequest) {
@@ -55,366 +65,356 @@ export async function POST(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   let body: {
-    type: AdType;
-    estilo: AdStyle;
-    imageUrl: string;
-    precio: string;
-    zona: string;
-    metros: string;
-    car1?: string;
-    car2?: string;
-    agente?: string;
-    colorMarca: string;
-    moneda: string;
-    badge: string;
+    type: AdType; estilo: AdStyle; imageUrl: string;
+    precio: string; zona: string; metros: string;
+    car1?: string; car2?: string; agente?: string;
+    colorMarca: string; moneda: string; badge: string;
   };
-
   try { body = await req.json(); }
   catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
 
   const {
-    type, estilo = "moderno", imageUrl, precio, zona, metros,
+    type, estilo = "moderno", imageUrl,
+    precio, zona, metros,
     car1 = "", car2 = "", agente = "",
     colorMarca = "#0f3460", moneda = "USD", badge = "En Venta",
   } = body;
 
+  const dims = { feed: [1080,1080], story: [1080,1920], banner: [1200,628] };
+  const [width, height] = dims[type] ?? dims.feed;
+
   let imageData: string;
   try { imageData = await fetchImageAsDataUrl(imageUrl); }
-  catch { return NextResponse.json({ error: "Failed to fetch property image" }, { status: 400 }); }
-
-  const dims: Record<AdType, { width: number; height: number }> = {
-    feed:   { width: 1080, height: 1080 },
-    story:  { width: 1080, height: 1920 },
-    banner: { width: 1200, height: 628 },
-  };
-  const { width, height } = dims[type] ?? dims.feed;
+  catch (e) { return NextResponse.json({ error: String(e) }, { status: 400 }); }
 
   const price = formatPrice(precio, moneda);
-  const bc = badgeColors(badge);
+  const bc    = badgeColor(badge);
 
-  const fontMap: Record<AdStyle, { family: string; weight: number }> = {
-    luxury:      { family: "Playfair Display", weight: 700 },
-    moderno:     { family: "Inter",             weight: 700 },
-    bold:        { family: "Oswald",            weight: 700 },
-    profesional: { family: "Montserrat",        weight: 700 },
+  const fontFamilies: Record<AdStyle, string> = {
+    luxury: "Playfair Display", moderno: "Inter", bold: "Oswald", profesional: "Montserrat",
   };
-  const fontCfg = fontMap[estilo];
-  let fontData: ArrayBuffer | undefined;
-  try { fontData = await fetchGoogleFont(fontCfg.family, fontCfg.weight); }
-  catch (e) { console.error("[generate-ad] font error:", e); }
+  const fontFamily = fontFamilies[estilo];
+  const fontData   = await fetchGoogleFont(fontFamily, 700);
+  const imgOpts    = fontData
+    ? { width, height, fonts: [{ name: fontFamily, data: fontData, weight: 700 as const, style: "normal" as const }] }
+    : { width, height };
+  const ff = fontData ? fontFamily : "sans-serif";
 
-  const fonts = fontData
-    ? [{ name: fontCfg.family, data: fontData, weight: fontCfg.weight as 700, style: "normal" as const }]
-    : undefined;
-  const opts = { width, height, fonts };
-  const ff = fontData ? fontCfg.family : "sans-serif";
+  try {
+    // ── LUXURY ────────────────────────────────────────────────────────────
+    if (estilo === "luxury") {
+      const GOLD = "#c9a84c"; const BG = "#0a0a0a"; const W = "#ffffff";
 
-  // ── LUXURY ──────────────────────────────────────────────────────────────
-  if (estilo === "luxury") {
-    const GOLD = "#c9a84c"; const BG = "#0a0a0a"; const W = "#ffffff";
-
-    if (type === "feed") return new ImageResponse(
-      <div style={{ display:"flex", flexDirection:"column", width:1080, height:1080, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
-        <div style={{ display:"flex", width:1080, height:594, position:"relative", flexShrink:0 }}>
-          <img src={imageData} alt="" style={{ width:1080, height:594, objectFit:"cover" }} />
-          <div style={{ position:"absolute", inset:0, backgroundColor:"rgba(0,0,0,0.38)", display:"flex" }} />
-          <div style={{ position:"absolute", top:32, left:32, display:"flex", backgroundColor:bc.bg, color:bc.text, fontSize:22, fontWeight:700, padding:"10px 26px", borderRadius:4, letterSpacing:"0.08em", textTransform:"uppercase" }}>{badge}</div>
-          {agente ? <div style={{ position:"absolute", top:32, right:32, display:"flex", color:W, fontSize:20, fontWeight:300, letterSpacing:"0.18em", textTransform:"uppercase", opacity:0.9 }}>{agente}</div> : null}
-        </div>
-        <div style={{ display:"flex", flexDirection:"column", width:1080, height:486, backgroundColor:BG, padding:"36px 60px 32px", flexShrink:0 }}>
-          <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55, marginBottom:28 }} />
-          <div style={{ display:"flex", fontSize:80, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
-          <div style={{ display:"flex", fontSize:28, color:W, marginTop:14, opacity:0.65, letterSpacing:"0.1em", textTransform:"uppercase", fontWeight:300 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
-          {(car1||car2) && <div style={{ display:"flex", flexDirection:"column", gap:8, marginTop:18 }}>
-            {car1 && <div style={{ display:"flex", fontSize:22, color:W, opacity:0.55 }}>— {car1}</div>}
-            {car2 && <div style={{ display:"flex", fontSize:22, color:W, opacity:0.55 }}>— {car2}</div>}
-          </div>}
-          <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:14 }}>
-            <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55 }} />
-            <div style={{ display:"flex", justifyContent:"flex-end", fontSize:15, color:W, opacity:0.3, letterSpacing:"0.06em" }}>Creado con PropIA</div>
+      if (type === "feed") return new ImageResponse(
+        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1080, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+          {/* Photo 55% */}
+          <div style={{ display:"flex", position:"relative", width:1080, height:594, flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:1080, height:594, objectFit:"cover" }} />
+            <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, backgroundColor:"rgba(0,0,0,0.38)" }} />
+            <div style={{ display:"flex", position:"absolute", top:32, left:32, backgroundColor:bc.bg, color:bc.text, fontSize:22, fontWeight:700, padding:"10px 26px", borderRadius:4, letterSpacing:"0.08em" }}>{badge.toUpperCase()}</div>
+            {agente ? <div style={{ display:"flex", position:"absolute", top:32, right:32, color:W, fontSize:20, fontWeight:300, letterSpacing:"0.18em" }}>{agente.toUpperCase()}</div> : null}
           </div>
-        </div>
-      </div>, opts
-    );
-
-    if (type === "story") return new ImageResponse(
-      <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
-        <div style={{ display:"flex", width:1080, height:960, position:"relative", flexShrink:0 }}>
-          <img src={imageData} alt="" style={{ width:1080, height:960, objectFit:"cover" }} />
-          <div style={{ position:"absolute", inset:0, backgroundColor:"rgba(0,0,0,0.38)", display:"flex" }} />
-          <div style={{ position:"absolute", top:50, left:50, display:"flex", backgroundColor:bc.bg, color:bc.text, fontSize:26, fontWeight:700, padding:"12px 32px", borderRadius:4, letterSpacing:"0.08em", textTransform:"uppercase" }}>{badge}</div>
-          {agente ? <div style={{ position:"absolute", top:50, right:50, display:"flex", color:W, fontSize:22, fontWeight:300, letterSpacing:"0.18em", textTransform:"uppercase", opacity:0.85 }}>{agente}</div> : null}
-        </div>
-        <div style={{ display:"flex", flexDirection:"column", flex:1, backgroundColor:BG, padding:"60px 80px 56px" }}>
-          <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55, marginBottom:48 }} />
-          <div style={{ display:"flex", fontSize:96, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
-          <div style={{ display:"flex", fontSize:36, color:W, marginTop:22, opacity:0.65, letterSpacing:"0.1em", textTransform:"uppercase", fontWeight:300 }}>{zona}</div>
-          <div style={{ display:"flex", fontSize:30, color:W, marginTop:8, opacity:0.45, letterSpacing:"0.06em" }}>{metros} m²</div>
-          {(car1||car2) && <div style={{ display:"flex", flexDirection:"column", gap:14, marginTop:36 }}>
-            {car1 && <div style={{ display:"flex", fontSize:28, color:W, opacity:0.6 }}>— {car1}</div>}
-            {car2 && <div style={{ display:"flex", fontSize:28, color:W, opacity:0.6 }}>— {car2}</div>}
-          </div>}
-          <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:18 }}>
-            <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55 }} />
-            <div style={{ display:"flex", justifyContent:"flex-end", fontSize:18, color:W, opacity:0.3 }}>Creado con PropIA</div>
-          </div>
-        </div>
-      </div>, opts
-    );
-
-    return new ImageResponse(
-      <div style={{ display:"flex", width:1200, height:628, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
-        <div style={{ display:"flex", width:540, height:628, position:"relative", flexShrink:0 }}>
-          <img src={imageData} alt="" style={{ width:540, height:628, objectFit:"cover" }} />
-          <div style={{ position:"absolute", inset:0, backgroundColor:"rgba(0,0,0,0.38)", display:"flex" }} />
-        </div>
-        <div style={{ display:"flex", flexDirection:"column", flex:1, backgroundColor:BG, padding:"40px 50px 36px" }}>
-          <div style={{ display:"flex", backgroundColor:bc.bg, color:bc.text, fontSize:17, fontWeight:700, padding:"8px 20px", borderRadius:4, letterSpacing:"0.08em", textTransform:"uppercase", alignSelf:"flex-start", marginBottom:22 }}>{badge}</div>
-          <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55, marginBottom:22 }} />
-          <div style={{ display:"flex", fontSize:62, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
-          <div style={{ display:"flex", fontSize:22, color:W, marginTop:12, opacity:0.65, letterSpacing:"0.1em", textTransform:"uppercase", fontWeight:300 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
-          {car1 && <div style={{ display:"flex", fontSize:18, color:W, opacity:0.5, marginTop:16 }}>— {car1}</div>}
-          {car2 && <div style={{ display:"flex", fontSize:18, color:W, opacity:0.5, marginTop:8 }}>— {car2}</div>}
-          <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:12 }}>
-            <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55 }} />
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-              {agente ? <div style={{ display:"flex", fontSize:17, color:W, opacity:0.5, fontWeight:300, letterSpacing:"0.12em", textTransform:"uppercase" }}>{agente}</div> : <div style={{ display:"flex" }} />}
-              <div style={{ display:"flex", fontSize:13, color:W, opacity:0.3 }}>Creado con PropIA</div>
+          {/* Info 45% */}
+          <div style={{ display:"flex", flexDirection:"column", width:1080, height:486, backgroundColor:BG, padding:"36px 60px 32px", flexShrink:0 }}>
+            <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55, marginBottom:28 }} />
+            <div style={{ display:"flex", fontSize:80, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
+            <div style={{ display:"flex", fontSize:28, color:W, marginTop:14, opacity:0.65, letterSpacing:"0.1em", fontWeight:300 }}>{zona.toUpperCase()}&nbsp;·&nbsp;{metros} m²</div>
+            {car1 ? <div style={{ display:"flex", fontSize:22, color:W, opacity:0.55, marginTop:18 }}>— {car1}</div> : null}
+            {car2 ? <div style={{ display:"flex", fontSize:22, color:W, opacity:0.55, marginTop:8 }}>— {car2}</div> : null}
+            <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:14 }}>
+              <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55 }} />
+              <div style={{ display:"flex", justifyContent:"flex-end", fontSize:15, color:W, opacity:0.3 }}>Creado con PropIA</div>
             </div>
           </div>
-        </div>
-      </div>, opts
-    );
-  }
+        </div>, imgOpts
+      );
 
-  // ── MODERNO ─────────────────────────────────────────────────────────────
-  if (estilo === "moderno") {
-    const A = colorMarca; const BG = "#ffffff"; const TEXT = "#111111"; const LIGHT = "#f4f4f4";
-
-    if (type === "feed") return new ImageResponse(
-      <div style={{ display:"flex", flexDirection:"column", width:1080, height:1080, backgroundColor:BG, fontFamily:ff, overflow:"hidden", padding:"56px" }}>
-        <div style={{ display:"flex", width:968, height:530, borderRadius:20, overflow:"hidden", flexShrink:0, position:"relative" }}>
-          <img src={imageData} alt="" style={{ width:968, height:530, objectFit:"cover" }} />
-          <div style={{ position:"absolute", top:22, left:22, display:"flex", backgroundColor:A, color:"#fff", fontSize:22, fontWeight:700, padding:"10px 24px", borderRadius:100 }}>{badge}</div>
-        </div>
-        <div style={{ display:"flex", flexDirection:"column", flex:1, paddingTop:34 }}>
-          <div style={{ display:"flex", fontSize:82, fontWeight:900, color:TEXT, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
-          <div style={{ display:"flex", alignItems:"center", gap:12, marginTop:14 }}>
-            <div style={{ display:"flex", width:8, height:8, borderRadius:"50%", backgroundColor:A }} />
-            <div style={{ display:"flex", fontSize:28, color:"#555" }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
+      if (type === "story") return new ImageResponse(
+        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+          <div style={{ display:"flex", position:"relative", width:1080, height:960, flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:1080, height:960, objectFit:"cover" }} />
+            <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, backgroundColor:"rgba(0,0,0,0.38)" }} />
+            <div style={{ display:"flex", position:"absolute", top:50, left:50, backgroundColor:bc.bg, color:bc.text, fontSize:26, fontWeight:700, padding:"12px 32px", borderRadius:4, letterSpacing:"0.08em" }}>{badge.toUpperCase()}</div>
+            {agente ? <div style={{ display:"flex", position:"absolute", top:50, right:50, color:W, fontSize:22, fontWeight:300, letterSpacing:"0.18em" }}>{agente.toUpperCase()}</div> : null}
           </div>
-          {(car1||car2) && <div style={{ display:"flex", gap:16, marginTop:20, flexWrap:"wrap" }}>
-            {car1 && <div style={{ display:"flex", alignItems:"center", gap:8, backgroundColor:LIGHT, borderRadius:100, padding:"8px 20px" }}>
+          <div style={{ display:"flex", flexDirection:"column", width:1080, height:960, backgroundColor:BG, padding:"60px 80px 56px", flexShrink:0 }}>
+            <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55, marginBottom:48 }} />
+            <div style={{ display:"flex", fontSize:96, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
+            <div style={{ display:"flex", fontSize:36, color:W, marginTop:22, opacity:0.65, letterSpacing:"0.1em", fontWeight:300 }}>{zona.toUpperCase()}</div>
+            <div style={{ display:"flex", fontSize:30, color:W, marginTop:8, opacity:0.45 }}>{metros} m²</div>
+            {car1 ? <div style={{ display:"flex", fontSize:28, color:W, opacity:0.6, marginTop:36 }}>— {car1}</div> : null}
+            {car2 ? <div style={{ display:"flex", fontSize:28, color:W, opacity:0.6, marginTop:14 }}>— {car2}</div> : null}
+            <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:18 }}>
+              <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55 }} />
+              <div style={{ display:"flex", justifyContent:"flex-end", fontSize:18, color:W, opacity:0.3 }}>Creado con PropIA</div>
+            </div>
+          </div>
+        </div>, imgOpts
+      );
+
+      return new ImageResponse(
+        <div style={{ display:"flex", width:1200, height:628, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+          <div style={{ display:"flex", position:"relative", width:540, height:628, flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:540, height:628, objectFit:"cover" }} />
+            <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, backgroundColor:"rgba(0,0,0,0.38)" }} />
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", flex:1, backgroundColor:BG, padding:"40px 50px 36px" }}>
+            <div style={{ display:"flex", backgroundColor:bc.bg, color:bc.text, fontSize:17, fontWeight:700, padding:"8px 20px", borderRadius:4, letterSpacing:"0.08em", alignSelf:"flex-start", marginBottom:22 }}>{badge.toUpperCase()}</div>
+            <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55, marginBottom:22 }} />
+            <div style={{ display:"flex", fontSize:62, fontWeight:700, color:GOLD, lineHeight:1 }}>{price}</div>
+            <div style={{ display:"flex", fontSize:22, color:W, marginTop:12, opacity:0.65, letterSpacing:"0.1em", fontWeight:300 }}>{zona.toUpperCase()}&nbsp;·&nbsp;{metros} m²</div>
+            {car1 ? <div style={{ display:"flex", fontSize:18, color:W, opacity:0.5, marginTop:16 }}>— {car1}</div> : null}
+            {car2 ? <div style={{ display:"flex", fontSize:18, color:W, opacity:0.5, marginTop:8 }}>— {car2}</div> : null}
+            <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:12 }}>
+              <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55 }} />
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                {agente ? <div style={{ display:"flex", fontSize:17, color:W, opacity:0.5, fontWeight:300, letterSpacing:"0.12em" }}>{agente.toUpperCase()}</div> : <div style={{ display:"flex" }} />}
+                <div style={{ display:"flex", fontSize:13, color:W, opacity:0.3 }}>Creado con PropIA</div>
+              </div>
+            </div>
+          </div>
+        </div>, imgOpts
+      );
+    }
+
+    // ── MODERNO ───────────────────────────────────────────────────────────
+    if (estilo === "moderno") {
+      const A = colorMarca; const BG = "#ffffff"; const TEXT = "#111111"; const LIGHT = "#f4f4f4";
+
+      if (type === "feed") return new ImageResponse(
+        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1080, backgroundColor:BG, fontFamily:ff, overflow:"hidden", paddingTop:56, paddingRight:56, paddingBottom:56, paddingLeft:56 }}>
+          {/* Photo with badge overlay */}
+          <div style={{ display:"flex", position:"relative", width:968, height:528, borderRadius:20, overflow:"hidden", flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:968, height:528, objectFit:"cover" }} />
+            <div style={{ display:"flex", position:"absolute", top:20, left:20, backgroundColor:A, color:"#fff", fontSize:22, fontWeight:700, paddingTop:10, paddingRight:24, paddingBottom:10, paddingLeft:24, borderRadius:100 }}>{badge}</div>
+          </div>
+          {/* Info */}
+          <div style={{ display:"flex", flexDirection:"column", flex:1, paddingTop:32 }}>
+            <div style={{ display:"flex", fontSize:80, fontWeight:900, color:TEXT, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
+            <div style={{ display:"flex", alignItems:"center", gap:12, marginTop:14 }}>
               <div style={{ display:"flex", width:8, height:8, borderRadius:"50%", backgroundColor:A }} />
-              <div style={{ display:"flex", fontSize:20, color:"#444" }}>{car1}</div>
-            </div>}
-            {car2 && <div style={{ display:"flex", alignItems:"center", gap:8, backgroundColor:LIGHT, borderRadius:100, padding:"8px 20px" }}>
-              <div style={{ display:"flex", width:8, height:8, borderRadius:"50%", backgroundColor:A }} />
-              <div style={{ display:"flex", fontSize:20, color:"#444" }}>{car2}</div>
-            </div>}
-          </div>}
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto" }}>
-            {agente ? <div style={{ display:"flex", fontSize:22, fontWeight:600, color:A }}>{agente}</div> : <div style={{ display:"flex" }} />}
-            <div style={{ display:"flex", fontSize:15, color:"#ccc" }}>Creado con PropIA</div>
+              <div style={{ display:"flex", fontSize:28, color:"#555555" }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
+            </div>
+            {(car1 || car2) ? (
+              <div style={{ display:"flex", gap:16, marginTop:20 }}>
+                {car1 ? (
+                  <div style={{ display:"flex", alignItems:"center", gap:8, backgroundColor:LIGHT, borderRadius:100, paddingTop:8, paddingRight:20, paddingBottom:8, paddingLeft:20 }}>
+                    <div style={{ display:"flex", width:8, height:8, borderRadius:"50%", backgroundColor:A }} />
+                    <div style={{ display:"flex", fontSize:20, color:"#444444" }}>{car1}</div>
+                  </div>
+                ) : null}
+                {car2 ? (
+                  <div style={{ display:"flex", alignItems:"center", gap:8, backgroundColor:LIGHT, borderRadius:100, paddingTop:8, paddingRight:20, paddingBottom:8, paddingLeft:20 }}>
+                    <div style={{ display:"flex", width:8, height:8, borderRadius:"50%", backgroundColor:A }} />
+                    <div style={{ display:"flex", fontSize:20, color:"#444444" }}>{car2}</div>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto" }}>
+              {agente ? <div style={{ display:"flex", fontSize:22, fontWeight:600, color:A }}>{agente}</div> : <div style={{ display:"flex" }} />}
+              <div style={{ display:"flex", fontSize:15, color:"#cccccc" }}>Creado con PropIA</div>
+            </div>
           </div>
-        </div>
-      </div>, opts
-    );
+        </div>, imgOpts
+      );
 
-    if (type === "story") return new ImageResponse(
-      <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
-        <div style={{ display:"flex", width:1080, height:1000, position:"relative", flexShrink:0 }}>
-          <img src={imageData} alt="" style={{ width:1080, height:1000, objectFit:"cover" }} />
-          <div style={{ position:"absolute", top:50, left:50, display:"flex", backgroundColor:A, color:"#fff", fontSize:28, fontWeight:700, padding:"12px 32px", borderRadius:100 }}>{badge}</div>
-        </div>
-        <div style={{ display:"flex", flexDirection:"column", flex:1, backgroundColor:BG, padding:"60px 80px 56px" }}>
-          <div style={{ display:"flex", fontSize:100, fontWeight:900, color:TEXT, lineHeight:1, letterSpacing:"-3px" }}>{price}</div>
-          <div style={{ display:"flex", alignItems:"center", gap:16, marginTop:22 }}>
-            <div style={{ display:"flex", width:10, height:10, borderRadius:"50%", backgroundColor:A }} />
-            <div style={{ display:"flex", fontSize:38, color:"#555" }}>{zona}</div>
+      if (type === "story") return new ImageResponse(
+        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+          <div style={{ display:"flex", position:"relative", width:1080, height:1000, flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:1080, height:1000, objectFit:"cover" }} />
+            <div style={{ display:"flex", position:"absolute", top:50, left:50, backgroundColor:A, color:"#fff", fontSize:28, fontWeight:700, paddingTop:12, paddingRight:32, paddingBottom:12, paddingLeft:32, borderRadius:100 }}>{badge}</div>
           </div>
-          <div style={{ display:"flex", fontSize:32, color:"#888", marginTop:10 }}>{metros} m²</div>
-          {(car1||car2) && <div style={{ display:"flex", flexDirection:"column", gap:16, marginTop:40 }}>
-            {car1 && <div style={{ display:"flex", alignItems:"center", gap:16, backgroundColor:LIGHT, borderRadius:16, padding:"16px 24px" }}>
-              <div style={{ display:"flex", width:10, height:10, borderRadius:"50%", backgroundColor:A, flexShrink:0 }} />
-              <div style={{ display:"flex", fontSize:28, color:"#444" }}>{car1}</div>
-            </div>}
-            {car2 && <div style={{ display:"flex", alignItems:"center", gap:16, backgroundColor:LIGHT, borderRadius:16, padding:"16px 24px" }}>
-              <div style={{ display:"flex", width:10, height:10, borderRadius:"50%", backgroundColor:A, flexShrink:0 }} />
-              <div style={{ display:"flex", fontSize:28, color:"#444" }}>{car2}</div>
-            </div>}
-          </div>}
-          <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:14 }}>
-            {agente ? <div style={{ display:"flex", fontSize:28, fontWeight:600, color:A }}>{agente}</div> : null}
-            <div style={{ display:"flex", fontSize:18, color:"#ccc" }}>Creado con PropIA</div>
+          <div style={{ display:"flex", flexDirection:"column", flex:1, backgroundColor:BG, paddingTop:60, paddingRight:80, paddingBottom:56, paddingLeft:80 }}>
+            <div style={{ display:"flex", fontSize:100, fontWeight:900, color:TEXT, lineHeight:1, letterSpacing:"-3px" }}>{price}</div>
+            <div style={{ display:"flex", alignItems:"center", gap:16, marginTop:22 }}>
+              <div style={{ display:"flex", width:10, height:10, borderRadius:"50%", backgroundColor:A }} />
+              <div style={{ display:"flex", fontSize:38, color:"#555555" }}>{zona}</div>
+            </div>
+            <div style={{ display:"flex", fontSize:32, color:"#888888", marginTop:10 }}>{metros} m²</div>
+            {car1 ? (
+              <div style={{ display:"flex", alignItems:"center", gap:16, backgroundColor:LIGHT, borderRadius:16, paddingTop:16, paddingRight:24, paddingBottom:16, paddingLeft:24, marginTop:40 }}>
+                <div style={{ display:"flex", width:10, height:10, borderRadius:"50%", backgroundColor:A, flexShrink:0 }} />
+                <div style={{ display:"flex", fontSize:28, color:"#444444" }}>{car1}</div>
+              </div>
+            ) : null}
+            {car2 ? (
+              <div style={{ display:"flex", alignItems:"center", gap:16, backgroundColor:LIGHT, borderRadius:16, paddingTop:16, paddingRight:24, paddingBottom:16, paddingLeft:24, marginTop:16 }}>
+                <div style={{ display:"flex", width:10, height:10, borderRadius:"50%", backgroundColor:A, flexShrink:0 }} />
+                <div style={{ display:"flex", fontSize:28, color:"#444444" }}>{car2}</div>
+              </div>
+            ) : null}
+            <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:14 }}>
+              {agente ? <div style={{ display:"flex", fontSize:28, fontWeight:600, color:A }}>{agente}</div> : null}
+              <div style={{ display:"flex", fontSize:18, color:"#cccccc" }}>Creado con PropIA</div>
+            </div>
           </div>
-        </div>
-      </div>, opts
-    );
+        </div>, imgOpts
+      );
 
-    return new ImageResponse(
-      <div style={{ display:"flex", width:1200, height:628, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
-        <div style={{ display:"flex", width:490, height:628, flexShrink:0, margin:"28px 0 28px 28px", borderRadius:18, overflow:"hidden" }}>
-          <img src={imageData} alt="" style={{ width:490, height:572, objectFit:"cover" }} />
-        </div>
-        <div style={{ display:"flex", flexDirection:"column", flex:1, padding:"50px 50px 40px 40px" }}>
-          <div style={{ display:"flex", backgroundColor:A, color:"#fff", fontSize:17, fontWeight:700, padding:"8px 20px", borderRadius:100, alignSelf:"flex-start", marginBottom:22 }}>{badge}</div>
-          <div style={{ display:"flex", fontSize:58, fontWeight:900, color:TEXT, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
-          <div style={{ display:"flex", fontSize:22, color:"#666", marginTop:10 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
-          {car1 && <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:18 }}>
-            <div style={{ display:"flex", width:8, height:8, borderRadius:"50%", backgroundColor:A, flexShrink:0 }} />
-            <div style={{ display:"flex", fontSize:18, color:"#555" }}>{car1}</div>
-          </div>}
-          {car2 && <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:10 }}>
-            <div style={{ display:"flex", width:8, height:8, borderRadius:"50%", backgroundColor:A, flexShrink:0 }} />
-            <div style={{ display:"flex", fontSize:18, color:"#555" }}>{car2}</div>
-          </div>}
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto" }}>
-            {agente ? <div style={{ display:"flex", fontSize:20, fontWeight:600, color:A }}>{agente}</div> : <div style={{ display:"flex" }} />}
-            <div style={{ display:"flex", fontSize:13, color:"#ccc" }}>Creado con PropIA</div>
+      return new ImageResponse(
+        <div style={{ display:"flex", width:1200, height:628, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+          {/* Photo left — fixed dims, no flex: the image doesn't flex */}
+          <div style={{ display:"flex", width:500, height:628, flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:500, height:628, objectFit:"cover" }} />
           </div>
-        </div>
-      </div>, opts
-    );
+          {/* Info right */}
+          <div style={{ display:"flex", flexDirection:"column", flex:1, paddingTop:50, paddingRight:50, paddingBottom:40, paddingLeft:40 }}>
+            <div style={{ display:"flex", backgroundColor:A, color:"#fff", fontSize:17, fontWeight:700, paddingTop:8, paddingRight:20, paddingBottom:8, paddingLeft:20, borderRadius:100, alignSelf:"flex-start", marginBottom:22 }}>{badge}</div>
+            <div style={{ display:"flex", fontSize:58, fontWeight:900, color:TEXT, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
+            <div style={{ display:"flex", fontSize:22, color:"#666666", marginTop:10 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
+            {car1 ? (
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:18 }}>
+                <div style={{ display:"flex", width:8, height:8, borderRadius:"50%", backgroundColor:A, flexShrink:0 }} />
+                <div style={{ display:"flex", fontSize:18, color:"#555555" }}>{car1}</div>
+              </div>
+            ) : null}
+            {car2 ? (
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginTop:10 }}>
+                <div style={{ display:"flex", width:8, height:8, borderRadius:"50%", backgroundColor:A, flexShrink:0 }} />
+                <div style={{ display:"flex", fontSize:18, color:"#555555" }}>{car2}</div>
+              </div>
+            ) : null}
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto" }}>
+              {agente ? <div style={{ display:"flex", fontSize:20, fontWeight:600, color:A }}>{agente}</div> : <div style={{ display:"flex" }} />}
+              <div style={{ display:"flex", fontSize:13, color:"#cccccc" }}>Creado con PropIA</div>
+            </div>
+          </div>
+        </div>, imgOpts
+      );
+    }
+
+    // ── BOLD ──────────────────────────────────────────────────────────────
+    if (estilo === "bold") {
+      const W = "#ffffff";
+
+      if (type === "feed") return new ImageResponse(
+        <div style={{ display:"flex", position:"relative", width:1080, height:1080, fontFamily:ff, overflow:"hidden" }}>
+          <img src={imageData} alt="" style={{ position:"absolute", top:0, left:0, width:1080, height:1080, objectFit:"cover" }} />
+          <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, background:"linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.05) 70%, transparent 100%)" }} />
+          <div style={{ display:"flex", position:"absolute", top:40, left:40, backgroundColor:bc.bg, color:bc.text, fontSize:24, fontWeight:700, paddingTop:12, paddingRight:28, paddingBottom:12, paddingLeft:28, borderRadius:6, letterSpacing:"0.06em" }}>{badge.toUpperCase()}</div>
+          {agente ? <div style={{ display:"flex", position:"absolute", top:44, right:40, color:W, fontSize:22, fontWeight:700 }}>{agente}</div> : null}
+          <div style={{ display:"flex", position:"absolute", bottom:110, left:50, right:50, flexDirection:"column" }}>
+            <div style={{ display:"flex", fontSize:96, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
+            <div style={{ display:"flex", fontSize:34, color:W, opacity:0.85, marginTop:14 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
+            {car1 ? <div style={{ display:"flex", fontSize:24, color:W, opacity:0.75, marginTop:16 }}>✓ {car1}</div> : null}
+            {car2 ? <div style={{ display:"flex", fontSize:24, color:W, opacity:0.75, marginTop:10 }}>✓ {car2}</div> : null}
+          </div>
+          <div style={{ display:"flex", position:"absolute", bottom:28, right:40, fontSize:16, color:W, opacity:0.3 }}>Creado con PropIA</div>
+        </div>, imgOpts
+      );
+
+      if (type === "story") return new ImageResponse(
+        <div style={{ display:"flex", position:"relative", width:1080, height:1920, fontFamily:ff, overflow:"hidden" }}>
+          <img src={imageData} alt="" style={{ position:"absolute", top:0, left:0, width:1080, height:1920, objectFit:"cover" }} />
+          <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, background:"linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.72) 38%, rgba(0,0,0,0.1) 65%, transparent 100%)" }} />
+          <div style={{ display:"flex", position:"absolute", top:60, left:60, backgroundColor:bc.bg, color:bc.text, fontSize:28, fontWeight:700, paddingTop:14, paddingRight:34, paddingBottom:14, paddingLeft:34, borderRadius:6, letterSpacing:"0.06em" }}>{badge.toUpperCase()}</div>
+          {agente ? <div style={{ display:"flex", position:"absolute", top:64, right:60, color:W, fontSize:26, fontWeight:700 }}>{agente}</div> : null}
+          <div style={{ display:"flex", position:"absolute", bottom:120, left:70, right:70, flexDirection:"column" }}>
+            <div style={{ display:"flex", fontSize:118, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-3px" }}>{price}</div>
+            <div style={{ display:"flex", fontSize:44, color:W, opacity:0.85, marginTop:22 }}>{zona}</div>
+            <div style={{ display:"flex", fontSize:36, color:W, opacity:0.65, marginTop:8 }}>{metros} m²</div>
+            {car1 ? <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8, marginTop:28 }}>✓ {car1}</div> : null}
+            {car2 ? <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8, marginTop:14 }}>✓ {car2}</div> : null}
+          </div>
+          <div style={{ display:"flex", position:"absolute", bottom:38, right:60, fontSize:20, color:W, opacity:0.3 }}>Creado con PropIA</div>
+        </div>, imgOpts
+      );
+
+      return new ImageResponse(
+        <div style={{ display:"flex", position:"relative", width:1200, height:628, fontFamily:ff, overflow:"hidden" }}>
+          <img src={imageData} alt="" style={{ position:"absolute", top:0, left:0, width:1200, height:628, objectFit:"cover" }} />
+          <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, background:"linear-gradient(to right, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.82) 55%, rgba(0,0,0,0.96) 100%)" }} />
+          <div style={{ display:"flex", position:"absolute", top:38, left:38, backgroundColor:bc.bg, color:bc.text, fontSize:19, fontWeight:700, paddingTop:9, paddingRight:22, paddingBottom:9, paddingLeft:22, borderRadius:5, letterSpacing:"0.06em" }}>{badge.toUpperCase()}</div>
+          <div style={{ display:"flex", position:"absolute", right:56, top:0, bottom:0, width:590, flexDirection:"column", justifyContent:"center" }}>
+            <div style={{ display:"flex", fontSize:72, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
+            <div style={{ display:"flex", fontSize:26, color:W, opacity:0.85, marginTop:12 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
+            {car1 ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.7, marginTop:14 }}>✓ {car1}</div> : null}
+            {car2 ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.7, marginTop:8 }}>✓ {car2}</div> : null}
+            {agente ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.55, marginTop:20, fontWeight:700 }}>{agente}</div> : null}
+          </div>
+          <div style={{ display:"flex", position:"absolute", bottom:18, right:38, fontSize:13, color:W, opacity:0.3 }}>Creado con PropIA</div>
+        </div>, imgOpts
+      );
+    }
+
+    // ── PROFESIONAL ───────────────────────────────────────────────────────
+    {
+      const P = colorMarca; const W = "#ffffff";
+
+      if (type === "feed") return new ImageResponse(
+        <div style={{ display:"flex", width:1080, height:1080, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
+          <div style={{ display:"flex", width:486, height:1080, flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:486, height:1080, objectFit:"cover" }} />
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", flex:1, paddingTop:56, paddingRight:50, paddingBottom:46, paddingLeft:50, color:W }}>
+            <div style={{ display:"flex", backgroundColor:"rgba(255,255,255,0.18)", color:W, fontSize:19, fontWeight:700, paddingTop:10, paddingRight:22, paddingBottom:10, paddingLeft:22, borderRadius:100, alignSelf:"flex-start", marginBottom:32, letterSpacing:"0.07em" }}>{badge.toUpperCase()}</div>
+            <div style={{ display:"flex", fontSize:14, opacity:0.6, letterSpacing:"0.12em", fontWeight:600, marginBottom:6 }}>PRECIO</div>
+            <div style={{ display:"flex", fontSize:72, fontWeight:900, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
+            <div style={{ display:"flex", width:56, height:3, backgroundColor:"rgba(255,255,255,0.45)", marginTop:26, marginBottom:26, borderRadius:2 }} />
+            <div style={{ display:"flex", fontSize:26, opacity:0.88, marginBottom:8 }}>{zona}</div>
+            <div style={{ display:"flex", fontSize:22, opacity:0.6 }}>{metros} m²</div>
+            {car1 ? <div style={{ display:"flex", fontSize:20, opacity:0.78, marginTop:22 }}>· {car1}</div> : null}
+            {car2 ? <div style={{ display:"flex", fontSize:20, opacity:0.78, marginTop:10 }}>· {car2}</div> : null}
+            <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:14 }}>
+              <div style={{ display:"flex", backgroundColor:W, color:P, fontSize:21, fontWeight:800, paddingTop:16, paddingRight:30, paddingBottom:16, paddingLeft:30, borderRadius:100, alignSelf:"flex-start" }}>Consultá ahora</div>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                {agente ? <div style={{ display:"flex", fontSize:17, opacity:0.7, fontWeight:600 }}>{agente}</div> : <div style={{ display:"flex" }} />}
+                <div style={{ display:"flex", fontSize:13, opacity:0.3 }}>Creado con PropIA</div>
+              </div>
+            </div>
+          </div>
+        </div>, imgOpts
+      );
+
+      if (type === "story") return new ImageResponse(
+        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
+          <div style={{ display:"flex", width:1080, height:810, flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:1080, height:810, objectFit:"cover" }} />
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", flex:1, paddingTop:56, paddingRight:80, paddingBottom:56, paddingLeft:80, color:W }}>
+            <div style={{ display:"flex", backgroundColor:"rgba(255,255,255,0.18)", color:W, fontSize:24, fontWeight:700, paddingTop:12, paddingRight:28, paddingBottom:12, paddingLeft:28, borderRadius:100, alignSelf:"flex-start", marginBottom:32, letterSpacing:"0.07em" }}>{badge.toUpperCase()}</div>
+            <div style={{ display:"flex", fontSize:96, fontWeight:900, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
+            <div style={{ display:"flex", width:56, height:3, backgroundColor:"rgba(255,255,255,0.45)", marginTop:28, marginBottom:28, borderRadius:2 }} />
+            <div style={{ display:"flex", fontSize:34, opacity:0.88 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
+            {car1 ? <div style={{ display:"flex", fontSize:26, opacity:0.72, marginTop:18 }}>· {car1}</div> : null}
+            {car2 ? <div style={{ display:"flex", fontSize:26, opacity:0.72, marginTop:12 }}>· {car2}</div> : null}
+            <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:18 }}>
+              <div style={{ display:"flex", backgroundColor:W, color:P, fontSize:32, fontWeight:800, paddingTop:22, paddingRight:60, paddingBottom:22, paddingLeft:60, borderRadius:100, alignSelf:"center" }}>Consultá ahora</div>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                {agente ? <div style={{ display:"flex", fontSize:22, opacity:0.65 }}>{agente}</div> : <div style={{ display:"flex" }} />}
+                <div style={{ display:"flex", fontSize:17, opacity:0.3 }}>Creado con PropIA</div>
+              </div>
+            </div>
+          </div>
+        </div>, imgOpts
+      );
+
+      return new ImageResponse(
+        <div style={{ display:"flex", width:1200, height:628, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
+          <div style={{ display:"flex", width:500, height:628, flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:500, height:628, objectFit:"cover" }} />
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", flex:1, paddingTop:38, paddingRight:50, paddingBottom:34, paddingLeft:50, color:W }}>
+            <div style={{ display:"flex", backgroundColor:"rgba(255,255,255,0.18)", color:W, fontSize:15, fontWeight:700, paddingTop:8, paddingRight:18, paddingBottom:8, paddingLeft:18, borderRadius:100, alignSelf:"flex-start", marginBottom:18, letterSpacing:"0.07em" }}>{badge.toUpperCase()}</div>
+            <div style={{ display:"flex", fontSize:56, fontWeight:900, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
+            <div style={{ display:"flex", width:50, height:3, backgroundColor:"rgba(255,255,255,0.45)", marginTop:18, marginBottom:18, borderRadius:2 }} />
+            <div style={{ display:"flex", fontSize:22, opacity:0.88 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
+            {car1 ? <div style={{ display:"flex", fontSize:17, opacity:0.72, marginTop:10 }}>· {car1}</div> : null}
+            {car2 ? <div style={{ display:"flex", fontSize:17, opacity:0.72, marginTop:6 }}>· {car2}</div> : null}
+            <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:11 }}>
+              <div style={{ display:"flex", backgroundColor:W, color:P, fontSize:19, fontWeight:800, paddingTop:13, paddingRight:30, paddingBottom:13, paddingLeft:30, borderRadius:100, alignSelf:"flex-start" }}>Consultá ahora</div>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                {agente ? <div style={{ display:"flex", fontSize:15, opacity:0.65 }}>{agente}</div> : <div style={{ display:"flex" }} />}
+                <div style={{ display:"flex", fontSize:12, opacity:0.3 }}>Creado con PropIA</div>
+              </div>
+            </div>
+          </div>
+        </div>, imgOpts
+      );
+    }
+  } catch (err) {
+    console.error("[generate-ad] ImageResponse error:", err);
+    return NextResponse.json({ error: "Image generation failed", detail: String(err) }, { status: 500 });
   }
-
-  // ── BOLD ────────────────────────────────────────────────────────────────
-  if (estilo === "bold") {
-    const W = "#ffffff";
-
-    if (type === "feed") return new ImageResponse(
-      <div style={{ display:"flex", width:1080, height:1080, fontFamily:ff, overflow:"hidden", position:"relative" }}>
-        <img src={imageData} alt="" style={{ position:"absolute", inset:0, width:1080, height:1080, objectFit:"cover" }} />
-        <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.68) 40%, rgba(0,0,0,0.08) 70%, transparent 100%)", display:"flex" }} />
-        <div style={{ position:"absolute", top:40, left:40, display:"flex", backgroundColor:bc.bg, color:bc.text, fontSize:24, fontWeight:700, padding:"12px 28px", borderRadius:6, letterSpacing:"0.06em", textTransform:"uppercase" }}>{badge}</div>
-        {agente ? <div style={{ position:"absolute", top:44, right:40, display:"flex", color:W, fontSize:22, fontWeight:700, textShadow:"0 2px 8px rgba(0,0,0,0.6)" }}>{agente}</div> : null}
-        <div style={{ position:"absolute", bottom:110, left:50, right:50, display:"flex", flexDirection:"column" }}>
-          <div style={{ display:"flex", fontSize:96, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
-          <div style={{ display:"flex", fontSize:34, color:W, opacity:0.85, marginTop:14 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
-          {(car1||car2) && <div style={{ display:"flex", gap:28, marginTop:16 }}>
-            {car1 && <div style={{ display:"flex", fontSize:24, color:W, opacity:0.75 }}>✓ {car1}</div>}
-            {car2 && <div style={{ display:"flex", fontSize:24, color:W, opacity:0.75 }}>✓ {car2}</div>}
-          </div>}
-        </div>
-        <div style={{ position:"absolute", bottom:28, right:40, display:"flex", fontSize:16, color:W, opacity:0.3 }}>Creado con PropIA</div>
-      </div>, opts
-    );
-
-    if (type === "story") return new ImageResponse(
-      <div style={{ display:"flex", width:1080, height:1920, fontFamily:ff, overflow:"hidden", position:"relative" }}>
-        <img src={imageData} alt="" style={{ position:"absolute", inset:0, width:1080, height:1920, objectFit:"cover" }} />
-        <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.72) 38%, rgba(0,0,0,0.12) 65%, transparent 100%)", display:"flex" }} />
-        <div style={{ position:"absolute", top:60, left:60, display:"flex", backgroundColor:bc.bg, color:bc.text, fontSize:28, fontWeight:700, padding:"14px 34px", borderRadius:6, letterSpacing:"0.06em", textTransform:"uppercase" }}>{badge}</div>
-        {agente ? <div style={{ position:"absolute", top:64, right:60, display:"flex", color:W, fontSize:26, fontWeight:700 }}>{agente}</div> : null}
-        <div style={{ position:"absolute", bottom:120, left:70, right:70, display:"flex", flexDirection:"column" }}>
-          <div style={{ display:"flex", fontSize:118, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-3px" }}>{price}</div>
-          <div style={{ display:"flex", fontSize:44, color:W, opacity:0.85, marginTop:22 }}>{zona}</div>
-          <div style={{ display:"flex", fontSize:36, color:W, opacity:0.65, marginTop:8 }}>{metros} m²</div>
-          {(car1||car2) && <div style={{ display:"flex", flexDirection:"column", gap:14, marginTop:28 }}>
-            {car1 && <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8 }}>✓ {car1}</div>}
-            {car2 && <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8 }}>✓ {car2}</div>}
-          </div>}
-        </div>
-        <div style={{ position:"absolute", bottom:38, right:60, display:"flex", fontSize:20, color:W, opacity:0.3 }}>Creado con PropIA</div>
-      </div>, opts
-    );
-
-    return new ImageResponse(
-      <div style={{ display:"flex", width:1200, height:628, fontFamily:ff, overflow:"hidden", position:"relative" }}>
-        <img src={imageData} alt="" style={{ position:"absolute", inset:0, width:1200, height:628, objectFit:"cover" }} />
-        <div style={{ position:"absolute", inset:0, background:"linear-gradient(to right, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.82) 55%, rgba(0,0,0,0.95) 100%)", display:"flex" }} />
-        <div style={{ position:"absolute", top:38, left:38, display:"flex", backgroundColor:bc.bg, color:bc.text, fontSize:19, fontWeight:700, padding:"9px 22px", borderRadius:5, letterSpacing:"0.06em", textTransform:"uppercase" }}>{badge}</div>
-        <div style={{ position:"absolute", right:56, top:0, bottom:0, display:"flex", flexDirection:"column", justifyContent:"center", width:590 }}>
-          <div style={{ display:"flex", fontSize:72, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
-          <div style={{ display:"flex", fontSize:26, color:W, opacity:0.85, marginTop:12 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
-          {car1 && <div style={{ display:"flex", fontSize:20, color:W, opacity:0.7, marginTop:14 }}>✓ {car1}</div>}
-          {car2 && <div style={{ display:"flex", fontSize:20, color:W, opacity:0.7, marginTop:8 }}>✓ {car2}</div>}
-          {agente ? <div style={{ display:"flex", fontSize:20, color:W, opacity:0.55, marginTop:20, fontWeight:700 }}>{agente}</div> : null}
-        </div>
-        <div style={{ position:"absolute", bottom:18, right:38, display:"flex", fontSize:13, color:W, opacity:0.3 }}>Creado con PropIA</div>
-      </div>, opts
-    );
-  }
-
-  // ── PROFESIONAL ─────────────────────────────────────────────────────────
-  const P = colorMarca; const W = "#ffffff";
-
-  if (type === "feed") return new ImageResponse(
-    <div style={{ display:"flex", width:1080, height:1080, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
-      <div style={{ display:"flex", width:486, height:1080, flexShrink:0 }}>
-        <img src={imageData} alt="" style={{ width:486, height:1080, objectFit:"cover" }} />
-      </div>
-      <div style={{ display:"flex", flexDirection:"column", flex:1, padding:"56px 50px 46px", color:W }}>
-        <div style={{ display:"flex", backgroundColor:"rgba(255,255,255,0.18)", color:W, fontSize:19, fontWeight:700, padding:"10px 22px", borderRadius:100, alignSelf:"flex-start", marginBottom:32, letterSpacing:"0.07em", textTransform:"uppercase" }}>{badge}</div>
-        <div style={{ display:"flex", fontSize:14, opacity:0.6, letterSpacing:"0.12em", textTransform:"uppercase", fontWeight:600, marginBottom:6 }}>Precio</div>
-        <div style={{ display:"flex", fontSize:72, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
-        <div style={{ display:"flex", width:56, height:3, backgroundColor:"rgba(255,255,255,0.45)", marginTop:26, marginBottom:26, borderRadius:2 }} />
-        <div style={{ display:"flex", fontSize:26, opacity:0.88, marginBottom:8 }}>{zona}</div>
-        <div style={{ display:"flex", fontSize:22, opacity:0.6 }}>{metros} m²</div>
-        {(car1||car2) && <div style={{ display:"flex", flexDirection:"column", gap:12, marginTop:26 }}>
-          {car1 && <div style={{ display:"flex", alignItems:"flex-start", gap:12 }}>
-            <div style={{ display:"flex", width:5, height:5, borderRadius:"50%", backgroundColor:W, opacity:0.55, marginTop:10, flexShrink:0 }} />
-            <div style={{ display:"flex", fontSize:20, opacity:0.78 }}>{car1}</div>
-          </div>}
-          {car2 && <div style={{ display:"flex", alignItems:"flex-start", gap:12 }}>
-            <div style={{ display:"flex", width:5, height:5, borderRadius:"50%", backgroundColor:W, opacity:0.55, marginTop:10, flexShrink:0 }} />
-            <div style={{ display:"flex", fontSize:20, opacity:0.78 }}>{car2}</div>
-          </div>}
-        </div>}
-        <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:14 }}>
-          <div style={{ display:"flex", backgroundColor:W, color:P, fontSize:21, fontWeight:800, padding:"16px 30px", borderRadius:100, alignSelf:"flex-start" }}>Consultá ahora</div>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-            {agente ? <div style={{ display:"flex", fontSize:17, opacity:0.7, fontWeight:600 }}>{agente}</div> : <div style={{ display:"flex" }} />}
-            <div style={{ display:"flex", fontSize:13, opacity:0.3 }}>Creado con PropIA</div>
-          </div>
-        </div>
-      </div>
-    </div>, opts
-  );
-
-  if (type === "story") return new ImageResponse(
-    <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
-      <div style={{ display:"flex", width:1080, height:810, flexShrink:0 }}>
-        <img src={imageData} alt="" style={{ width:1080, height:810, objectFit:"cover" }} />
-      </div>
-      <div style={{ display:"flex", flexDirection:"column", flex:1, padding:"56px 80px 56px", color:W }}>
-        <div style={{ display:"flex", backgroundColor:"rgba(255,255,255,0.18)", color:W, fontSize:24, fontWeight:700, padding:"12px 28px", borderRadius:100, alignSelf:"flex-start", marginBottom:32, letterSpacing:"0.07em", textTransform:"uppercase" }}>{badge}</div>
-        <div style={{ display:"flex", fontSize:96, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
-        <div style={{ display:"flex", width:56, height:3, backgroundColor:"rgba(255,255,255,0.45)", marginTop:28, marginBottom:28, borderRadius:2 }} />
-        <div style={{ display:"flex", fontSize:34, opacity:0.88 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
-        {car1 && <div style={{ display:"flex", fontSize:26, opacity:0.72, marginTop:18 }}>· {car1}</div>}
-        {car2 && <div style={{ display:"flex", fontSize:26, opacity:0.72, marginTop:12 }}>· {car2}</div>}
-        <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:18 }}>
-          <div style={{ display:"flex", backgroundColor:W, color:P, fontSize:32, fontWeight:800, padding:"22px 60px", borderRadius:100, alignSelf:"center" }}>Consultá ahora</div>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-            {agente ? <div style={{ display:"flex", fontSize:22, opacity:0.65 }}>{agente}</div> : <div style={{ display:"flex" }} />}
-            <div style={{ display:"flex", fontSize:17, opacity:0.3 }}>Creado con PropIA</div>
-          </div>
-        </div>
-      </div>
-    </div>, opts
-  );
-
-  return new ImageResponse(
-    <div style={{ display:"flex", width:1200, height:628, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
-      <div style={{ display:"flex", width:500, height:628, flexShrink:0 }}>
-        <img src={imageData} alt="" style={{ width:500, height:628, objectFit:"cover" }} />
-      </div>
-      <div style={{ display:"flex", flexDirection:"column", flex:1, padding:"38px 50px 34px", color:W }}>
-        <div style={{ display:"flex", backgroundColor:"rgba(255,255,255,0.18)", color:W, fontSize:15, fontWeight:700, padding:"8px 18px", borderRadius:100, alignSelf:"flex-start", marginBottom:18, letterSpacing:"0.07em", textTransform:"uppercase" }}>{badge}</div>
-        <div style={{ display:"flex", fontSize:56, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
-        <div style={{ display:"flex", width:50, height:3, backgroundColor:"rgba(255,255,255,0.45)", marginTop:18, marginBottom:18, borderRadius:2 }} />
-        <div style={{ display:"flex", fontSize:22, opacity:0.88 }}>{zona}&nbsp;·&nbsp;{metros} m²</div>
-        {car1 && <div style={{ display:"flex", fontSize:17, opacity:0.72, marginTop:10 }}>· {car1}</div>}
-        {car2 && <div style={{ display:"flex", fontSize:17, opacity:0.72, marginTop:6 }}>· {car2}</div>}
-        <div style={{ display:"flex", flexDirection:"column", marginTop:"auto", gap:11 }}>
-          <div style={{ display:"flex", backgroundColor:W, color:P, fontSize:19, fontWeight:800, padding:"13px 30px", borderRadius:100, alignSelf:"flex-start" }}>Consultá ahora</div>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-            {agente ? <div style={{ display:"flex", fontSize:15, opacity:0.65 }}>{agente}</div> : <div style={{ display:"flex" }} />}
-            <div style={{ display:"flex", fontSize:12, opacity:0.3 }}>Creado con PropIA</div>
-          </div>
-        </div>
-      </div>
-    </div>, opts
-  );
 }
