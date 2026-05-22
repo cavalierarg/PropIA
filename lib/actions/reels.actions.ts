@@ -12,6 +12,17 @@ export type PropertyInput = {
   caracteristica1: string;
   caracteristica2: string;
   caracteristica3: string;
+  tipoOperacion?: string;
+  dormitorios?: string;
+  banios?: string;
+  cocheras?: string;
+  antiguedad?: string;
+  piso?: string;
+  expensas?: string;
+  amenities?: string[];
+  agenteWhatsapp?: string;
+  agenteInstagram?: string;
+  agenteSitioWeb?: string;
 };
 
 export type TrendingFormat = {
@@ -66,11 +77,26 @@ function buildPropiedadStr(data: PropertyInput): string {
   const caracteristicas = [data.caracteristica1, data.caracteristica2, data.caracteristica3]
     .filter(Boolean)
     .join(", ");
+  const extras = [
+    data.tipoOperacion ? `- Operación: ${data.tipoOperacion}` : "",
+    data.dormitorios ? `- Dormitorios: ${data.dormitorios}` : "",
+    data.banios ? `- Baños: ${data.banios}` : "",
+    data.cocheras ? `- Cocheras: ${data.cocheras}` : "",
+    data.antiguedad ? `- Antigüedad: ${data.antiguedad}` : "",
+    data.piso ? `- Piso: ${data.piso}` : "",
+    data.expensas ? `- Expensas: ${data.expensas}` : "",
+    data.amenities?.length ? `- Amenities: ${data.amenities.join(", ")}` : "",
+    data.agenteWhatsapp ? `- WhatsApp del agente: ${data.agenteWhatsapp}` : "",
+    data.agenteInstagram ? `- Instagram del agente: @${data.agenteInstagram.replace(/^@/, "")}` : "",
+    data.agenteSitioWeb ? `- Sitio web: ${data.agenteSitioWeb}` : "",
+  ].filter(Boolean).join("\n");
+
   return [
     `- Tipo: ${data.tipoPropiedad}`,
     `- Ubicación: ${data.ubicacion}`,
     `- Superficie: ${data.metrosCuadrados} m²`,
     `- Precio: ${data.precio}`,
+    extras || "",
     caracteristicas ? `- Destacados: ${caracteristicas}` : "",
   ]
     .filter(Boolean)

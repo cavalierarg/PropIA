@@ -12,6 +12,17 @@ export type PropertyInput = {
   caracteristica1: string;
   caracteristica2: string;
   caracteristica3: string;
+  tipoOperacion?: string;
+  dormitorios?: string;
+  banios?: string;
+  cocheras?: string;
+  antiguedad?: string;
+  piso?: string;
+  expensas?: string;
+  amenities?: string[];
+  agenteWhatsapp?: string;
+  agenteInstagram?: string;
+  agenteSitioWeb?: string;
 };
 
 export type DescripcionResult = {
@@ -39,11 +50,28 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
     .filter(Boolean)
     .join(", ");
 
-  const propiedad = `
-- Tipo: ${data.tipoPropiedad}
-- Ubicación: ${data.ubicacion}
-- Superficie: ${data.metrosCuadrados} m²
-- Precio: ${data.precio}${caracteristicas ? `\n- Destacados: ${caracteristicas}` : ""}`.trim();
+  const extras = [
+    data.tipoOperacion ? `- Operación: ${data.tipoOperacion}` : "",
+    data.dormitorios ? `- Dormitorios: ${data.dormitorios}` : "",
+    data.banios ? `- Baños: ${data.banios}` : "",
+    data.cocheras ? `- Cocheras: ${data.cocheras}` : "",
+    data.antiguedad ? `- Antigüedad: ${data.antiguedad}` : "",
+    data.piso ? `- Piso: ${data.piso}` : "",
+    data.expensas ? `- Expensas: ${data.expensas}` : "",
+    data.amenities?.length ? `- Amenities: ${data.amenities.join(", ")}` : "",
+    data.agenteWhatsapp ? `- WhatsApp del agente: ${data.agenteWhatsapp}` : "",
+    data.agenteInstagram ? `- Instagram del agente: @${data.agenteInstagram.replace(/^@/, "")}` : "",
+    data.agenteSitioWeb ? `- Sitio web: ${data.agenteSitioWeb}` : "",
+  ].filter(Boolean).join("\n");
+
+  const propiedad = [
+    `- Tipo: ${data.tipoPropiedad}`,
+    `- Ubicación: ${data.ubicacion}`,
+    `- Superficie: ${data.metrosCuadrados} m²`,
+    `- Precio: ${data.precio}`,
+    extras || "",
+    caracteristicas ? `- Destacados: ${caracteristicas}` : "",
+  ].filter(Boolean).join("\n");
 
   const prompt = isPro
     ? `Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre. Tu texto posiciona bien en buscadores y persuade al comprador a contactar.

@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { generarDescripcion, DescripcionResult } from "@/lib/actions/descripcion.actions";
+import { getUserProfile, saveUserProfile } from "@/lib/actions/user-profile.actions";
 import { getUserPlan } from "@/lib/actions/subscription.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckIcon, CopyIcon, LoaderIcon, LockIcon, SparklesIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, LockIcon, SparklesIcon, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -21,6 +22,19 @@ const TIPOS_PROPIEDAD = [
   "Cochera",
 ];
 
+const AMENITIES_LIST = [
+  "Pileta",
+  "Gimnasio",
+  "Seguridad 24hs",
+  "Jardín",
+  "Terraza",
+  "Balcón",
+  "Vista panorámica",
+  "Parrilla",
+  "Quincho",
+  "Apto mascotas",
+];
+
 export default function DescripcionContent() {
   const { user } = useUser();
   const [form, setForm] = useState({
@@ -31,7 +45,21 @@ export default function DescripcionContent() {
     caracteristica1: "",
     caracteristica2: "",
     caracteristica3: "",
+    tipoOperacion: "",
+    dormitorios: "",
+    banios: "",
+    cocheras: "",
+    antiguedad: "",
+    piso: "",
+    expensas: "",
+    agenteWhatsapp: "",
+    agenteInstagram: "",
+    agenteSitioWeb: "",
   });
+  const [amenities, setAmenities] = useState<string[]>([]);
+  const [showDatos, setShowDatos] = useState(false);
+  const [showAmenities, setShowAmenities] = useState(false);
+  const [showContacto, setShowContacto] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<DescripcionResult | null>(null);
@@ -45,10 +73,24 @@ export default function DescripcionContent() {
 
   useEffect(() => {
     getUserPlan().then((plan) => setIsPro(plan === "pro"));
+    getUserProfile().then((profile) => {
+      setForm((prev) => ({
+        ...prev,
+        agenteWhatsapp: profile.whatsapp ?? "",
+        agenteInstagram: profile.instagram ?? "",
+        agenteSitioWeb: profile.sitio_web ?? "",
+      }));
+    });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleAmenityChange = (amenity: string, checked: boolean) => {
+    setAmenities((prev) =>
+      checked ? [...prev, amenity] : prev.filter((a) => a !== amenity)
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,8 +99,16 @@ export default function DescripcionContent() {
     setResult(null);
     setLoading(true);
 
+    if (form.agenteWhatsapp || form.agenteInstagram || form.agenteSitioWeb) {
+      saveUserProfile({
+        whatsapp: form.agenteWhatsapp || undefined,
+        instagram: form.agenteInstagram || undefined,
+        sitio_web: form.agenteSitioWeb || undefined,
+      }).catch(() => {});
+    }
+
     try {
-      const res = await generarDescripcion(form);
+      const res = await generarDescripcion({ ...form, amenities });
       setResult(res);
       setIsPro(res.isPro);
     } catch (err: unknown) {
@@ -158,6 +208,7 @@ export default function DescripcionContent() {
           </div>
         </div>
 
+        {/* Características */}
         <div className="flex flex-col gap-3">
           <Label className="text-sm font-medium">3 Características destacadas</Label>
           <p className="text-xs text-muted-foreground -mt-1">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
@@ -184,6 +235,246 @@ export default function DescripcionContent() {
               className="h-12 text-base"
             />
           </div>
+        </div>
+
+        {/* ── Sección colapsable: Datos de la propiedad ── */}
+        <div className="border border-slate-200 rounded-xl overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowDatos(!showDatos)}
+            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm font-semibold text-[#0f3460]">Datos de la propiedad</span>
+              <span className="hidden sm:inline text-xs text-slate-400 font-normal">
+                dormitorios, baños, tipo de operación…
+              </span>
+            </div>
+            <ChevronDown
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
+                showDatos ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {showDatos && (
+            <div className="p-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-slate-600">Tipo de operación</Label>
+                <select
+                  name="tipoOperacion"
+                  value={form.tipoOperacion}
+                  onChange={handleChange}
+                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+                >
+                  <option value="">Seleccionar</option>
+                  <option value="Venta">Venta</option>
+                  <option value="Alquiler">Alquiler</option>
+                  <option value="Alquiler temporal">Alquiler temporal</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-slate-600">Dormitorios</Label>
+                <select
+                  name="dormitorios"
+                  value={form.dormitorios}
+                  onChange={handleChange}
+                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+                >
+                  <option value="">No tiene</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5+">5+</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-slate-600">Baños</Label>
+                <select
+                  name="banios"
+                  value={form.banios}
+                  onChange={handleChange}
+                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+                >
+                  <option value="">No tiene</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4+">4+</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-slate-600">Cocheras</Label>
+                <select
+                  name="cocheras"
+                  value={form.cocheras}
+                  onChange={handleChange}
+                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+                >
+                  <option value="">No tiene</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3+">3+</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-slate-600">Antigüedad</Label>
+                <select
+                  name="antiguedad"
+                  value={form.antiguedad}
+                  onChange={handleChange}
+                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+                >
+                  <option value="">—</option>
+                  <option value="A estrenar">A estrenar</option>
+                  <option value="0-5 años">0–5 años</option>
+                  <option value="5-10 años">5–10 años</option>
+                  <option value="10-20 años">10–20 años</option>
+                  <option value="20+ años">20+ años</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-slate-600">
+                  Piso <span className="text-slate-400 font-normal">(opcional)</span>
+                </Label>
+                <Input
+                  name="piso"
+                  placeholder="Opcional — dejar vacío si no aplica"
+                  value={form.piso}
+                  onChange={handleChange}
+                  className="h-10 text-sm"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2 col-span-2 sm:col-span-1">
+                <Label className="text-sm font-medium text-slate-600">
+                  Expensas <span className="text-slate-400 font-normal">(opcional)</span>
+                </Label>
+                <Input
+                  name="expensas"
+                  placeholder="Opcional — dejar vacío si no aplica"
+                  value={form.expensas}
+                  onChange={handleChange}
+                  className="h-10 text-sm"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Sección colapsable: Amenities ── */}
+        <div className="border border-slate-200 rounded-xl overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowAmenities(!showAmenities)}
+            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm font-semibold text-[#0f3460]">Amenities</span>
+              {amenities.length > 0 ? (
+                <span className="text-xs bg-[#0f3460] text-white px-2 py-0.5 rounded-full font-semibold">
+                  {amenities.length} seleccionado{amenities.length !== 1 ? "s" : ""}
+                </span>
+              ) : (
+                <span className="hidden sm:inline text-xs text-slate-400 font-normal">
+                  pileta, gimnasio, seguridad, jardín…
+                </span>
+              )}
+            </div>
+            <ChevronDown
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
+                showAmenities ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {showAmenities && (
+            <div className="p-4 border-t border-slate-100">
+              <p className="text-xs text-muted-foreground mb-3">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {AMENITIES_LIST.map((amenity) => (
+                  <label key={amenity} className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={amenities.includes(amenity)}
+                      onChange={(e) => handleAmenityChange(amenity, e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-[#0f3460] focus:ring-[#0f3460] cursor-pointer"
+                    />
+                    <span className="text-sm text-slate-700 group-hover:text-[#0f3460] transition-colors">
+                      {amenity}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Sección colapsable: Contacto del agente ── */}
+        <div className="border border-slate-200 rounded-xl overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowContacto(!showContacto)}
+            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm font-semibold text-[#0f3460]">Contacto del agente</span>
+              <span className="hidden sm:inline text-xs text-slate-400 font-normal">
+                WhatsApp, Instagram, sitio web
+              </span>
+            </div>
+            <ChevronDown
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
+                showContacto ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {showContacto && (
+            <div className="p-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-slate-600">WhatsApp</Label>
+                <Input
+                  name="agenteWhatsapp"
+                  placeholder="Opcional — dejar vacío si no aplica"
+                  value={form.agenteWhatsapp}
+                  onChange={handleChange}
+                  className="h-10 text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-slate-600">Instagram</Label>
+                <Input
+                  name="agenteInstagram"
+                  placeholder="Opcional — dejar vacío si no aplica"
+                  value={form.agenteInstagram}
+                  onChange={handleChange}
+                  className="h-10 text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-slate-600">Sitio web</Label>
+                <Input
+                  name="agenteSitioWeb"
+                  placeholder="Opcional — dejar vacío si no aplica"
+                  value={form.agenteSitioWeb}
+                  onChange={handleChange}
+                  className="h-10 text-sm"
+                />
+              </div>
+              <p className="col-span-full text-xs text-slate-400">
+                Tu información de contacto se guarda automáticamente y se usa en las CTAs de la descripción.
+              </p>
+            </div>
+          )}
         </div>
 
         {error && <p className="text-destructive text-sm">{error}</p>}
