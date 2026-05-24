@@ -36,7 +36,20 @@
       "Bash(mkdir -p \"C:\\\\Users\\\\valen\\\\saas-template\\\\.claude\\\\skills\\\\commit\")",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\valen\\\\saas-template\" -Recurse -Directory | Select-Object -ExpandProperty FullName | ForEach-Object { $_ -replace [regex]::Escape\\(\"C:\\\\Users\\\\valen\\\\saas-template\"\\), \"\" } | Sort-Object)",
       "Bash(dir \"C:\\\\Users\\\\valen\\\\saas-template\\\\app\" -Recurse -Filter \"*.tsx\" -Name)",
-      "Skill(push-all)"
+      "Skill(push-all)",
+      "PowerShell($content = Get-Content \".git\\\\refs\\\\heads\\\\main\" -Raw; Write-Host \"Length: $\\($content.Length\\)\"; Write-Host \"Content: [$content]\")",
+      "PowerShell(git update-ref *)",
+      "PowerShell([System.IO.File]::WriteAllText\\(\".git\\\\refs\\\\heads\\\\main\", \"fccbb9e414ab7b5ce6d3d2f62be3e6d3f332a272`n\"\\); $bytes = [System.IO.File]::ReadAllBytes\\(\".git\\\\refs\\\\heads\\\\main\"\\); Write-Host \"Bytes: $\\($bytes.Length\\)\"; git log --oneline -3 2>&1)",
+      "PowerShell(git reset *)",
+      "PowerShell(git add *)",
+      "PowerShell(git commit -m $msg)",
+      "PowerShell($msg = \"feat\\(ui\\): redisenio completo de la landing page con foco en conversion`n`n- Nueva seccion El Problema con glassmorphism sobre fondo oscuro`n- Hero con titulo orientado al dolor del agente y subrayado decorativo en cyan`n- Precios simplificados: solo plan Pro visible, link a /pricing para el resto`n- Testimoniales con borde izquierdo cyan, gradiente en iniciales y metrica concreta`n- Pasos con linea conectora animada via IntersectionObserver`n- CTA final con patron de puntos sobre azul oscuro`n- Animaciones fade-in en todas las secciones`n- Eliminadas: carruseles, lista de features tecnicas y slides de ejemplo\")",
+      "PowerShell(git push *)",
+      "PowerShell(git pull *)",
+      "PowerShell(git fetch *)",
+      "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\(\".git\\\\packed-refs\"\\); Write-Host \"Bytes total: $\\($bytes.Length\\)\"; $text = [System.Text.Encoding]::UTF8.GetString\\($bytes\\); Write-Host \"---\"; Write-Host $text; Write-Host \"---\")",
+      "PowerShell(git rebase *)",
+      "PowerShell(git *)"
     ]
   }
 }
