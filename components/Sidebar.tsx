@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   Building2,
   Sparkles,
+  Tag,
 } from "lucide-react";
 
 type Plan = "free" | "pro" | "pro_max";
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { href: "/reels", label: "Guiones Reels", icon: Video, requiredPlan: "pro" as Plan },
   { href: "/tendencias", label: "Tendencias", icon: TrendingUp, requiredPlan: "pro" as Plan },
   { href: "/ads-generator", label: "Generador de Ads", icon: Layers, requiredPlan: "pro_max" as Plan },
+  { href: "/pricing", label: "Precios y planes", icon: Tag },
 ];
 
 interface SidebarProps {
