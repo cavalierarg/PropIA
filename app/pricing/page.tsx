@@ -40,9 +40,11 @@ const FEATURES: {
   { text: "Descripción para portal — versión corta", free: true, pro: true, proMax: true },
   { text: "Descripción para portal — versión larga (~400 palabras)", free: false, pro: true, proMax: true },
   { text: "Calendario de contenido", free: "Preview 3 días", pro: "30 días completo", proMax: "30 días completo" },
-  { text: "Guion para Reels con tendencias en tiempo real", free: false, pro: true, proMax: true },
+  { text: "Guión para Reels con tendencias en tiempo real", free: false, pro: true, proMax: true },
   { text: "Análisis de tendencias del mercado", free: false, pro: true, proMax: true },
-  { text: "Generador de Ads profesional para Meta Ads", free: false, pro: false, proMax: "4 estilos · 3 formatos · color de marca · hasta 3 fotos" },
+  { text: "Generador de Ads — básico", free: false, pro: "1 foto · 3 formatos (Feed, Story, Banner) · 4 estilos", proMax: true },
+  { text: "Generador de Ads — avanzado", free: false, pro: false, proMax: "Hasta 3 fotos · carrusel 5 slides · selector de color completo · descarga en ZIP" },
+  { text: "Publicación directa a Instagram y Facebook", free: false, pro: false, proMax: "Próximamente" },
   { text: "Soporte prioritario por email", free: false, pro: true, proMax: true },
 ];
 
@@ -350,22 +352,20 @@ export default function PricingPage() {
                 <div className="h-px bg-slate-100" />
 
                 <ul className="flex flex-col gap-2.5">
-                  {FEATURES.filter((f) => f.text !== "Generador de Ads para Meta Ads").map((f) => (
+                  {FEATURES.map((f) => (
                     <li key={f.text} className="flex items-start gap-2.5">
-                      <CheckIcon className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                      <span className="text-xs text-slate-700 leading-snug">
+                      {f.pro === false ? (
+                        <XIcon className="w-4 h-4 text-slate-300 shrink-0 mt-0.5" />
+                      ) : (
+                        <CheckIcon className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                      )}
+                      <span className={`text-xs leading-snug ${f.pro === false ? "text-slate-400" : "text-slate-700"}`}>
                         {typeof f.pro === "string"
                           ? `${f.text}: ${f.pro}`
                           : f.text}
                       </span>
                     </li>
                   ))}
-                  <li className="flex items-start gap-2.5">
-                    <XIcon className="w-4 h-4 text-slate-300 shrink-0 mt-0.5" />
-                    <span className="text-xs text-slate-400 leading-snug">
-                      Generador de Ads para Meta Ads
-                    </span>
-                  </li>
                 </ul>
               </div>
             </div>
@@ -405,7 +405,7 @@ export default function PricingPage() {
                     </p>
                   )}
                   <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                    Todo lo del plan PRO más ads profesionales para Meta Ads con 4 estilos de diseño y color de marca personalizado.
+                    Todo lo del plan PRO más el Generador de Ads avanzado: hasta 3 fotos, carruseles, selector de color completo y descarga en ZIP.
                   </p>
                 </div>
 

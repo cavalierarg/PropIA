@@ -19,6 +19,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
+import { LockIcon } from "lucide-react";
 
 type AdType  = "feed" | "story" | "banner";
 type AdStyle = "luxury" | "moderno" | "bold" | "profesional";
@@ -93,7 +94,14 @@ const TIPS_GENERATE = [
   "Preparando formatos para Meta Ads...",
 ];
 
-export default function AdsGeneratorContent() {
+export default function AdsGeneratorContent({
+  plan = "pro_max",
+  proMaxCheckoutUrl,
+}: {
+  plan?: "pro" | "pro_max";
+  proMaxCheckoutUrl?: string;
+}) {
+  const isProMax = plan === "pro_max";
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null]);
 
   const [images,   setImages]   = useState<(File | null)[]>([null, null, null]);
@@ -278,22 +286,36 @@ export default function AdsGeneratorContent() {
             <span className="text-muted-foreground ml-1.5 font-normal">(hasta 3 · la 1ra es obligatoria)</span>
           </Label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[0, 1, 2].map((i) => (
-              <ImageSlot
-                key={i}
-                index={i}
-                preview={previews[i] ?? null}
-                onFile={(f) => applyFile(i, f)}
-                onDrop={(e) => handleDrop(i, e)}
-                onRemove={() => removeImage(i)}
-                onClickRef={() => fileInputRefs.current[i]?.click()}
-                inputRef={(el) => { fileInputRefs.current[i] = el; }}
-                required={i === 0}
-              />
-            ))}
+            {[0, 1, 2].map((i) => {
+              const locked = !isProMax && i > 0;
+              if (locked) {
+                return (
+                  <LockedImageSlot
+                    key={i}
+                    index={i}
+                    proMaxCheckoutUrl={proMaxCheckoutUrl}
+                  />
+                );
+              }
+              return (
+                <ImageSlot
+                  key={i}
+                  index={i}
+                  preview={previews[i] ?? null}
+                  onFile={(f) => applyFile(i, f)}
+                  onDrop={(e) => handleDrop(i, e)}
+                  onRemove={() => removeImage(i)}
+                  onClickRef={() => fileInputRefs.current[i]?.click()}
+                  inputRef={(el) => { fileInputRefs.current[i] = el; }}
+                  required={i === 0}
+                />
+              );
+            })}
           </div>
           <p className="text-xs text-muted-foreground">
-            Cada foto genera 3 formatos (Feed · Story · Banner) · JPG, PNG o WEBP · Máx 10 MB
+            {isProMax
+              ? "Cada foto genera 3 formatos (Feed · Story · Banner) · JPG, PNG o WEBP · Máx 10 MB"
+              : "Tu plan PRO incluye 1 foto · 3 formatos (Feed · Story · Banner) · Actualizá a PRO MAX para agregar hasta 3 fotos"}
           </p>
         </div>
 
@@ -790,6 +812,39 @@ export default function AdsGeneratorContent() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── Locked image slot (Pro Max only) ── */
+function LockedImageSlot({
+  index,
+  proMaxCheckoutUrl,
+}: {
+  index: number;
+  proMaxCheckoutUrl?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <p className="text-xs font-medium text-muted-foreground">
+        Foto {index + 1} <span className="text-muted-foreground/50">(opcional)</span>
+      </p>
+      <div className="border-2 border-dashed border-[#f59e0b]/25 rounded-xl bg-[#f59e0b]/3 h-36 flex flex-col items-center justify-center gap-2 px-3 text-center">
+        <div className="w-9 h-9 rounded-xl bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center">
+          <LockIcon className="w-4 h-4 text-[#f59e0b]/60" />
+        </div>
+        <p className="text-[11px] text-[#f59e0b] font-semibold leading-snug">PRO MAX</p>
+        {proMaxCheckoutUrl && (
+          <a
+            href={proMaxCheckoutUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-slate-400 hover:text-[#f59e0b] transition-colors underline underline-offset-2 leading-snug"
+          >
+            Actualizar
+          </a>
+        )}
+      </div>
     </div>
   );
 }

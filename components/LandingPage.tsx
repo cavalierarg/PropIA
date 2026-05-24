@@ -256,22 +256,22 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
               </div>
             ))}
 
-            {/* Generador de Ads — PRO MAX */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#f59e0b]/30 flex flex-col gap-4 hover:shadow-md hover:border-[#f59e0b]/50 transition-all relative overflow-hidden sm:col-span-2 lg:col-span-2">
-              <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 rounded-full bg-[#f59e0b]/5 blur-2xl -translate-y-1/2 translate-x-1/4" />
+            {/* Generador de Ads — PRO */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#00c9c9]/30 flex flex-col gap-4 hover:shadow-md hover:border-[#00c9c9]/50 transition-all relative overflow-hidden sm:col-span-2 lg:col-span-2">
+              <div className="pointer-events-none absolute top-0 right-0 w-32 h-32 rounded-full bg-[#00c9c9]/5 blur-2xl -translate-y-1/2 translate-x-1/4" />
               <div className="flex items-start justify-between gap-3 relative">
-                <div className="bg-[#f59e0b]/10 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
-                  <Layers className="w-6 h-6 text-[#f59e0b]" />
+                <div className="bg-[#0f3460]/10 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+                  <Layers className="w-6 h-6 text-[#0f3460]" />
                 </div>
-                <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/30 rounded-full px-2.5 py-1 shrink-0">
+                <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#00c9c9]/10 text-[#00c9c9] border border-[#00c9c9]/30 rounded-full px-2.5 py-1 shrink-0">
                   <Sparkles className="w-3 h-3" />
-                  PRO MAX
+                  PRO
                 </span>
               </div>
               <div className="relative">
                 <h3 className="text-base font-bold text-[#0f3460]">Generador de Ads para Meta</h3>
                 <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                  Subí hasta 3 fotos y generá ads en 4 estilos (Luxury, Moderno, Bold, Profesional) con tu color de marca, en 3 formatos: Feed, Story y Banner.
+                  Generá ads en 4 estilos (Luxury, Moderno, Bold, Profesional) en 3 formatos: Feed, Story y Banner. Pro Max suma hasta 3 fotos simultáneas, carruseles y descarga en ZIP.
                 </p>
               </div>
             </div>
@@ -377,7 +377,7 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
               </div>
               <div className="px-6 py-6 flex flex-col gap-5 flex-1 relative">
                 <ul className="flex flex-col gap-3">
-                  {["Generaciones ilimitadas", "Calendario de contenido (30 días)", "Guiones para Reels", "Descripción para portales", "Análisis de tendencias", "Soporte prioritario"].map((f) => (
+                  {["Generaciones ilimitadas", "Calendario de contenido (30 días)", "Guiones para Reels", "Descripción para portales", "Análisis de tendencias", "Generador de Ads básico (1 foto, 3 formatos, 4 estilos)", "Soporte prioritario"].map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm text-white/80">
                       <Check className="w-4 h-4 text-[#00c9c9] shrink-0 mt-0.5" />
                       {f}
@@ -414,7 +414,7 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
               </div>
               <div className="px-6 py-6 flex flex-col gap-5 flex-1 relative">
                 <ul className="flex flex-col gap-3">
-                  {["Todo lo del plan PRO", "Generador de Ads para Meta Ads", "4 estilos y 3 formatos de ads", "Color de marca personalizado", "Hasta 3 fotos por ad", "Descarga en PNG alta resolución"].map((f, i) => (
+                  {["Todo lo del plan PRO", "Ads avanzados: hasta 3 fotos simultáneas", "Carruseles de 5 slides para Meta Ads", "Selector de color de marca completo", "Descarga en ZIP de todos los formatos", "Publicación directa a Instagram y Facebook (próx.)"].map((f, i) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm text-slate-700">
                       <Check className={`w-4 h-4 shrink-0 mt-0.5 ${i >= 1 ? "text-[#f59e0b]" : "text-emerald-500"}`} />
                       {f}

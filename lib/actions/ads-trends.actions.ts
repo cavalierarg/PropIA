@@ -28,8 +28,8 @@ export async function investigarTendenciasAds(): Promise<AdTrendsResult> {
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (data?.plan !== "pro_max" || data?.status !== "active") {
-    throw new Error("PRO_MAX_REQUIRED");
+  if ((data?.plan !== "pro" && data?.plan !== "pro_max") || data?.status !== "active") {
+    throw new Error("PRO_REQUIRED");
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });

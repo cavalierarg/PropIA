@@ -27,7 +27,7 @@ const NAV_ITEMS = [
   { href: "/descripcion", label: "Portal Inmobiliario", icon: Home, requiredPlan: "pro" as Plan },
   { href: "/reels", label: "Guiones Reels", icon: Video, requiredPlan: "pro" as Plan },
   { href: "/tendencias", label: "Tendencias", icon: TrendingUp, requiredPlan: "pro" as Plan },
-  { href: "/ads-generator", label: "Generador de Ads", icon: Layers, requiredPlan: "pro_max" as Plan },
+  { href: "/ads-generator", label: "Generador de Ads", icon: Layers, requiredPlan: "pro" as Plan },
   { href: "/pricing", label: "Precios y planes", icon: Tag },
 ];
 

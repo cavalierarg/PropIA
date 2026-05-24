@@ -48,7 +48,7 @@ export async function buscarTendencias(): Promise<TendenciasResult> {
     .select("plan, status")
     .eq("user_id", userId)
     .maybeSingle();
-  if (!(data?.plan === "pro" && data?.status === "active")) {
+  if (!((data?.plan === "pro" || data?.plan === "pro_max") && data?.status === "active")) {
     throw new Error("PRO_REQUIRED");
   }
 

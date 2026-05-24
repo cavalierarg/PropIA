@@ -12,6 +12,8 @@ import {
   RectangleHorizontalIcon,
 } from "lucide-react";
 
+const PRO_CHECKOUT =
+  "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2";
 const PRO_MAX_CHECKOUT =
   "https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d";
 
@@ -23,9 +25,9 @@ export default async function AdsGeneratorPage() {
 
   const plan = await getUserPlan();
 
-  /* ── Upgrade page para Free y Pro ─────────────────────────── */
-  if (plan !== "pro_max") {
-    const checkoutUrl = `${PRO_MAX_CHECKOUT}?checkout[custom][plan]=pro_max&checkout[custom][user_id]=${userId}`;
+  /* ── Upgrade page solo para Free ──────────────────────────── */
+  if (plan === "free") {
+    const checkoutUrl = `${PRO_CHECKOUT}?checkout[custom][plan]=pro&checkout[custom][user_id]=${userId}`;
 
     return (
       <div className="flex flex-col min-h-[80vh]">
@@ -33,15 +35,15 @@ export default async function AdsGeneratorPage() {
 
           {/* Badge + heading */}
           <div className="flex flex-col items-center gap-3 text-center">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/25 rounded-full px-3 py-1.5">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold bg-[#00c9c9]/10 text-[#00c9c9] border border-[#00c9c9]/25 rounded-full px-3 py-1.5">
               <SparklesIcon className="w-3.5 h-3.5" />
-              Exclusivo Pro Max
+              Disponible en Plan PRO
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-[#0f3460] leading-tight">
               Generador de Ads para Meta Ads
             </h1>
             <p className="text-base text-slate-500 leading-relaxed max-w-xl mx-auto">
-              Subí hasta 3 fotos, la IA investiga las tendencias actuales en Meta Ads y genera hasta 9 ads profesionales listos para publicar.
+              Generá ads profesionales en 4 estilos y 3 formatos listos para publicar en Instagram y Facebook.
             </p>
           </div>
 
@@ -68,9 +70,9 @@ export default async function AdsGeneratorPage() {
               </div>
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-4 border border-[#f59e0b]/30 shadow-lg text-center">
-                <p className="text-sm font-bold text-[#0f3460]">Desbloqueá con Pro Max</p>
-                <p className="text-xs text-slate-500 mt-1">Hasta 9 ads por sesión</p>
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-4 border border-[#00c9c9]/30 shadow-lg text-center">
+                <p className="text-sm font-bold text-[#0f3460]">Desbloqueá con PRO</p>
+                <p className="text-xs text-slate-500 mt-1">Ads en 4 estilos · 3 formatos</p>
               </div>
             </div>
           </div>
@@ -97,7 +99,7 @@ export default async function AdsGeneratorPage() {
                 dims: "1200 × 628",
               },
             ].map((f) => (
-              <div key={f.title} className="border border-[#f59e0b]/20 rounded-xl p-4 bg-[#f59e0b]/5 flex flex-col gap-2">
+              <div key={f.title} className="border border-[#00c9c9]/20 rounded-xl p-4 bg-[#00c9c9]/5 flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-[#0f3460]/8 border border-[#0f3460]/15 flex items-center justify-center">
                     {f.icon}
@@ -105,7 +107,7 @@ export default async function AdsGeneratorPage() {
                   <span className="text-sm font-semibold text-[#0f3460]">{f.title}</span>
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">{f.desc}</p>
-                <span className="text-xs font-mono text-[#f59e0b]/80">{f.dims}</span>
+                <span className="text-xs font-mono text-[#00c9c9]/80">{f.dims}</span>
               </div>
             ))}
           </div>
@@ -113,14 +115,13 @@ export default async function AdsGeneratorPage() {
           {/* Beneficios */}
           <ul className="flex flex-col gap-2.5 text-sm text-left w-full max-w-md">
             {[
-              "IA investiga tendencias actuales en Meta Ads antes de generar",
-              "Hasta 3 fotos por sesión · 3 formatos cada una = 9 ads",
-              "Diseño con colores de marca y logo PropIA",
-              "Descargá en PNG de alta resolución",
-              "Generaciones ilimitadas incluidas",
-            ].map((item) => (
+              "1 foto por sesión · 3 formatos = 3 ads listos para publicar (PRO)",
+              "4 estilos de diseño: Luxury, Moderno, Bold y Profesional",
+              "Incluido en el plan PRO — generaciones ilimitadas",
+              "Hasta 3 fotos + carruseles + descarga en ZIP (PRO MAX)",
+            ].map((item, i) => (
               <li key={item} className="flex items-center gap-3 text-slate-700">
-                <CheckIcon className="w-4 h-4 text-[#f59e0b] shrink-0" />
+                <CheckIcon className={`w-4 h-4 shrink-0 ${i === 3 ? "text-[#f59e0b]" : "text-[#00c9c9]"}`} />
                 {item}
               </li>
             ))}
@@ -130,11 +131,11 @@ export default async function AdsGeneratorPage() {
           <div className="flex flex-col items-center gap-3">
             <Button
               asChild
-              className="h-13 px-10 text-base font-bold bg-[#f59e0b] hover:bg-[#e08e00] text-white border-0 shadow-lg"
+              className="h-13 px-10 text-base font-bold bg-[#0f3460] hover:bg-[#0f3460]/90 text-white border-0 shadow-lg"
             >
               <a href={checkoutUrl} target="_blank" rel="noopener noreferrer">
                 <SparklesIcon className="w-5 h-5" />
-                Upgrade a Pro Max — $59/mes
+                Upgrade a PRO — $29/mes
               </a>
             </Button>
             <Link href="/pricing" className="text-sm text-slate-400 hover:text-slate-600 transition-colors underline underline-offset-2">
@@ -146,7 +147,9 @@ export default async function AdsGeneratorPage() {
     );
   }
 
-  /* ── Feature completa para Pro Max ────────────────────────── */
+  /* ── Generador para Pro y Pro Max ──────────────────────────── */
+  const proMaxCheckoutUrl = `${PRO_MAX_CHECKOUT}?checkout[custom][plan]=pro_max&checkout[custom][user_id]=${userId}`;
+
   return (
     <div className="max-w-5xl mx-auto py-8 sm:py-10 px-4">
       <div className="flex flex-col gap-2 mb-8">
@@ -154,18 +157,27 @@ export default async function AdsGeneratorPage() {
           <h1 className="text-2xl font-bold text-[#0f3460] sm:text-3xl">
             Generador de Ads
           </h1>
-          <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/25 rounded-full px-2.5 py-1">
-            <SparklesIcon className="w-3 h-3" />
-            PRO MAX — 3 formatos × hasta 3 fotos
-          </span>
+          {plan === "pro_max" ? (
+            <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#f59e0b]/10 text-[#f59e0b] border border-[#f59e0b]/25 rounded-full px-2.5 py-1">
+              <SparklesIcon className="w-3 h-3" />
+              PRO MAX — 3 formatos × hasta 3 fotos
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#00c9c9]/10 text-[#00c9c9] border border-[#00c9c9]/25 rounded-full px-2.5 py-1">
+              <SparklesIcon className="w-3 h-3" />
+              PRO — 3 formatos × 1 foto
+            </span>
+          )}
         </div>
         <p className="text-sm text-muted-foreground">
-          Completá los datos, investigá tendencias en Meta Ads y generá hasta 9 ads en alta resolución.
+          {plan === "pro_max"
+            ? "Completá los datos y generá hasta 9 ads en alta resolución."
+            : "Subí una foto y generá 3 ads profesionales listos para Meta Ads."}
         </p>
         <div className="h-1 w-16 bg-[#00c9c9] rounded-full" />
       </div>
 
-      <AdsGeneratorContent />
+      <AdsGeneratorContent plan={plan} proMaxCheckoutUrl={proMaxCheckoutUrl} />
     </div>
   );
 }

@@ -96,9 +96,9 @@ const FEATURES: Feature[] = [
     icon: Layers,
     title: "Generador de Ads",
     description: "Ads profesionales para Meta Ads en 4 estilos y 3 formatos.",
-    badge: "PRO MAX",
-    badgeColor: "gold",
-    accent: "#f59e0b",
+    badge: "PRO",
+    badgeColor: "amber",
+    accent: "#0f3460",
   },
 ];
 
