@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { uploadPropertyImage } from "@/lib/actions/flyers.actions";
+import { uploadAgentLogo, getAgentLogoUrl } from "@/lib/actions/agent-logo.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -116,6 +117,12 @@ export default function AdsGeneratorContent() {
   const [showDatos,    setShowDatos]    = useState(false);
   const [showAmenities,setShowAmenities]= useState(false);
   const [showContacto, setShowContacto] = useState(false);
+  const [showLogo,     setShowLogo]     = useState(false);
+
+  const [agentLogoUrl,     setAgentLogoUrl]     = useState<string | null>(null);
+  const [agentLogoPreview, setAgentLogoPreview] = useState<string | null>(null);
+  const [logoUploading,    setLogoUploading]    = useState(false);
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
 
   const [estilo,     setEstilo]     = useState<AdStyle>("moderno");
   const [colorMarca, setColorMarca] = useState("#0f3460");
@@ -136,6 +143,39 @@ export default function AdsGeneratorContent() {
     const id = setInterval(() => setLoadingTip((p) => (p + 1) % TIPS_GENERATE.length), 3500);
     return () => clearInterval(id);
   }, [isLoading]);
+
+  useEffect(() => {
+    getAgentLogoUrl().then((url) => {
+      if (url) setAgentLogoUrl(url);
+    }).catch(() => {});
+  }, []);
+
+  /* ── Agent logo handler ── */
+  const handleLogoFile = async (file: File) => {
+    if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+      toast.error("Solo se aceptan archivos PNG o JPG");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("El logo no puede superar los 2 MB");
+      return;
+    }
+    const preview = URL.createObjectURL(file);
+    setAgentLogoPreview(preview);
+    setLogoUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("logo", file);
+      const url = await uploadAgentLogo(fd);
+      setAgentLogoUrl(url);
+      toast.success("Logo guardado correctamente");
+    } catch {
+      toast.error("No se pudo subir el logo. Intentá de nuevo.");
+      setAgentLogoPreview(null);
+    } finally {
+      setLogoUploading(false);
+    }
+  };
 
   /* ── Image handlers ── */
   const applyFile = (index: number, file: File) => {
@@ -189,6 +229,7 @@ export default function AdsGeneratorContent() {
               type, imageUrl: url, precio, zona, metros, car1, car2, agente,
               dormitorios, banios, cocheras, amenities, agenteWhatsapp,
               estilo, colorMarca, moneda, badge,
+              agentLogoUrl: agentLogoUrl ?? undefined,
             }),
           });
           if (!res.ok) throw new Error(`API error ${res.status}`);
@@ -405,6 +446,76 @@ export default function AdsGeneratorContent() {
                 <Label className="text-sm font-medium text-slate-600">Sitio web</Label>
                 <Input value={agenteSitioWeb} onChange={(e) => setAgenteSitioWeb(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-10 text-sm" />
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Sección colapsable: Tu logo ── */}
+        <div className="border border-slate-200 rounded-xl overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowLogo(!showLogo)}
+            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <span className="text-sm font-semibold text-[#0f3460]">Tu logo</span>
+              {agentLogoUrl ? (
+                <span className="text-xs bg-[#00c9c9]/15 text-[#00c9c9] border border-[#00c9c9]/30 px-2 py-0.5 rounded-full font-semibold">Guardado</span>
+              ) : (
+                <span className="hidden sm:inline text-xs text-slate-400 font-normal">aparecerá en todos los ads generados</span>
+              )}
+            </div>
+            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${showLogo ? "rotate-180" : ""}`} />
+          </button>
+          {showLogo && (
+            <div className="p-4 border-t border-slate-100 flex flex-col gap-4">
+              <p className="text-xs text-muted-foreground">
+                Subí el logo de tu inmobiliaria para incluirlo en los ads generados.
+                Aparecerá en la esquina superior izquierda de cada formato.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 items-start">
+                {/* Preview */}
+                {(agentLogoPreview ?? agentLogoUrl) ? (
+                  <div className="relative group shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={agentLogoPreview ?? agentLogoUrl!}
+                      alt="Logo preview"
+                      className="h-20 max-w-[200px] object-contain rounded-lg border border-slate-200 bg-slate-50 p-2"
+                    />
+                    {logoUploading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/70 rounded-lg">
+                        <div className="w-5 h-5 border-2 border-[#0f3460]/20 border-t-[#00c9c9] rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+
+                {/* Upload area */}
+                <div
+                  className="flex-1 border-2 border-dashed border-[#0f3460]/20 rounded-xl cursor-pointer hover:border-[#00c9c9]/50 hover:bg-[#00c9c9]/5 transition-colors"
+                  onClick={() => logoInputRef.current?.click()}
+                  onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleLogoFile(f); }}
+                  onDragOver={(e) => e.preventDefault()}
+                >
+                  <div className="flex flex-col items-center justify-center gap-2 py-6 px-4 text-center">
+                    <div className="w-9 h-9 rounded-xl bg-[#0f3460]/8 border border-[#0f3460]/15 flex items-center justify-center">
+                      <UploadCloudIcon className="w-4 h-4 text-[#0f3460]/40" />
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-snug">
+                      {agentLogoUrl ? "Arrastrá o hacé click para cambiar el logo" : "Arrastrá o hacé click para subir el logo"}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground/60">PNG o JPG · Máx 2 MB</p>
+                  </div>
+                </div>
+              </div>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png,image/jpeg"
+                className="hidden"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleLogoFile(f); e.target.value = ""; }}
+              />
             </div>
           )}
         </div>

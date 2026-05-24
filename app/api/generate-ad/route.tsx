@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
     dormitorios?: string; banios?: string; cocheras?: string;
     amenities?: string[]; agenteWhatsapp?: string;
     colorMarca: string; moneda: string; badge: string;
+    agentLogoUrl?: string;
   };
   try { body = await req.json(); }
   catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
     dormitorios = "", banios = "",
     amenities = [] as string[], agenteWhatsapp = "",
     colorMarca = "#0f3460", moneda = "USD", badge = "En Venta",
+    agentLogoUrl,
   } = body;
 
   const dims = { feed: [1080,1080], story: [1080,1920], banner: [1200,628] };
@@ -81,6 +83,15 @@ export async function POST(req: NextRequest) {
   let imageData: string;
   try { imageData = await fetchImageAsDataUrl(imageUrl); }
   catch (e) { return NextResponse.json({ error: String(e) }, { status: 400 }); }
+
+  const agentLogoData: string | null = agentLogoUrl
+    ? await fetchImageAsDataUrl(agentLogoUrl).catch(() => null)
+    : null;
+
+  // Logo dimensions per format (max 20% of ad width, proportional height)
+  const logoFeed   = { w: 200, h: 70, top: 24, left: 24 } as const;
+  const logoBanner = { w: 220, h: 60, top: 20, left: 20 } as const;
+  const logoProps = type === "banner" ? logoBanner : logoFeed;
 
   const price = formatPrice(precio, moneda);
   const specs = buildSpecs(metros, dormitorios, banios);
@@ -95,7 +106,7 @@ export async function POST(req: NextRequest) {
       const GOLD = colorMarca; const BG = "#0a0a0a"; const W = "#ffffff";
 
       if (type === "feed") return new ImageResponse(
-        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1080, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+        <div style={{ display:"flex", flexDirection:"column", position:"relative", width:1080, height:1080, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
           {/* Photo 55% */}
           <div style={{ display:"flex", position:"relative", width:1080, height:594, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:1080, height:594, objectFit:"cover" }} />
@@ -117,11 +128,12 @@ export async function POST(req: NextRequest) {
               <div style={{ display:"flex", justifyContent:"flex-end", fontSize:15, color:W, opacity:0.3 }}>Creado con PropIA</div>
             </div>
           </div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
 
       if (type === "story") return new ImageResponse(
-        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+        <div style={{ display:"flex", flexDirection:"column", position:"relative", width:1080, height:1920, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
           <div style={{ display:"flex", position:"relative", width:1080, height:960, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:1080, height:960, objectFit:"cover" }} />
             <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, backgroundColor:"rgba(0,0,0,0.38)" }} />
@@ -142,11 +154,12 @@ export async function POST(req: NextRequest) {
               <div style={{ display:"flex", justifyContent:"flex-end", fontSize:18, color:W, opacity:0.3 }}>Creado con PropIA</div>
             </div>
           </div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
 
       return new ImageResponse(
-        <div style={{ display:"flex", width:1200, height:628, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+        <div style={{ display:"flex", position:"relative", width:1200, height:628, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
           <div style={{ display:"flex", position:"relative", width:540, height:628, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:540, height:628, objectFit:"cover" }} />
             <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, backgroundColor:"rgba(0,0,0,0.38)" }} />
@@ -168,6 +181,7 @@ export async function POST(req: NextRequest) {
               </div>
             </div>
           </div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
     }
@@ -177,7 +191,7 @@ export async function POST(req: NextRequest) {
       const A = colorMarca; const BG = "#ffffff"; const TEXT = "#111111"; const LIGHT = "#f4f4f4";
 
       if (type === "feed") return new ImageResponse(
-        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1080, backgroundColor:BG, fontFamily:ff, overflow:"hidden", paddingTop:56, paddingRight:56, paddingBottom:56, paddingLeft:56 }}>
+        <div style={{ display:"flex", flexDirection:"column", position:"relative", width:1080, height:1080, backgroundColor:BG, fontFamily:ff, overflow:"hidden", paddingTop:56, paddingRight:56, paddingBottom:56, paddingLeft:56 }}>
           {/* Photo with badge overlay */}
           <div style={{ display:"flex", position:"relative", width:968, height:528, borderRadius:20, overflow:"hidden", flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:968, height:528, objectFit:"cover" }} />
@@ -213,11 +227,12 @@ export async function POST(req: NextRequest) {
               <div style={{ display:"flex", fontSize:15, color:"#cccccc" }}>Creado con PropIA</div>
             </div>
           </div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
 
       if (type === "story") return new ImageResponse(
-        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+        <div style={{ display:"flex", flexDirection:"column", position:"relative", width:1080, height:1920, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
           <div style={{ display:"flex", position:"relative", width:1080, height:1000, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:1080, height:1000, objectFit:"cover" }} />
             <div style={{ display:"flex", position:"absolute", top:50, left:50, backgroundColor:A, color:"#fff", fontSize:28, fontWeight:700, paddingTop:12, paddingRight:32, paddingBottom:12, paddingLeft:32, borderRadius:100 }}>{badge}</div>
@@ -248,11 +263,12 @@ export async function POST(req: NextRequest) {
               <div style={{ display:"flex", fontSize:18, color:"#cccccc" }}>Creado con PropIA</div>
             </div>
           </div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
 
       return new ImageResponse(
-        <div style={{ display:"flex", width:1200, height:628, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
+        <div style={{ display:"flex", position:"relative", width:1200, height:628, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
           {/* Photo left — fixed dims, no flex: the image doesn't flex */}
           <div style={{ display:"flex", width:500, height:628, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:500, height:628, objectFit:"cover" }} />
@@ -281,6 +297,7 @@ export async function POST(req: NextRequest) {
               <div style={{ display:"flex", fontSize:13, color:"#cccccc" }}>Creado con PropIA</div>
             </div>
           </div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
     }
@@ -305,6 +322,7 @@ export async function POST(req: NextRequest) {
           </div>
           <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:6, backgroundColor:colorMarca }} />
           <div style={{ display:"flex", position:"absolute", bottom:28, right:40, fontSize:16, color:W, opacity:0.3 }}>Creado con PropIA</div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
 
@@ -325,6 +343,7 @@ export async function POST(req: NextRequest) {
           </div>
           <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:6, backgroundColor:colorMarca }} />
           <div style={{ display:"flex", position:"absolute", bottom:38, right:60, fontSize:20, color:W, opacity:0.3 }}>Creado con PropIA</div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
 
@@ -344,6 +363,7 @@ export async function POST(req: NextRequest) {
           </div>
           <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:5, backgroundColor:colorMarca }} />
           <div style={{ display:"flex", position:"absolute", bottom:18, right:38, fontSize:13, color:W, opacity:0.3 }}>Creado con PropIA</div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
     }
@@ -353,7 +373,7 @@ export async function POST(req: NextRequest) {
       const P = colorMarca; const W = "#ffffff";
 
       if (type === "feed") return new ImageResponse(
-        <div style={{ display:"flex", width:1080, height:1080, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
+        <div style={{ display:"flex", position:"relative", width:1080, height:1080, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
           <div style={{ display:"flex", width:486, height:1080, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:486, height:1080, objectFit:"cover" }} />
           </div>
@@ -376,11 +396,12 @@ export async function POST(req: NextRequest) {
               </div>
             </div>
           </div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
 
       if (type === "story") return new ImageResponse(
-        <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
+        <div style={{ display:"flex", flexDirection:"column", position:"relative", width:1080, height:1920, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
           <div style={{ display:"flex", width:1080, height:810, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:1080, height:810, objectFit:"cover" }} />
           </div>
@@ -401,11 +422,12 @@ export async function POST(req: NextRequest) {
               </div>
             </div>
           </div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
 
       return new ImageResponse(
-        <div style={{ display:"flex", width:1200, height:628, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
+        <div style={{ display:"flex", position:"relative", width:1200, height:628, backgroundColor:P, fontFamily:ff, overflow:"hidden" }}>
           <div style={{ display:"flex", width:500, height:628, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:500, height:628, objectFit:"cover" }} />
           </div>
@@ -426,6 +448,7 @@ export async function POST(req: NextRequest) {
               </div>
             </div>
           </div>
+          {agentLogoData ? <img src={agentLogoData} alt="" style={{ position:"absolute", top:logoProps.top, left:logoProps.left, width:logoProps.w, height:logoProps.h, objectFit:"contain", objectPosition:"left center" }} /> : null}
         </div>, imgOpts
       );
     }
