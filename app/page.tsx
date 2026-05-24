@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Building2,
   BarChart3,
+  GalleryHorizontal,
 } from "lucide-react";
 import LandingPage from "@/components/LandingPage";
 import { Greeting } from "@/components/Greeting";
@@ -98,6 +99,15 @@ const FEATURES: Feature[] = [
     description: "Ads profesionales para Meta Ads en 4 estilos y 3 formatos.",
     badge: "PRO",
     badgeColor: "amber",
+    accent: "#0f3460",
+  },
+  {
+    href: "/carousels",
+    icon: GalleryHorizontal,
+    title: "Carruseles de Instagram",
+    description: "5 slides con tu marca listos para publicar.",
+    badge: "PRO MAX",
+    badgeColor: "gold",
     accent: "#0f3460",
   },
 ];
