@@ -9,7 +9,8 @@ export type FeatureName =
   | "calendario"
   | "descripcion"
   | "tendencias"
-  | "ads";
+  | "ads"
+  | "carrusel";
 
 export async function logFeatureUsage(feature: FeatureName): Promise<void> {
   try {
@@ -114,6 +115,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
     descripcion: "Portal Inmobiliario",
     tendencias: "Tendencias",
     ads: "Generador de Ads",
+    carrusel: "Carruseles IG",
   };
   const featureUsage = Object.entries(FEATURE_LABELS)
     .map(([key, label]) => ({ feature: label, count: featureCounts[key] ?? 0 }))
