@@ -54,13 +54,6 @@ const Navbar = () => {
 
         {/* ── Desktop nav ── */}
         <nav className="hidden sm:flex items-center gap-1 shrink-0">
-          <Link
-            href="/pricing"
-            className="text-sm font-medium text-white/70 hover:text-white transition-colors px-2.5 py-1.5 rounded-md hover:bg-white/8"
-          >
-            Precios
-          </Link>
-
           {isSignedIn && (
             <>
               {NAV_LINKS.map((link) => (
@@ -141,14 +134,6 @@ const Navbar = () => {
       {/* ── Mobile dropdown ── */}
       {menuOpen && (
         <div className="sm:hidden bg-[#0f3460] border-t border-[#00c9c9]/15 px-4 py-3 flex flex-col gap-0.5">
-          <Link
-            href="/pricing"
-            onClick={() => setMenuOpen(false)}
-            className="text-sm font-medium text-white/75 hover:text-white py-2.5 border-b border-white/8 transition-colors"
-          >
-            Precios
-          </Link>
-
           {isSignedIn && (
             <>
               {NAV_LINKS.map((link) => (
