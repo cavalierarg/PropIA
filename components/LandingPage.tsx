@@ -61,10 +61,10 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
         <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#1a4a7a]/30 blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-28">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-16 gap-12">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-12 gap-12">
 
-            {/* Left: Text */}
-            <div className="flex-1 text-center lg:text-left">
+            {/* Left: Text — 45% */}
+            <div className="text-center lg:text-left" style={{ flex: "0 0 45%" }}>
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-[#00c9c9]/15 border border-[#00c9c9]/30 text-[#00c9c9] text-xs font-semibold px-4 py-1.5 rounded-full mb-7">
                 <Zap className="w-3.5 h-3.5" />
@@ -124,78 +124,48 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
               </p>
             </div>
 
-            {/* Right: Browser mockup */}
-            <div className="flex-shrink-0 lg:w-[480px] hidden lg:block">
-              <div className="relative">
-                {/* Glow */}
-                <div className="absolute -inset-6 bg-[#00c9c9]/10 blur-3xl rounded-full" />
+            {/* Right: Browser mockup with real screenshot */}
+            <div className="hidden lg:block flex-shrink-0" style={{ width: "55%" }}>
+              <div className="relative" style={{ transform: "rotate(-2deg)" }}>
+                {/* Glow behind the frame */}
+                <div className="absolute -inset-8 bg-[#00c9c9]/15 blur-3xl rounded-full pointer-events-none" />
+                <div className="absolute -inset-4 bg-[#0f3460]/20 blur-2xl rounded-3xl pointer-events-none" />
 
                 {/* Browser frame */}
-                <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/40 border border-white/10">
-                  {/* Browser chrome */}
-                  <div className="bg-[#0d1f38] px-4 py-3 flex items-center gap-3">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-red-500/70" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-                      <div className="w-3 h-3 rounded-full bg-green-500/70" />
+                <div
+                  className="relative rounded-2xl overflow-hidden border border-white/15"
+                  style={{ boxShadow: "0 40px 80px rgba(0,0,0,0.5), 0 16px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.08)" }}
+                >
+                  {/* Browser chrome bar */}
+                  <div className="bg-[#1e2a3a] px-4 py-2.5 flex items-center gap-3">
+                    {/* Traffic lights */}
+                    <div className="flex gap-1.5 shrink-0">
+                      <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                      <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                      <div className="w-3 h-3 rounded-full bg-[#28c840]" />
                     </div>
-                    <div className="flex-1 bg-[#0a1628] rounded-md h-6 flex items-center px-3">
-                      <div className="w-2 h-2 rounded-full bg-[#00c9c9]/40 mr-2" />
-                      <span className="text-white/30 text-xs">propia.online</span>
+                    {/* URL bar */}
+                    <div className="flex-1 bg-[#131f2e] rounded-md h-6 flex items-center px-3 gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400/60 shrink-0" />
+                      <span className="text-white/35 text-[11px] font-mono">propia.online</span>
+                    </div>
+                    {/* Action icons placeholder */}
+                    <div className="flex gap-2 shrink-0">
+                      <div className="w-4 h-4 rounded bg-white/5" />
+                      <div className="w-4 h-4 rounded bg-white/5" />
                     </div>
                   </div>
 
-                  {/* Browser content: mock app UI */}
-                  <div className="bg-[#f8fafc] p-4 space-y-3">
-                    {/* Sidebar + content mock */}
-                    <div className="flex gap-3">
-                      {/* Mini sidebar */}
-                      <div className="w-28 bg-white rounded-xl border border-slate-200 p-2.5 space-y-1.5 shrink-0">
-                        <div className="h-5 w-16 bg-[#0f3460] rounded-md" />
-                        <div className="h-3 w-full bg-slate-100 rounded" />
-                        {["#00c9c9", "#e2e8f0", "#e2e8f0", "#e2e8f0", "#e2e8f0"].map((c, i) => (
-                          <div key={i} className="h-3 w-full rounded" style={{ background: c }} />
-                        ))}
-                      </div>
-
-                      {/* Content area */}
-                      <div className="flex-1 space-y-2.5">
-                        {/* Header */}
-                        <div className="bg-white rounded-xl border border-slate-200 p-3">
-                          <div className="h-4 w-32 bg-[#0f3460] rounded mb-2" />
-                          <div className="flex gap-2">
-                            <div className="h-2 w-20 bg-slate-200 rounded" />
-                            <div className="h-2 w-16 bg-slate-100 rounded" />
-                          </div>
-                        </div>
-                        {/* Cards grid */}
-                        <div className="grid grid-cols-2 gap-2">
-                          {[0, 1, 2, 3].map((i) => (
-                            <div key={i} className="bg-white rounded-xl border border-slate-200 p-2.5">
-                              <div className="w-6 h-6 rounded-lg bg-[#0f3460]/10 mb-1.5" />
-                              <div className="h-2 w-full bg-slate-200 rounded mb-1" />
-                              <div className="h-1.5 w-3/4 bg-slate-100 rounded" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Generated posts preview */}
-                    <div className="bg-white rounded-xl border border-[#00c9c9]/30 p-3 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full bg-[#00c9c9]" />
-                        <div className="h-2 w-24 bg-slate-200 rounded" />
-                      </div>
-                      <div className="space-y-1">
-                        <div className="h-2 w-full bg-slate-100 rounded" />
-                        <div className="h-2 w-5/6 bg-slate-100 rounded" />
-                        <div className="h-2 w-4/6 bg-slate-100 rounded" />
-                      </div>
-                      <div className="h-7 bg-[#00c9c9] rounded-lg flex items-center justify-center">
-                        <div className="h-2 w-16 bg-white/60 rounded" />
-                      </div>
-                    </div>
+                  {/* Screenshot */}
+                  <div className="relative">
+                    <Image
+                      src="/dashboard-mockup.png"
+                      alt="PropIA dashboard"
+                      width={960}
+                      height={600}
+                      className="w-full block"
+                      priority
+                    />
                   </div>
                 </div>
               </div>
