@@ -43,19 +43,30 @@ export default async function MisPropiedadesPage() {
 
       {properties.length === 0 ? (
         <div className="flex flex-col items-center gap-5 py-16 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#0f3460]/5 flex items-center justify-center">
-            <BuildingIcon className="w-8 h-8 text-[#0f3460]/40" />
+          {/* SVG illustration */}
+          <div className="flex justify-center">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="50" fill="#0f3460" fillOpacity="0.05" />
+              <rect x="20" y="42" width="60" height="40" rx="5" fill="#0f3460" fillOpacity="0.12" />
+              <path d="M50 22L78 42H22L50 22Z" fill="#0f3460" fillOpacity="0.18" />
+              <rect x="38" y="58" width="24" height="24" rx="3" fill="#00c9c9" fillOpacity="0.4" />
+              <circle cx="50" cy="48" r="4" fill="#0f3460" fillOpacity="0.25" />
+              {/* Key icon */}
+              <circle cx="72" cy="68" r="7" fill="none" stroke="#f59e0b" strokeWidth="2.5" />
+              <rect x="76.5" y="66.5" width="10" height="3" rx="1" fill="#f59e0b" />
+              <rect x="83" y="66.5" width="3" height="5" rx="1" fill="#f59e0b" />
+            </svg>
           </div>
           <div className="flex flex-col gap-2">
-            <p className="font-semibold text-[#0f3460] text-lg">Todavía no generaste propiedades</p>
-            <p className="text-sm text-muted-foreground max-w-xs">
+            <p className="font-bold text-[#0f3460] text-xl">Todavía no generaste ninguna propiedad</p>
+            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
               Cuando generes posts para una propiedad, aparecerá acá para que puedas revisarlos cuando quieras.
             </p>
           </div>
-          <Button asChild className="bg-[#0f3460] hover:bg-[#0f3460]/90 text-white">
+          <Button asChild className="bg-[#00c9c9] hover:bg-[#00b3b3] text-white font-bold h-11 px-6">
             <Link href="/posts" className="flex items-center gap-2">
               <PlusIcon className="w-4 h-4" />
-              Generar primera propiedad
+              Generar mi primer post
             </Link>
           </Button>
         </div>

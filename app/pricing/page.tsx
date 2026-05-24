@@ -295,10 +295,10 @@ export default function PricingPage() {
             </div>
 
             {/* Plan PRO */}
-            <div className="bg-white rounded-2xl border-2 border-[#00c9c9] shadow-xl flex flex-col relative mt-5 sm:mt-0">
+            <div className="bg-white rounded-2xl border-2 border-[#00c9c9] shadow-2xl shadow-[#00c9c9]/15 flex flex-col relative mt-5 sm:mt-0 sm:scale-[1.05] sm:z-10">
               {/* "Más popular" badge */}
               <div className="absolute -top-4 left-0 right-0 flex justify-center">
-                <span className="inline-flex items-center gap-1.5 bg-[#00c9c9] text-[#0f3460] text-xs font-bold px-4 py-1.5 rounded-full shadow-md">
+                <span className="inline-flex items-center gap-1.5 bg-[#00c9c9] text-[#0f3460] text-xs font-bold px-4 py-1.5 rounded-full shadow-md animate-pulse">
                   <SparklesIcon className="w-3.5 h-3.5" />
                   Más popular
                 </span>

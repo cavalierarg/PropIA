@@ -1,18 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Geist, Geist_Mono } from "next/font/google";
-
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
+import MobileNav from "@/components/MobileNav";
 import { Toaster } from "sonner";
+import { getUserPlan } from "@/lib/actions/subscription.actions";
+import { getUsage } from "@/lib/actions/usage.actions";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -26,20 +25,54 @@ export const metadata: Metadata = {
   description: "Genera posts para Instagram, Facebook y LinkedIn en segundos con inteligencia artificial.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { userId } = await auth();
+
+  let sidebarProps = null;
+  if (userId) {
+    const [user, plan, usage] = await Promise.all([
+      currentUser(),
+      getUserPlan(),
+      getUsage(),
+    ]);
+
+    const checkoutUrl = `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? ""}?checkout[custom][user_id]=${userId}`;
+
+    sidebarProps = {
+      plan,
+      firstName: user?.firstName ?? "Usuario",
+      usageCount: usage.count,
+      usageLimit: usage.limit,
+      isPro: usage.isPro,
+      checkoutUrl,
+    };
+  }
+
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <Navbar />
+      <html lang="es">
+        <body className={`${inter.variable} antialiased`}>
+          {userId && sidebarProps ? (
+            <div className="flex min-h-screen bg-[#f8fafc]">
+              <Sidebar {...sidebarProps} />
+              <div className="flex-1 flex flex-col lg:pl-60 min-w-0">
+                <MobileNav plan={sidebarProps.plan} checkoutUrl={sidebarProps.checkoutUrl} />
+                <div className="flex-1">
+                  {children}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <Navbar />
+              {children}
+            </>
+          )}
           <Toaster richColors position="bottom-right" />
-          {children}
         </body>
       </html>
     </ClerkProvider>
