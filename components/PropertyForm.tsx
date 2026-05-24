@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
+import type { ErrorGeneracion } from "@/lib/actions/posts.actions";
 import { getUsage } from "@/lib/actions/usage.actions";
 import { saveProperty } from "@/lib/actions/properties.actions";
 import { getUserProfile, saveUserProfile } from "@/lib/actions/user-profile.actions";
@@ -70,8 +71,8 @@ export default function PropertyForm() {
 
   const [posts, setPosts] = useState<PostResult[]>([]);
   const [recomendaciones, setRecomendaciones] = useState<RecomendacionesResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<ErrorGeneracion | "CAMPOS_INCOMPLETOS" | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [unauthenticated, setUnauthenticated] = useState(false);
@@ -107,20 +108,19 @@ export default function PropertyForm() {
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError(null);
     setPosts([]);
     setRecomendaciones(null);
     setUnauthenticated(false);
 
     if (!form.tipoPropiedad || !form.ubicacion || !form.metrosCuadrados || !form.precio) {
-      setError("Por favor completa todos los campos obligatorios.");
+      setError("CAMPOS_INCOMPLETOS");
       return;
     }
 
-    setLoading(true);
-    try {
+    startTransition(async () => {
       if (form.agenteWhatsapp || form.agenteInstagram || form.agenteSitioWeb) {
         saveUserProfile({
           whatsapp: form.agenteWhatsapp || undefined,
@@ -129,9 +129,16 @@ export default function PropertyForm() {
         }).catch(() => {});
       }
 
-      const { posts: newPosts, recomendaciones: newRecs, remaining: newRemaining, isPro: newIsPro } =
-        await generarPosts({ ...form, amenities });
+      const result = await generarPosts({ ...form, amenities });
 
+      if (!result.ok) {
+        if (result.error === "LIMIT_REACHED") setRemaining(0);
+        else if (result.error === "UNAUTHENTICATED") setUnauthenticated(true);
+        else setError(result.error);
+        return;
+      }
+
+      const { posts: newPosts, recomendaciones: newRecs, remaining: newRemaining, isPro: newIsPro } = result;
       setPosts(newPosts);
       setRecomendaciones(newRecs);
       setIsPro(newIsPro);
@@ -148,19 +155,7 @@ export default function PropertyForm() {
         posts: newPosts,
         recomendaciones: newRecs,
       }).catch(() => {});
-    } catch (err: unknown) {
-      if (err instanceof Error && err.message === "LIMIT_REACHED") {
-        setRemaining(0);
-      } else if (err instanceof Error && err.message === "UNAUTHENTICATED") {
-        setUnauthenticated(true);
-      } else {
-        setError(
-          "Ocurrió un error al generar los posts. Verifica tu clave de API e intenta de nuevo."
-        );
-      }
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const isLimitReached = !isPro && remaining === 0;
@@ -604,23 +599,36 @@ export default function PropertyForm() {
           )}
         </div>
 
-        {error && <p className="text-destructive text-sm">{error}</p>}
+        {error && error !== "CAMPOS_INCOMPLETOS" && (
+          <p className="text-destructive text-sm">
+            {error === "ERROR_API"
+              ? "Error al conectar con la IA. Verificá tu conexión e intentá de nuevo."
+              : error === "ERROR_FORMATO"
+              ? "La IA devolvió una respuesta inesperada. Intentá de nuevo."
+              : error === "API_KEY_FALTANTE"
+              ? "Clave de API no configurada. Contactá al soporte."
+              : "Ocurrió un error al generar los posts. Intentá de nuevo."}
+          </p>
+        )}
+        {error === "CAMPOS_INCOMPLETOS" && (
+          <p className="text-destructive text-sm">Por favor completá todos los campos obligatorios.</p>
+        )}
 
         <Button
           type="submit"
-          disabled={loading || isLimitReached}
+          disabled={isPending || isLimitReached}
           className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
         >
           <ZapIcon className="w-4 h-4" />
-          {loading ? "Generando con IA..." : "Generar 5 posts"}
+          {isPending ? "Generando con IA..." : "Generar 5 posts"}
         </Button>
       </form>
 
       {/* Skeleton de carga */}
-      {loading && <PostsSkeleton />}
+      {isPending && <PostsSkeleton />}
 
       {/* Resultados */}
-      {posts.length > 0 && !loading && (
+      {posts.length > 0 && !isPending && (
         <div className="flex flex-col gap-5 sm:gap-6">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-4">

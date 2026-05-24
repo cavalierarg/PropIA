@@ -47,11 +47,20 @@ export type PropertyData = {
   agenteSitioWeb?: string;
 };
 
-export const generarPosts = async (
-  data: PropertyData
-): Promise<{ posts: PostResult[]; recomendaciones: RecomendacionesResult; remaining: number; isPro: boolean }> => {
+export type ErrorGeneracion =
+  | "UNAUTHENTICATED"
+  | "LIMIT_REACHED"
+  | "API_KEY_FALTANTE"
+  | "ERROR_API"
+  | "ERROR_FORMATO";
+
+export type ResultadoGeneracion =
+  | { ok: true; posts: PostResult[]; recomendaciones: RecomendacionesResult; remaining: number; isPro: boolean }
+  | { ok: false; error: ErrorGeneracion };
+
+export const generarPosts = async (data: PropertyData): Promise<ResultadoGeneracion> => {
   const { userId } = await auth();
-  if (!userId) throw new Error("UNAUTHENTICATED");
+  if (!userId) return { ok: false, error: "UNAUTHENTICATED" };
 
   const supabase = createSupabaseClient();
   const month = getCurrentMonth();
@@ -74,7 +83,12 @@ export const generarPosts = async (
   const currentCount = usageData?.count ?? 0;
 
   if (!isPro && currentCount >= MONTHLY_LIMIT) {
-    throw new Error("LIMIT_REACHED");
+    return { ok: false, error: "LIMIT_REACHED" };
+  }
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error("[posts.actions] ERROR: ANTHROPIC_API_KEY no está definida");
+    return { ok: false, error: "API_KEY_FALTANTE" };
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -168,38 +182,32 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
   }
 }`;
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("[posts.actions] ERROR: ANTHROPIC_API_KEY no está definida en las variables de entorno");
-    throw new Error("API key no configurada");
-  }
-
   let message;
   try {
     message = await client.messages.create({
-      model: "claude-sonnet-4-6",
+      model: "claude-sonnet-4-20250514",
       max_tokens: 6000,
       messages: [{ role: "user", content: prompt }],
     });
   } catch (apiError) {
     console.error("[posts.actions] ERROR al llamar a la API de Anthropic:", apiError);
-    throw apiError;
+    return { ok: false, error: "ERROR_API" };
   }
 
   const rawText = message.content[0].type === "text" ? message.content[0].text : "";
-  console.log("[posts.actions] Respuesta de Anthropic (primeros 200 chars):", rawText.slice(0, 200));
 
   const jsonMatch = rawText.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
-    console.error("[posts.actions] ERROR: respuesta sin JSON válido. Texto completo:", rawText);
-    throw new Error("La respuesta de la IA no tiene el formato esperado");
+    console.error("[posts.actions] ERROR: respuesta sin JSON válido:", rawText);
+    return { ok: false, error: "ERROR_FORMATO" };
   }
 
   let parsed;
   try {
     parsed = JSON.parse(jsonMatch[0]);
   } catch (parseError) {
-    console.error("[posts.actions] ERROR al parsear JSON:", parseError, "\nJSON recibido:", jsonMatch[0]);
-    throw parseError;
+    console.error("[posts.actions] ERROR al parsear JSON:", parseError);
+    return { ok: false, error: "ERROR_FORMATO" };
   }
 
   const newCount = currentCount + 1;
@@ -212,6 +220,7 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
   }
 
   return {
+    ok: true,
     posts: parsed.posts as PostResult[],
     recomendaciones: parsed.recomendaciones as RecomendacionesResult,
     remaining: isPro ? -1 : Math.max(0, MONTHLY_LIMIT - newCount),
