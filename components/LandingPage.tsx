@@ -17,8 +17,11 @@ import {
   GalleryHorizontal,
 } from "lucide-react";
 
+const PRO_MAX_CHECKOUT =
+  "https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d?checkout[custom][plan]=pro_max";
+
 interface LandingPageProps {
-  checkoutUrl?: string;
+  checkoutUrl: string;
 }
 
 const TESTIMONIALS = [
@@ -45,7 +48,7 @@ const TESTIMONIALS = [
   },
 ];
 
-export default function LandingPage(_props: LandingPageProps) {
+export default function LandingPage({ checkoutUrl }: LandingPageProps) {
   return (
     <div className="min-h-screen flex flex-col">
 
@@ -343,39 +346,131 @@ export default function LandingPage(_props: LandingPageProps) {
       </section>
 
       {/* ══════════════════════════════════════════════════
-          CTA — PRECIOS
+          PRECIOS
       ══════════════════════════════════════════════════ */}
-      <section style={{ background: "linear-gradient(135deg, #0f3460 0%, #0a1628 100%)" }} className="py-20 sm:py-24 border-t border-white/5">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center gap-7">
-          <div className="inline-flex items-center gap-2 bg-[#00c9c9]/15 border border-[#00c9c9]/30 text-[#00c9c9] text-xs font-semibold px-4 py-1.5 rounded-full">
-            <Sparkles className="w-3.5 h-3.5" />
-            Desde gratis hasta Pro Max
+      <section className="bg-slate-50 py-20 sm:py-24 border-t border-slate-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0f3460]">Planes simples y transparentes</h2>
+            <p className="text-slate-500 mt-3 text-lg">Empezá gratis, escalá cuando estés listo</p>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
-            ¿Listo para publicar como un profesional?
-          </h2>
-          <p className="text-white/60 text-lg max-w-xl leading-relaxed">
-            Empezá gratis hoy. Sin tarjeta de crédito. Escalá al plan que se adapte a tu ritmo.
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-center">
+            {/* Plan Free */}
+            <div className="border border-slate-200 rounded-2xl overflow-hidden flex flex-col bg-white shadow-sm">
+              <div className="px-6 pt-7 pb-6 bg-slate-50 border-b border-slate-200">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Free</p>
+                <div className="flex items-end gap-2">
+                  <span className="text-4xl font-bold text-[#0f3460]">$0</span>
+                  <span className="text-slate-400 text-sm pb-1">para siempre</span>
+                </div>
+              </div>
+              <div className="px-6 py-6 flex flex-col gap-5 flex-1">
+                <ul className="flex flex-col gap-3">
+                  {["5 generaciones gratis", "Posts para Instagram, Facebook y LinkedIn", "Historial de propiedades"].map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-slate-600">
+                      <Check className="w-4 h-4 text-[#00c9c9] shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/sign-in"
+                  className="mt-auto block text-center border-2 border-[#0f3460] text-[#0f3460] font-semibold px-5 py-3 rounded-xl hover:bg-[#0f3460] hover:text-white transition-colors text-sm"
+                >
+                  Empezar gratis
+                </Link>
+              </div>
+            </div>
+
+            {/* Plan PRO */}
+            <div className="bg-[#0f3460] rounded-2xl overflow-hidden flex flex-col relative shadow-2xl shadow-[#0f3460]/30 sm:scale-[1.03] sm:z-10">
+              <div className="pointer-events-none absolute top-0 right-0 w-40 h-40 rounded-full bg-[#00c9c9]/10 blur-2xl -translate-y-1/2 translate-x-1/3" />
+              <div className="px-6 pt-7 pb-6 border-b border-white/10 relative">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold text-white/50 uppercase tracking-widest">Pro</p>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#00c9c9] text-[#0f3460] px-2.5 py-1 rounded-full animate-pulse">
+                    <Sparkles className="w-3 h-3" />
+                    Más popular
+                  </span>
+                </div>
+                <div className="flex items-end gap-2">
+                  <span className="text-4xl font-bold text-white">$29</span>
+                  <span className="text-white/40 text-sm pb-1">/ mes</span>
+                </div>
+              </div>
+              <div className="px-6 py-6 flex flex-col gap-5 flex-1 relative">
+                <ul className="flex flex-col gap-3">
+                  {["Generaciones ilimitadas", "Calendario de contenido (30 días)", "Guiones para Reels", "Descripción para portales", "Análisis de tendencias", "Generador de Ads básico (1 foto, 3 formatos, 4 estilos)", "Soporte prioritario"].map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-white/80">
+                      <Check className="w-4 h-4 text-[#00c9c9] shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={checkoutUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto block text-center bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-bold px-5 py-3 rounded-xl transition-colors text-sm"
+                >
+                  Probar PRO 7 días gratis
+                </a>
+              </div>
+            </div>
+
+            {/* Plan PRO MAX */}
+            <div className="rounded-2xl overflow-hidden flex flex-col relative border-2 border-[#f59e0b] bg-white shadow-sm">
+              <div className="pointer-events-none absolute top-0 right-0 w-40 h-40 rounded-full bg-[#f59e0b]/10 blur-2xl -translate-y-1/2 translate-x-1/3" />
+              <div className="h-1 bg-gradient-to-r from-[#f59e0b]/60 via-[#f59e0b] to-[#f59e0b]/60" />
+              <div className="px-6 pt-6 pb-6 border-b border-[#f59e0b]/15 relative">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest">Pro Max</p>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold bg-[#f59e0b] text-white px-2.5 py-1 rounded-full">
+                    <Sparkles className="w-3 h-3" />
+                    Más completo
+                  </span>
+                </div>
+                <div className="flex items-end gap-2">
+                  <span className="text-4xl font-bold text-[#0f3460]">$59</span>
+                  <span className="text-slate-400 text-sm pb-1">/ mes</span>
+                </div>
+              </div>
+              <div className="px-6 py-6 flex flex-col gap-5 flex-1 relative">
+                <ul className="flex flex-col gap-3">
+                  {["Todo lo del plan PRO", "Ads avanzados: hasta 3 fotos simultáneas", "Carruseles IG: 5 slides 1080×1080 con tu marca", "Selector de color de marca completo", "Descarga en ZIP de todos los formatos", "Publicación directa a Instagram y Facebook (próx.)"].map((f, i) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-slate-700">
+                      <Check className={`w-4 h-4 shrink-0 mt-0.5 ${i >= 1 ? "text-[#f59e0b]" : "text-emerald-500"}`} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href={PRO_MAX_CHECKOUT}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto block text-center bg-[#f59e0b] hover:bg-[#e08e00] text-white font-bold px-5 py-3 rounded-xl transition-colors text-sm"
+                >
+                  Probar PRO MAX 7 días gratis
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Guarantee strip */}
+          <div className="flex items-center justify-center gap-3 mt-10 bg-white rounded-2xl border border-slate-200 px-6 py-4">
+            <ShieldCheck className="w-5 h-5 text-emerald-500 shrink-0" />
+            <p className="text-sm text-slate-600">
+              <strong className="text-slate-800">Garantía de 7 días:</strong> Si no estás satisfecho, te devolvemos el dinero sin preguntas.
+            </p>
+          </div>
+
+          <p className="text-center text-slate-400 text-sm mt-6">
+            ¿Tenés preguntas?{" "}
+            <Link href="/pricing" className="text-[#00c9c9] hover:underline font-medium">
+              Ver todos los detalles de los planes →
+            </Link>
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <Link
-              href="/sign-in"
-              className="inline-flex items-center justify-center gap-2 bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-bold px-8 py-4 rounded-xl text-base transition-colors shadow-lg shadow-[#00c9c9]/20"
-            >
-              Empezar gratis
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white font-semibold px-8 py-4 rounded-xl text-base transition-colors border border-white/20"
-            >
-              Ver planes y precios
-            </Link>
-          </div>
-          <div className="flex items-center gap-3 text-white/35 text-sm">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            Garantía de devolución 7 días · Sin permanencia mínima
-          </div>
         </div>
       </section>
 

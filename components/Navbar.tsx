@@ -110,19 +110,11 @@ const Navbar = () => {
               <UserButton />
             </>
           ) : (
-            <>
-              <Link
-                href="/pricing"
-                className="text-sm font-medium text-white/70 hover:text-white transition-colors px-2 hidden sm:block"
-              >
-                Precios
-              </Link>
-              <SignInButton>
-                <Button className="bg-[#00c9c9] text-[#0f3460] font-semibold hover:bg-[#00b3b3] border-0 shadow-sm h-9 px-4 text-sm">
-                  Iniciar sesión
-                </Button>
-              </SignInButton>
-            </>
+            <SignInButton>
+              <Button className="bg-[#00c9c9] text-[#0f3460] font-semibold hover:bg-[#00b3b3] border-0 shadow-sm h-9 px-4 text-sm">
+                Iniciar sesión
+              </Button>
+            </SignInButton>
           )}
         </div>
 

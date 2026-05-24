@@ -23,7 +23,20 @@
       "Bash(node -e ' *)",
       "Bash(npx -y dotenv-cli node -e ' *)",
       "Bash(node --env-file=.env.local -e ' *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(npx ruflo@latest *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\valen\\\\saas-template\\\\public\" -Recurse)",
+      "Bash(git rm *)",
+      "Bash(dir)",
+      "Bash(findstr /I \"env\")",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\valen\\\\saas-template\\\\.claude\\\\hooks\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\valen\\\\saas-template\\\\.claude\\\\skills\\\\push-all\")",
+      "Bash(mkdir -p \"C:\\\\Users\\\\valen\\\\saas-template\\\\.claude\\\\skills\\\\commit\")",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\valen\\\\saas-template\" -Recurse -Directory | Select-Object -ExpandProperty FullName | ForEach-Object { $_ -replace [regex]::Escape\\(\"C:\\\\Users\\\\valen\\\\saas-template\"\\), \"\" } | Sort-Object)",
+      "Bash(dir \"C:\\\\Users\\\\valen\\\\saas-template\\\\app\" -Recurse -Filter \"*.tsx\" -Name)",
+      "Skill(push-all)"
     ]
   }
 }
