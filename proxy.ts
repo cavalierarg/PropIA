@@ -17,6 +17,11 @@ export default clerkMiddleware(async (auth, request) => {
       return NextResponse.redirect(signInUrl);
     }
   }
+
+  // Inject pathname so layout.tsx can read it for profile-completion redirect
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  return NextResponse.next({ request: { headers: requestHeaders } });
 });
 
 export const config = {

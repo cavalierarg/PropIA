@@ -2,12 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { Inter } from "next/font/google";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import { Toaster } from "sonner";
 import { getUserPlan } from "@/lib/actions/subscription.actions";
 import { getUsage } from "@/lib/actions/usage.actions";
+import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,11 +37,22 @@ export default async function RootLayout({
 
   let sidebarProps = null;
   if (userId) {
-    const [user, plan, usage] = await Promise.all([
+    const headersList = await headers();
+    const pathname = headersList.get("x-pathname") ?? "/";
+    const skipProfileCheck = ["/perfil", "/api/", "/sign-in", "/sign-up"].some((p) =>
+      pathname.startsWith(p)
+    );
+
+    const [user, plan, usage, agentProfile] = await Promise.all([
       currentUser(),
       getUserPlan(),
       getUsage(),
+      skipProfileCheck ? Promise.resolve({ perfil_completado: true }) : getAgentProfile(),
     ]);
+
+    if (!skipProfileCheck && !agentProfile.perfil_completado) {
+      redirect("/perfil");
+    }
 
     const checkoutUrl = `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? ""}?checkout[custom][user_id]=${userId}`;
 

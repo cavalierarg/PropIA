@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { uploadPropertyImage } from "@/lib/actions/flyers.actions";
 import { uploadAgentLogo, getAgentLogoUrl } from "@/lib/actions/agent-logo.actions";
+import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -155,6 +156,13 @@ export default function AdsGeneratorContent({
   useEffect(() => {
     getAgentLogoUrl().then((url) => {
       if (url) setAgentLogoUrl(url);
+    }).catch(() => {});
+
+    getAgentProfile().then((profile) => {
+      if (profile.whatsapp) setAgenteWhatsapp(profile.whatsapp);
+      if (profile.instagram) setAgenteInstagram(profile.instagram);
+      if (profile.sitio_web) setAgenteSitioWeb(profile.sitio_web);
+      if (profile.color_marca) setColorMarca(profile.color_marca);
     }).catch(() => {});
   }, []);
 

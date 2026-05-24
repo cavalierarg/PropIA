@@ -25,6 +25,15 @@ export async function getUserProfile(): Promise<UserProfile> {
   if (!userId) return {};
   try {
     const supabase = createSupabaseClient();
+    // agent_profiles is the source of truth — fall back to user_profiles
+    const { data: agentData } = await supabase
+      .from("agent_profiles")
+      .select("whatsapp, instagram, sitio_web")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (agentData?.whatsapp || agentData?.instagram || agentData?.sitio_web) {
+      return agentData;
+    }
     const { data } = await supabase
       .from("user_profiles")
       .select("whatsapp, instagram, sitio_web")
