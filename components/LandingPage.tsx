@@ -304,6 +304,141 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
       </section>
 
       {/* ══════════════════════════════════════════════════
+          CARRUSELES — SHOWCASE
+      ══════════════════════════════════════════════════ */}
+      <section className="py-20 sm:py-24 border-t border-white/10 overflow-hidden" style={{ background: "#0a1628" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-14">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-[#f59e0b]/15 text-[#f59e0b] border border-[#f59e0b]/30 rounded-full px-4 py-1.5 mb-5">
+              <Sparkles className="w-3.5 h-3.5" />
+              Exclusivo PRO MAX
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mt-3">
+              Carruseles de Instagram<br />
+              <span className="text-[#f59e0b]">con tu marca, en segundos</span>
+            </h2>
+            <p className="text-white/55 mt-4 text-lg max-w-2xl mx-auto">
+              Completás los datos de la propiedad y PropIA genera 5 slides a 1080×1080px listos para publicar. Descargá en PNG o ZIP.
+            </p>
+          </div>
+
+          {/* Slide previews */}
+          <div className="flex gap-4 overflow-x-auto pb-4 sm:justify-center">
+            {/* Slide 1: Foto + precio */}
+            <div className="shrink-0 w-44 h-44 rounded-2xl relative overflow-hidden border border-white/10" style={{ background: "linear-gradient(to top, #0f3460 0%, #1a4d8f 50%, #0a1628 100%)" }}>
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%)" }} />
+              <div className="absolute top-3 left-3 bg-green-600 text-white text-[9px] font-bold px-2 py-1 rounded-md">EN VENTA</div>
+              <div className="absolute bottom-3 left-3 right-4">
+                <div className="text-white font-black text-lg leading-tight">$250.000</div>
+                <div className="flex items-center gap-1 mt-1">
+                  <div className="w-1 h-4 bg-[#00c9c9] rounded" />
+                  <span className="text-white/80 text-[10px]">Palermo, CABA</span>
+                </div>
+              </div>
+              <div className="absolute top-0 right-0 w-1.5 h-full bg-[#0f3460]/80" />
+              <div className="absolute bottom-1.5 right-2 text-white/25 text-[9px]">1/5</div>
+            </div>
+
+            {/* Slide 2: Stats */}
+            <div className="shrink-0 w-44 h-44 rounded-2xl p-3 relative overflow-hidden" style={{ background: "#0f3460" }}>
+              <div className="text-white/40 text-[7px] font-bold tracking-widest uppercase mb-1.5">CARACTERÍSTICAS</div>
+              <div className="w-6 h-0.5 bg-[#00c9c9] rounded mb-2.5" />
+              <div className="grid grid-cols-2 gap-2">
+                {[["3", "Dorm."], ["2", "Baños"], ["90", "m²"], ["1", "Coch."]].map(([v, l]) => (
+                  <div key={l} className="bg-white/10 rounded-lg p-1.5 text-center">
+                    <div className="text-white font-black text-xl leading-none">{v}</div>
+                    <div className="text-white/45 text-[8px] mt-0.5">{l}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="absolute bottom-1.5 right-2 text-white/25 text-[9px]">2/5</div>
+            </div>
+
+            {/* Slide 3: Checklist */}
+            <div className="shrink-0 w-44 h-44 rounded-2xl p-3 bg-white relative overflow-hidden">
+              <div className="text-[#0f3460] font-bold text-[10px] mb-1">Detalles</div>
+              <div className="w-5 h-0.5 bg-[#00c9c9] rounded mb-2.5" />
+              {["Luminoso", "Balcón", "Amenities", "Cochera cubierta"].map((item) => (
+                <div key={item} className="flex items-center gap-1.5 mb-2">
+                  <div className="w-4 h-4 rounded-full bg-[#00c9c9] flex items-center justify-center shrink-0">
+                    <Check className="w-2.5 h-2.5 text-white" />
+                  </div>
+                  <span className="text-[10px] text-slate-700">{item}</span>
+                </div>
+              ))}
+              <div className="absolute bottom-1.5 right-2 text-slate-300 text-[9px]">3/5</div>
+            </div>
+
+            {/* Slide 4: Ubicación */}
+            <div className="shrink-0 w-44 h-44 rounded-2xl flex flex-col items-center justify-center p-3 relative overflow-hidden" style={{ background: "#0a1628" }}>
+              <div className="w-6 h-0.5 bg-[#00c9c9] rounded mb-2" />
+              <div className="text-white/35 text-[7px] font-bold tracking-widest uppercase mb-1">UBICACIÓN</div>
+              <div className="text-white font-bold text-sm text-center mb-2">Palermo, CABA</div>
+              <div className="w-8 h-px bg-white/15 mb-2" />
+              <div className="text-[#00c9c9] font-black text-base">$250.000</div>
+              <div className="mt-2 border border-white/15 rounded-full px-3 py-0.5">
+                <span className="text-white/60 text-[9px]">En Venta</span>
+              </div>
+              <div className="absolute bottom-1.5 right-2 text-white/25 text-[9px]">4/5</div>
+            </div>
+
+            {/* Slide 5: Contacto */}
+            <div className="shrink-0 w-44 h-44 rounded-2xl flex flex-col items-center justify-center p-3 bg-slate-50 relative overflow-hidden border border-slate-200">
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#0f3460]" />
+              <div className="w-9 h-9 rounded-full bg-[#0f3460] flex items-center justify-center mb-1.5">
+                <span className="text-white font-black text-sm">P</span>
+              </div>
+              <div className="text-[#0f3460] font-bold text-[10px] mb-0.5">Carlos García</div>
+              <div className="text-slate-400 text-[9px] mb-2">Inmobiliaria García</div>
+              <div className="w-6 h-0.5 bg-[#00c9c9] rounded mb-2" />
+              <div className="bg-[#0f3460] rounded-lg px-3 py-1.5">
+                <span className="text-white text-[9px] font-bold">Consultá ahora</span>
+              </div>
+              <div className="absolute bottom-1.5 right-2 text-slate-300 text-[9px]">5/5</div>
+            </div>
+          </div>
+
+          {/* Slide labels */}
+          <div className="hidden sm:flex gap-4 justify-center mt-3">
+            {["Foto + Precio", "Estadísticas", "Características", "Ubicación", "Contacto"].map((label) => (
+              <div key={label} className="text-center text-white/30 text-xs w-44 shrink-0">{label}</div>
+            ))}
+          </div>
+
+          {/* Feature bullets */}
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 mt-10">
+            {[
+              "Foto real de la propiedad con gradiente y precio",
+              "Stats grandes: dormitorios, baños, m², cocheras",
+              "Lista de características con checkmarks",
+              "Slide de ubicación y precio sobre fondo oscuro",
+              "Tarjeta de contacto con logo, WhatsApp e Instagram",
+            ].map((b) => (
+              <div key={b} className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-[#f59e0b] shrink-0" />
+                <span className="text-white/60 text-sm">{b}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="text-center mt-12">
+            <a
+              href={PRO_MAX_CHECKOUT}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#f59e0b] hover:bg-[#e08e00] text-white font-bold px-8 py-4 rounded-xl text-base transition-colors shadow-lg shadow-[#f59e0b]/25"
+            >
+              <GalleryHorizontal className="w-5 h-5" />
+              Activar PRO MAX y crear carruseles
+            </a>
+            <p className="text-white/30 text-sm mt-4">7 días gratis · Sin tarjeta de crédito</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════
           TESTIMONIALES
       ══════════════════════════════════════════════════ */}
       <section className="bg-white py-20 sm:py-24 border-t border-slate-100">
@@ -502,6 +637,7 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
                   { label: "Calendario", href: "/calendario" },
                   { label: "Guiones Reels", href: "/reels" },
                   { label: "Generador de Ads", href: "/ads-generator" },
+                  { label: "Carruseles IG", href: "/carousels" },
                   { label: "Precios", href: "/pricing" },
                 ].map((l) => (
                   <li key={l.label}>
