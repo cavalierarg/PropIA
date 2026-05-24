@@ -43,7 +43,8 @@ const FEATURES: {
   { text: "Guión para Reels con tendencias en tiempo real", free: false, pro: true, proMax: true },
   { text: "Análisis de tendencias del mercado", free: false, pro: true, proMax: true },
   { text: "Generador de Ads — básico", free: false, pro: "1 foto · 3 formatos (Feed, Story, Banner) · 4 estilos", proMax: true },
-  { text: "Generador de Ads — avanzado", free: false, pro: false, proMax: "Hasta 3 fotos · carrusel 5 slides · selector de color completo · descarga en ZIP" },
+  { text: "Generador de Ads — avanzado", free: false, pro: false, proMax: "Hasta 3 fotos · selector de color completo · descarga en ZIP" },
+  { text: "Carruseles de Instagram (5 slides 1080×1080)", free: false, pro: false, proMax: "Foto + stats + detalles + ubicación + contacto · PNG y ZIP" },
   { text: "Publicación directa a Instagram y Facebook", free: false, pro: false, proMax: "Próximamente" },
   { text: "Soporte prioritario por email", free: false, pro: true, proMax: true },
 ];
@@ -405,7 +406,7 @@ export default function PricingPage() {
                     </p>
                   )}
                   <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                    Todo lo del plan PRO más el Generador de Ads avanzado: hasta 3 fotos, carruseles, selector de color completo y descarga en ZIP.
+                    Todo el plan PRO más Ads avanzados, Carruseles de Instagram (5 slides 1080×1080 con tu marca) y descarga en ZIP.
                   </p>
                 </div>
 
