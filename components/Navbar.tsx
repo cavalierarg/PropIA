@@ -40,7 +40,7 @@ const Navbar = () => {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 min-w-0 shrink-0" onClick={() => setMenuOpen(false)}>
           <Image
-            src="/logo.png.png"
+            src="/logo.png"
             alt="PropIA logo"
             width={32}
             height={32}
