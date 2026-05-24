@@ -3,6 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
+import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 
 export type CalendarDay = {
   dia: number;
@@ -158,5 +159,6 @@ export async function generarCalendario(data: {
     dias = [...batch1, ...batch2];
   }
 
+  void logFeatureUsage("calendario");
   return { dias, isPro };
 }

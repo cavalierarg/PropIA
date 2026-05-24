@@ -3,6 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
+import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 
 const MONTHLY_LIMIT = 10;
 
@@ -218,6 +219,8 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
   if (upsertError) {
     console.error("[posts.actions] ERROR al actualizar usage en Supabase:", upsertError);
   }
+
+  void logFeatureUsage("posts");
 
   return {
     ok: true,

@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 
 export const runtime = "nodejs";
 
@@ -456,4 +457,5 @@ export async function POST(req: NextRequest) {
     console.error("[generate-ad] ImageResponse error:", err);
     return NextResponse.json({ error: "Image generation failed", detail: String(err) }, { status: 500 });
   }
+  void logFeatureUsage("ads");
 }

@@ -3,6 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
+import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 
 export type PropertyInput = {
   tipoPropiedad: string;
@@ -262,10 +263,14 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     throw new Error("Formato de respuesta inválido");
   }
 
+  let result: GuionResult;
   try {
-    return JSON.parse(jsonMatch[0]) as GuionResult;
+    result = JSON.parse(jsonMatch[0]) as GuionResult;
   } catch (e) {
     console.error("[reels.actions] Error parseando guion:", e);
     throw new Error("Error al procesar el guion");
   }
+
+  void logFeatureUsage("reels");
+  return result;
 }

@@ -3,6 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
+import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 
 export type PropertyInput = {
   tipoPropiedad: string;
@@ -146,6 +147,7 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     throw new Error("Error al procesar la respuesta de la IA");
   }
 
+  void logFeatureUsage("descripcion");
   return {
     version_corta: parsed.version_corta,
     version_larga: isPro ? (parsed.version_larga ?? null) : null,

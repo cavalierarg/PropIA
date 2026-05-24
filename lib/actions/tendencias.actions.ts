@@ -3,6 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
+import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 
 export type FormatoEngagement = {
   posicion: number;
@@ -168,10 +169,14 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     throw new Error("Formato de respuesta inválido");
   }
 
+  let result: TendenciasResult;
   try {
-    return JSON.parse(jsonMatch[0]) as TendenciasResult;
+    result = JSON.parse(jsonMatch[0]) as TendenciasResult;
   } catch (e) {
     console.error("[tendencias.actions] Error parseando JSON:", e);
     throw new Error("Error al procesar la respuesta de la IA");
   }
+
+  void logFeatureUsage("tendencias");
+  return result;
 }
