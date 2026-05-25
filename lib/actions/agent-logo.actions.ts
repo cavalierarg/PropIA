@@ -1,9 +1,51 @@
 "use server";
 
+import sharp from "sharp";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
 const BUCKET = "agent-logos";
+
+async function removeLogoBackground(input: Buffer): Promise<Buffer> {
+  const { data, info } = await sharp(input)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const pixels = new Uint8ClampedArray(data.buffer);
+  const { width, height } = info;
+
+  // Sample 4 corners to detect background color
+  const corners = [
+    [0, 0], [width - 1, 0],
+    [0, height - 1], [width - 1, height - 1],
+  ] as const;
+
+  let sumR = 0, sumG = 0, sumB = 0;
+  for (const [x, y] of corners) {
+    const i = (y * width + x) * 4;
+    sumR += pixels[i]; sumG += pixels[i + 1]; sumB += pixels[i + 2];
+  }
+  const bgR = Math.round(sumR / 4);
+  const bgG = Math.round(sumG / 4);
+  const bgB = Math.round(sumB / 4);
+
+  // Make pixels within threshold of background color fully transparent
+  const threshold = 30;
+  for (let i = 0; i < pixels.length; i += 4) {
+    if (
+      Math.abs(pixels[i]     - bgR) < threshold &&
+      Math.abs(pixels[i + 1] - bgG) < threshold &&
+      Math.abs(pixels[i + 2] - bgB) < threshold
+    ) {
+      pixels[i + 3] = 0;
+    }
+  }
+
+  return sharp(Buffer.from(pixels.buffer), {
+    raw: { width, height, channels: 4 },
+  }).png().toBuffer();
+}
 
 export async function uploadAgentLogo(formData: FormData): Promise<string> {
   const { userId } = await auth();
@@ -13,17 +55,18 @@ export async function uploadAgentLogo(formData: FormData): Promise<string> {
   if (!file || file.size === 0) throw new Error("No file provided");
   if (file.size > 2 * 1024 * 1024) throw new Error("El archivo supera los 2 MB");
 
-  const ext = file.type.includes("png") ? "png" : "jpg";
-  const fileName = `${userId}/logo.${ext}`;
-  const arrayBuffer = await file.arrayBuffer();
+  const rawBuffer = Buffer.from(await file.arrayBuffer());
+  const processedBuffer = await removeLogoBackground(rawBuffer);
+
+  // Always save as PNG to preserve transparency
+  const fileName = `${userId}/logo.png`;
   const supabase = createSupabaseAdminClient();
 
-  // Auto-create bucket if it doesn't exist yet
   await supabase.storage.createBucket(BUCKET, { public: true }).catch(() => {});
 
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(fileName, arrayBuffer, { contentType: file.type, upsert: true });
+    .upload(fileName, processedBuffer, { contentType: "image/png", upsert: true });
 
   if (error) throw new Error(`Upload fallido: ${error.message}`);
 

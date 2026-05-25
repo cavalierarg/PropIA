@@ -112,8 +112,8 @@ export async function POST(req: NextRequest) {
           <div style={{ display:"flex", position:"relative", width:1080, height:594, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:1080, height:594, objectFit:"cover" }} />
             <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, backgroundColor:"rgba(0,0,0,0.38)" }} />
-            <div style={{ display:"flex", position:"absolute", top:32, left:32, backgroundColor:bc.bg, color:bc.text, fontSize:22, fontWeight:700, padding:"10px 26px", borderRadius:4, letterSpacing:"0.08em" }}>{badge.toUpperCase()}</div>
-            {agente ? <div style={{ display:"flex", position:"absolute", top:32, right:32, color:W, fontSize:20, fontWeight:300, letterSpacing:"0.18em" }}>{agente.toUpperCase()}</div> : null}
+            <div style={{ display:"flex", position:"absolute", top:32, right:32, backgroundColor:bc.bg, color:bc.text, fontSize:22, fontWeight:700, padding:"10px 26px", borderRadius:4, letterSpacing:"0.08em" }}>{badge.toUpperCase()}</div>
+            {agente ? <div style={{ display:"flex", position:"absolute", top:86, right:32, color:W, fontSize:20, fontWeight:300, letterSpacing:"0.18em" }}>{agente.toUpperCase()}</div> : null}
           </div>
           {/* Info 45% */}
           <div style={{ display:"flex", flexDirection:"column", width:1080, height:486, backgroundColor:BG, padding:"36px 60px 32px", flexShrink:0 }}>
@@ -138,8 +138,8 @@ export async function POST(req: NextRequest) {
           <div style={{ display:"flex", position:"relative", width:1080, height:960, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:1080, height:960, objectFit:"cover" }} />
             <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, backgroundColor:"rgba(0,0,0,0.38)" }} />
-            <div style={{ display:"flex", position:"absolute", top:50, left:50, backgroundColor:bc.bg, color:bc.text, fontSize:26, fontWeight:700, padding:"12px 32px", borderRadius:4, letterSpacing:"0.08em" }}>{badge.toUpperCase()}</div>
-            {agente ? <div style={{ display:"flex", position:"absolute", top:50, right:50, color:W, fontSize:22, fontWeight:300, letterSpacing:"0.18em" }}>{agente.toUpperCase()}</div> : null}
+            <div style={{ display:"flex", position:"absolute", top:50, right:50, backgroundColor:bc.bg, color:bc.text, fontSize:26, fontWeight:700, padding:"12px 32px", borderRadius:4, letterSpacing:"0.08em" }}>{badge.toUpperCase()}</div>
+            {agente ? <div style={{ display:"flex", position:"absolute", top:110, right:50, color:W, fontSize:22, fontWeight:300, letterSpacing:"0.18em" }}>{agente.toUpperCase()}</div> : null}
           </div>
           <div style={{ display:"flex", flexDirection:"column", width:1080, height:960, backgroundColor:BG, padding:"60px 80px 56px", flexShrink:0 }}>
             <div style={{ display:"flex", width:"100%", height:1, backgroundColor:GOLD, opacity:0.55, marginBottom:48 }} />
@@ -196,7 +196,7 @@ export async function POST(req: NextRequest) {
           {/* Photo with badge overlay */}
           <div style={{ display:"flex", position:"relative", width:968, height:528, borderRadius:20, overflow:"hidden", flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:968, height:528, objectFit:"cover" }} />
-            <div style={{ display:"flex", position:"absolute", top:20, left:20, backgroundColor:A, color:"#fff", fontSize:22, fontWeight:700, paddingTop:10, paddingRight:24, paddingBottom:10, paddingLeft:24, borderRadius:100 }}>{badge}</div>
+            <div style={{ display:"flex", position:"absolute", top:20, right:20, backgroundColor:A, color:"#fff", fontSize:22, fontWeight:700, paddingTop:10, paddingRight:24, paddingBottom:10, paddingLeft:24, borderRadius:100 }}>{badge}</div>
           </div>
           {/* Info */}
           <div style={{ display:"flex", flexDirection:"column", flex:1, paddingTop:32 }}>
@@ -236,7 +236,7 @@ export async function POST(req: NextRequest) {
         <div style={{ display:"flex", flexDirection:"column", position:"relative", width:1080, height:1920, backgroundColor:BG, fontFamily:ff, overflow:"hidden" }}>
           <div style={{ display:"flex", position:"relative", width:1080, height:1000, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:1080, height:1000, objectFit:"cover" }} />
-            <div style={{ display:"flex", position:"absolute", top:50, left:50, backgroundColor:A, color:"#fff", fontSize:28, fontWeight:700, paddingTop:12, paddingRight:32, paddingBottom:12, paddingLeft:32, borderRadius:100 }}>{badge}</div>
+            <div style={{ display:"flex", position:"absolute", top:50, right:50, backgroundColor:A, color:"#fff", fontSize:28, fontWeight:700, paddingTop:12, paddingRight:32, paddingBottom:12, paddingLeft:32, borderRadius:100 }}>{badge}</div>
           </div>
           <div style={{ display:"flex", flexDirection:"column", flex:1, backgroundColor:BG, paddingTop:60, paddingRight:80, paddingBottom:56, paddingLeft:80 }}>
             <div style={{ display:"flex", fontSize:100, fontWeight:900, color:TEXT, lineHeight:1, letterSpacing:"-3px" }}>{price}</div>
@@ -311,8 +311,8 @@ export async function POST(req: NextRequest) {
         <div style={{ display:"flex", position:"relative", width:1080, height:1080, fontFamily:ff, overflow:"hidden" }}>
           <img src={imageData} alt="" style={{ position:"absolute", top:0, left:0, width:1080, height:1080, objectFit:"cover" }} />
           <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, background:"linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.05) 70%, transparent 100%)" }} />
-          <div style={{ display:"flex", position:"absolute", top:40, left:40, backgroundColor:bc.bg, color:bc.text, fontSize:24, fontWeight:700, paddingTop:12, paddingRight:28, paddingBottom:12, paddingLeft:28, borderRadius:6, letterSpacing:"0.06em" }}>{badge.toUpperCase()}</div>
-          {agente ? <div style={{ display:"flex", position:"absolute", top:44, right:40, color:W, fontSize:22, fontWeight:700 }}>{agente}</div> : null}
+          <div style={{ display:"flex", position:"absolute", top:40, right:40, backgroundColor:bc.bg, color:bc.text, fontSize:24, fontWeight:700, paddingTop:12, paddingRight:28, paddingBottom:12, paddingLeft:28, borderRadius:6, letterSpacing:"0.06em" }}>{badge.toUpperCase()}</div>
+          {agente ? <div style={{ display:"flex", position:"absolute", top:100, right:40, color:W, fontSize:22, fontWeight:700 }}>{agente}</div> : null}
           <div style={{ display:"flex", position:"absolute", bottom:110, left:50, right:50, flexDirection:"column" }}>
             <div style={{ display:"flex", fontSize:96, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
             <div style={{ display:"flex", fontSize:34, color:W, opacity:0.85, marginTop:14 }}>{zona}&nbsp;·&nbsp;{specs}</div>
@@ -331,8 +331,8 @@ export async function POST(req: NextRequest) {
         <div style={{ display:"flex", position:"relative", width:1080, height:1920, fontFamily:ff, overflow:"hidden" }}>
           <img src={imageData} alt="" style={{ position:"absolute", top:0, left:0, width:1080, height:1920, objectFit:"cover" }} />
           <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, background:"linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.72) 38%, rgba(0,0,0,0.1) 65%, transparent 100%)" }} />
-          <div style={{ display:"flex", position:"absolute", top:60, left:60, backgroundColor:bc.bg, color:bc.text, fontSize:28, fontWeight:700, paddingTop:14, paddingRight:34, paddingBottom:14, paddingLeft:34, borderRadius:6, letterSpacing:"0.06em" }}>{badge.toUpperCase()}</div>
-          {agente ? <div style={{ display:"flex", position:"absolute", top:64, right:60, color:W, fontSize:26, fontWeight:700 }}>{agente}</div> : null}
+          <div style={{ display:"flex", position:"absolute", top:60, right:60, backgroundColor:bc.bg, color:bc.text, fontSize:28, fontWeight:700, paddingTop:14, paddingRight:34, paddingBottom:14, paddingLeft:34, borderRadius:6, letterSpacing:"0.06em" }}>{badge.toUpperCase()}</div>
+          {agente ? <div style={{ display:"flex", position:"absolute", top:124, right:60, color:W, fontSize:26, fontWeight:700 }}>{agente}</div> : null}
           <div style={{ display:"flex", position:"absolute", bottom:120, left:70, right:70, flexDirection:"column" }}>
             <div style={{ display:"flex", fontSize:118, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-3px" }}>{price}</div>
             <div style={{ display:"flex", fontSize:44, color:W, opacity:0.85, marginTop:22 }}>{zona}</div>
@@ -352,7 +352,7 @@ export async function POST(req: NextRequest) {
         <div style={{ display:"flex", position:"relative", width:1200, height:628, fontFamily:ff, overflow:"hidden" }}>
           <img src={imageData} alt="" style={{ position:"absolute", top:0, left:0, width:1200, height:628, objectFit:"cover" }} />
           <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, bottom:0, background:"linear-gradient(to right, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.82) 55%, rgba(0,0,0,0.96) 100%)" }} />
-          <div style={{ display:"flex", position:"absolute", top:38, left:38, backgroundColor:bc.bg, color:bc.text, fontSize:19, fontWeight:700, paddingTop:9, paddingRight:22, paddingBottom:9, paddingLeft:22, borderRadius:5, letterSpacing:"0.06em" }}>{badge.toUpperCase()}</div>
+          <div style={{ display:"flex", position:"absolute", top:38, right:38, backgroundColor:bc.bg, color:bc.text, fontSize:19, fontWeight:700, paddingTop:9, paddingRight:22, paddingBottom:9, paddingLeft:22, borderRadius:5, letterSpacing:"0.06em" }}>{badge.toUpperCase()}</div>
           <div style={{ display:"flex", position:"absolute", right:56, top:0, bottom:0, width:590, flexDirection:"column", justifyContent:"center" }}>
             <div style={{ display:"flex", fontSize:72, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-2px" }}>{price}</div>
             <div style={{ display:"flex", fontSize:26, color:W, opacity:0.85, marginTop:12 }}>{zona}&nbsp;·&nbsp;{specs}</div>
