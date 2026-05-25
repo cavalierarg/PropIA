@@ -44,6 +44,8 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
 
   const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
 
+  const fechaActual = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const caracteristicas = [data.caracteristica1, data.caracteristica2, data.caracteristica3]
@@ -73,7 +75,9 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
   ].filter(Boolean).join("\n");
 
   const prompt = isPro
-    ? `Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre. Tu texto posiciona bien en buscadores y persuade al comprador a contactar.
+    ? `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
+
+Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre. Tu texto posiciona bien en buscadores y persuade al comprador a contactar.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
 
@@ -105,7 +109,9 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
   "version_corta": "texto completo versión corta",
   "version_larga": "texto completo versión larga"
 }`
-    : `Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre.
+    : `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
+
+Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
 

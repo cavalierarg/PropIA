@@ -113,14 +113,17 @@ export async function buscarFormatosTrending(
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const propiedad = buildPropiedadStr(data);
+  const fechaActual = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  const prompt = `Sos un experto en marketing inmobiliario y video content para Instagram Reels y TikTok. Investigá con web search cuáles son los formatos de video que están generando más engagement para el sector inmobiliario en Instagram y TikTok en este momento.
+  const prompt = `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
+
+Sos un experto en marketing inmobiliario y video content para Instagram Reels y TikTok. Investigá con web search cuáles son los formatos de video que están generando más engagement para el sector inmobiliario en Instagram y TikTok en este momento.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
 
 DATOS: Usá únicamente los datos proporcionados. No inventes ni asumas características que no fueron especificadas.
 
-Buscá información sobre: "real estate reels trends 2025", "trending real estate video formats instagram tiktok", "viral real estate content ideas 2025".
+Buscá información sobre: "real estate reels trends ${new Date().getFullYear()}", "trending real estate video formats instagram tiktok ${new Date().getFullYear()}", "viral real estate content ideas ${new Date().getFullYear()}", "contenido inmobiliario viral instagram ${new Date().getFullYear()}".
 
 Luego elegí los 3 formatos más efectivos y adaptálos para esta propiedad específica:
 ${propiedad}
@@ -197,8 +200,11 @@ export async function generarGuion(
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const propiedad = buildPropiedadStr(data);
+  const fechaActualGuion = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  const prompt = `Sos un director de contenido especialista en video marketing inmobiliario. Generá un guion completo y detallado para un Reel de Instagram usando el siguiente formato trending.
+  const prompt = `La fecha actual es ${fechaActualGuion}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
+
+Sos un director de contenido especialista en video marketing inmobiliario. Generá un guion completo y detallado para un Reel de Instagram usando el siguiente formato trending.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
 
@@ -211,10 +217,10 @@ PROPIEDAD:
 ${propiedad}
 
 INSTRUCCIONES PARA EL REEL (30-60 segundos total, 4-6 escenas):
-- Escena 1: Hook de 3-5 segundos que detenga el scroll inmediatamente — pregunta directa, dato sorprendente o afirmación polémica relacionada a la propiedad
+- Escena 1: Hook de 3-5 segundos que detenga el scroll inmediatamente. Elegí UNO de estos estilos según cuál sea más efectivo para esta propiedad específica — NO uses siempre preguntas. Estilos disponibles: Hook de dato impactante (ej: 'Este depto en Palermo vale menos que un auto 0km'), Hook de revelación (ej: 'Te muestro algo que muy poca gente sabe de esta zona'), Hook de controversia (ej: 'Esta es la propiedad que todos quieren pero nadie se anima a comprar'), Hook de urgencia (ej: 'Quedan 48 horas para ver esta propiedad antes de que se venda'), Hook de curiosidad (ej: 'Entrá y fijate por qué este precio no tiene sentido'), Hook narrativo (ej: 'Hace 3 meses este lugar estaba abandonado. Hoy vale esto'), Hook de beneficio directo (ej: 'Comprás esto hoy y en 2 años duplicaste tu inversión'). Variá el estilo según la propiedad — nunca uses el mismo tipo de hook dos veces seguidas.
 - Cada escena especifica exactamente qué decir (palabras concretas, tono natural como si lo dijera el agente), qué filmar y cómo encuadrar la cámara, duración en segundos, y texto superpuesto en pantalla (si aplica)
 - Ritmo dinámico, cortes cada 5-10 segundos
-- CTA claro y directo en la última escena
+- Última escena — CTA potente y variado: elegí UNO de estos estilos — nunca uses el genérico 'Contactame' o 'Escribime': CTA de escasez (ej: 'Solo atiendo a los primeros 3 interesados esta semana'), CTA de exclusividad (ej: 'Mandame un mensaje con la palabra PALERMO y te paso los detalles que no puse acá'), CTA de beneficio (ej: 'Escribime hoy y te consigo la visita antes de que salga al mercado'), CTA de curiosidad (ej: 'Si querés saber el precio real mandame un DM — no lo puse acá a propósito'), CTA social (ej: 'Guardá este video si conocés a alguien que esté buscando en esta zona'), CTA de urgencia (ej: 'Las consultas cierran el viernes — después de eso ya tiene dueño'). El CTA tiene que sentirse natural, no forzado, y coherente con el hook elegido.
 - Sin guión de locutor formal — tiene que sonar espontáneo y auténtico
 
 INSTRUCCIONES PARA LA STORY (3 slides complementarios al Reel):
