@@ -49,7 +49,15 @@
       "PowerShell(git fetch *)",
       "PowerShell($bytes = [System.IO.File]::ReadAllBytes\\(\".git\\\\packed-refs\"\\); Write-Host \"Bytes total: $\\($bytes.Length\\)\"; $text = [System.Text.Encoding]::UTF8.GetString\\($bytes\\); Write-Host \"---\"; Write-Host $text; Write-Host \"---\")",
       "PowerShell(git rebase *)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\valen\\\\saas-template\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(npm list *)",
+      "Bash(vercel *)",
+      "Bash(npm i *)",
+      "Bash(xargs grep -l \"subscriptions.*table\\\\|CREATE.*subscriptions\")",
+      "Bash(Get-Content .env.local)",
+      "Bash(Select-String \"SUPABASE\")"
     ]
   }
 }
