@@ -98,7 +98,7 @@ export default function ReelsContent() {
 
   useEffect(() => {
     getUserPlan().then((plan) => {
-      setIsPro(plan === "pro");
+      setIsPro(plan === "pro" || plan === "pro_max");
       setPlanChecked(true);
     });
     getUserProfile().then((profile) => {

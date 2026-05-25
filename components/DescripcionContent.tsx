@@ -71,7 +71,7 @@ export default function DescripcionContent() {
     : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
 
   useEffect(() => {
-    getUserPlan().then((plan) => setIsPro(plan === "pro"));
+    getUserPlan().then((plan) => setIsPro(plan === "pro" || plan === "pro_max"));
     getUserProfile().then((profile) => {
       setForm((prev) => ({
         ...prev,

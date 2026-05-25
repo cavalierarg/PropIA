@@ -53,7 +53,7 @@ export default function CalendarioContent() {
 
   useEffect(() => {
     getUserPlan().then((plan) => {
-      setIsPro(plan === "pro");
+      setIsPro(plan === "pro" || plan === "pro_max");
       setPlanChecked(true);
     });
   }, []);
