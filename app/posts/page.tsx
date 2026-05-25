@@ -1,9 +1,26 @@
 import { Suspense } from "react";
+import { auth } from "@clerk/nextjs/server";
 import PropertyForm from "@/components/PropertyForm";
+import OnboardingBanner from "@/components/OnboardingBanner";
+import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
+import { getUsage } from "@/lib/actions/usage.actions";
 
-export default function GenerarPostsPage() {
+export default async function GenerarPostsPage() {
+  const { userId } = await auth();
+
+  let showBanner = false;
+  if (userId) {
+    const [onboarding, usage] = await Promise.all([
+      getOnboardingStatus(),
+      getUsage(),
+    ]);
+    showBanner = onboarding.completed && usage.count === 0;
+  }
+
   return (
     <main className="flex flex-col gap-6 py-6 sm:gap-8 sm:py-8">
+      {showBanner && <OnboardingBanner />}
+
       <section className="flex flex-col gap-2 sm:gap-3">
         <h1 className="text-2xl font-bold text-[#0f3460] sm:text-3xl lg:text-4xl leading-tight">
           Generador de Posts Inmobiliarios

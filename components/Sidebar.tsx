@@ -81,7 +81,7 @@ export default function Sidebar({ plan, firstName, usageCount, usageLimit, isPro
       </div>
 
       {/* User info */}
-      <div className="px-4 py-3.5 border-b border-[#e2e8f0] flex items-center gap-3 shrink-0">
+      <div id="sidebar-plan-badge" className="px-4 py-3.5 border-b border-[#e2e8f0] flex items-center gap-3 shrink-0">
         <UserButton />
         <div className="min-w-0 flex flex-col gap-1">
           <p className="text-sm font-semibold text-[#0f3460] truncate leading-none">{firstName}</p>
@@ -101,6 +101,13 @@ export default function Sidebar({ plan, firstName, usageCount, usageLimit, isPro
             <Link
               key={item.href}
               href={item.href}
+              id={
+                item.href === "/posts"
+                  ? "nav-generar-posts"
+                  : item.href === "/mis-propiedades"
+                  ? "nav-mis-propiedades"
+                  : undefined
+              }
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive
                   ? "bg-[#00c9c9]/10 text-[#0f3460] font-semibold"

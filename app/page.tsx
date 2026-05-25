@@ -19,6 +19,9 @@ import {
 } from "lucide-react";
 import LandingPage from "@/components/LandingPage";
 import { Greeting } from "@/components/Greeting";
+import OnboardingChecklist, { type ChecklistItem } from "@/components/OnboardingChecklist";
+import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
+import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -125,13 +128,44 @@ export default async function DashboardPage() {
   const user = await currentUser();
   const firstName = user?.firstName ?? "Usuario";
 
-  const [usage, allProperties] = await Promise.all([
+  const [usage, allProperties, onboarding, agentProfile] = await Promise.all([
     getUsage(),
     getUserProperties(),
+    getOnboardingStatus(),
+    getAgentProfile(),
   ]);
 
   const recentProperties = allProperties.slice(0, 3);
   const totalProperties = allProperties.length;
+
+  const checklistItems: ChecklistItem[] = onboarding.completed
+    ? [
+        {
+          id: "primer_post",
+          label: "Generá tu primer post",
+          done: usage.count > 0,
+          href: "/posts",
+        },
+        {
+          id: "propiedad_guardada",
+          label: "Guardá una propiedad",
+          done: totalProperties > 0,
+          href: "/posts",
+        },
+        {
+          id: "calendario_visitado",
+          label: "Explorá el Calendario de Contenido",
+          done: !!onboarding.steps.calendario_visitado,
+          href: "/calendario",
+        },
+        {
+          id: "perfil_completado",
+          label: "Completá tu perfil de marca",
+          done: !!agentProfile.perfil_completado,
+          href: "/perfil",
+        },
+      ]
+    : [];
 
   const checkoutUrl = `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? ""}?checkout[custom][user_id]=${userId}`;
 
@@ -212,6 +246,11 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
+
+      {/* ── PRIMEROS PASOS ── */}
+      {checklistItems.length > 0 && (
+        <OnboardingChecklist items={checklistItems} />
+      )}
 
       {/* ── HERRAMIENTAS ── */}
       <section>

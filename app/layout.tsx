@@ -11,6 +11,8 @@ import { Toaster } from "sonner";
 import { getUserPlan } from "@/lib/actions/subscription.actions";
 import { getUsage } from "@/lib/actions/usage.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
+import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
+import OnboardingModal from "@/components/OnboardingModal";
 import "./globals.css";
 
 const inter = Inter({
@@ -43,11 +45,12 @@ export default async function RootLayout({
       pathname.startsWith(p)
     );
 
-    const [user, plan, usage, agentProfile] = await Promise.all([
+    const [user, plan, usage, agentProfile, onboarding] = await Promise.all([
       currentUser(),
       getUserPlan(),
       getUsage(),
       skipProfileCheck ? Promise.resolve({ perfil_completado: true }) : getAgentProfile(),
+      getOnboardingStatus(),
     ]);
 
     if (!skipProfileCheck && !agentProfile.perfil_completado) {
@@ -63,6 +66,7 @@ export default async function RootLayout({
       usageLimit: usage.limit,
       isPro: usage.isPro,
       checkoutUrl,
+      onboardingCompleted: onboarding.completed,
     };
   }
 
@@ -75,7 +79,7 @@ export default async function RootLayout({
               <Sidebar {...sidebarProps} />
               <div className="flex-1 flex flex-col lg:pl-60 min-w-0">
                 <MobileNav plan={sidebarProps.plan} checkoutUrl={sidebarProps.checkoutUrl} />
-                <div className="flex-1">
+                <div id="main-content" className="flex-1">
                   {children}
                 </div>
               </div>
@@ -85,6 +89,12 @@ export default async function RootLayout({
               <Navbar />
               {children}
             </>
+          )}
+          {userId && sidebarProps && !sidebarProps.onboardingCompleted && (
+            <OnboardingModal
+              firstName={sidebarProps.firstName}
+              plan={sidebarProps.plan}
+            />
           )}
           <Toaster richColors position="bottom-right" />
         </body>

@@ -1,6 +1,8 @@
 import CalendarioContent from "@/components/CalendarioContent";
+import { updateOnboardingStep } from "@/lib/actions/onboarding.actions";
 
-export default function CalendarioPage() {
+export default async function CalendarioPage() {
+  await updateOnboardingStep("calendario_visitado");
   return (
     <main className="flex flex-col gap-6 py-6 sm:gap-8 sm:py-8">
       <section className="flex flex-col gap-2 sm:gap-3">
