@@ -138,7 +138,7 @@ export async function generarCalendario(data: {
     .eq("user_id", userId)
     .maybeSingle();
 
-  const isPro = subData?.plan === "pro" && subData?.status === "active";
+  const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 

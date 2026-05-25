@@ -27,7 +27,7 @@ export async function getUsage(): Promise<{
     .eq("user_id", userId)
     .maybeSingle();
 
-  const isPro = subData?.plan === "pro" && subData?.status === "active";
+  const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
 
   if (isPro) {
     return { count: 0, remaining: -1, limit: -1, isPro: true };

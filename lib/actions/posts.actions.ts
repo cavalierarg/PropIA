@@ -72,7 +72,7 @@ export const generarPosts = async (data: PropertyData): Promise<ResultadoGenerac
     .eq("user_id", userId)
     .maybeSingle();
 
-  const isPro = subData?.plan === "pro" && subData?.status === "active";
+  const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
 
   const { data: usageData } = await supabase
     .from("usage")

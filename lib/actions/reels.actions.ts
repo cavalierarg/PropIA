@@ -70,7 +70,7 @@ async function getIsPro(userId: string): Promise<boolean> {
     .select("plan, status")
     .eq("user_id", userId)
     .maybeSingle();
-  return data?.plan === "pro" && data?.status === "active";
+  return (data?.plan === "pro" || data?.plan === "pro_max") && data?.status === "active";
 }
 
 function buildPropiedadStr(data: PropertyInput): string {
