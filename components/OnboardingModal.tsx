@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { X, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 import { completeOnboarding } from "@/lib/actions/onboarding.actions";
+import { trackEvent } from "@/lib/meta-pixel";
 import "driver.js/dist/driver.css";
 
 interface OnboardingModalProps {
@@ -42,6 +43,10 @@ const TOUR_STEPS = [
 
 export default function OnboardingModal({ firstName, plan }: OnboardingModalProps) {
   const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    trackEvent("CompleteRegistration");
+  }, []);
 
   const planDescription =
     plan === "free"

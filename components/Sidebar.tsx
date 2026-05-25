@@ -19,6 +19,7 @@ import {
   BarChart2,
   GalleryHorizontal,
 } from "lucide-react";
+import { trackEvent } from "@/lib/meta-pixel";
 
 type Plan = "free" | "pro" | "pro_max";
 
@@ -161,6 +162,7 @@ export default function Sidebar({ plan, firstName, usageCount, usageLimit, isPro
               href={checkoutUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackEvent("InitiateCheckout")}
               className="flex items-center justify-center gap-1.5 w-full bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-bold text-xs py-2.5 rounded-lg transition-colors shadow-sm"
             >
               <Sparkles className="w-3.5 h-3.5" />

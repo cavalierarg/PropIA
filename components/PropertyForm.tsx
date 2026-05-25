@@ -15,6 +15,8 @@ import PostsSkeleton from "@/components/PostsSkeleton";
 import { ZapIcon, LogInIcon, SparklesIcon, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { trackEvent } from "@/lib/meta-pixel";
+import { useRef } from "react";
 
 const MONTHLY_LIMIT = 10;
 
@@ -74,8 +76,10 @@ export default function PropertyForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<ErrorGeneracion | "CAMPOS_INCOMPLETOS" | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [usageLimit, setUsageLimit] = useState<number>(5);
   const [isPro, setIsPro] = useState(false);
   const [unauthenticated, setUnauthenticated] = useState(false);
+  const hasTrackedLead = useRef(false);
 
   const isRegenerando = searchParams.get("regenerar") === "1";
 
@@ -87,6 +91,7 @@ export default function PropertyForm() {
     getUsage().then((usage) => {
       setIsPro(usage.isPro);
       setRemaining(usage.isPro ? null : usage.remaining);
+      setUsageLimit(usage.limit);
     });
     getUserProfile().then((profile) => {
       setForm((prev) => ({
@@ -139,6 +144,12 @@ export default function PropertyForm() {
       }
 
       const { posts: newPosts, recomendaciones: newRecs, remaining: newRemaining, isPro: newIsPro } = result;
+
+      if (!newIsPro && remaining === usageLimit && !hasTrackedLead.current) {
+        trackEvent("Lead");
+        hasTrackedLead.current = true;
+      }
+
       setPosts(newPosts);
       setRecomendaciones(newRecs);
       setIsPro(newIsPro);
@@ -241,7 +252,7 @@ export default function PropertyForm() {
             asChild
             className="w-full sm:w-auto sm:self-start h-11 sm:h-10 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white"
           >
-            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("InitiateCheckout")} className="flex items-center gap-2">
               <SparklesIcon className="w-4 h-4" />
               Upgrade a PRO — generaciones ilimitadas
             </a>

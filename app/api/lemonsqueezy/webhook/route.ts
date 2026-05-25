@@ -67,6 +67,29 @@ export async function POST(req: NextRequest) {
     }
 
     console.log("[webhook] Usuario", userId, "actualizado a", plan.toUpperCase());
+
+    const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+    const accessToken = process.env.META_PIXEL_ACCESS_TOKEN;
+    if (pixelId && accessToken) {
+      const value = plan === "pro_max" ? 59 : 29;
+      await fetch(
+        `https://graph.facebook.com/v21.0/${pixelId}/events?access_token=${accessToken}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            data: [
+              {
+                event_name: "Purchase",
+                event_time: Math.floor(Date.now() / 1000),
+                action_source: "website",
+                custom_data: { currency: "USD", value },
+              },
+            ],
+          }),
+        }
+      ).catch((e) => console.error("[pixel] Error Conversions API:", e));
+    }
   } else if (
     eventName === "subscription_cancelled" ||
     eventName === "subscription_expired" ||

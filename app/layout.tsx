@@ -13,6 +13,7 @@ import { getUsage } from "@/lib/actions/usage.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import OnboardingModal from "@/components/OnboardingModal";
+import MetaPixelScript from "@/components/MetaPixelScript";
 import "./globals.css";
 
 const inter = Inter({
@@ -95,6 +96,9 @@ export default async function RootLayout({
               firstName={sidebarProps.firstName}
               plan={sidebarProps.plan}
             />
+          )}
+          {process.env.NEXT_PUBLIC_META_PIXEL_ID && (
+            <MetaPixelScript pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID} />
           )}
           <Toaster richColors position="bottom-right" />
         </body>

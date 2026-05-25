@@ -22,6 +22,7 @@ import { Greeting } from "@/components/Greeting";
 import OnboardingChecklist, { type ChecklistItem } from "@/components/OnboardingChecklist";
 import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
+import { UpgradeButton } from "@/components/UpgradeLink";
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -229,15 +230,7 @@ export default async function DashboardPage() {
               />
             </div>
             {usage.remaining === 0 ? (
-              <a
-                href={checkoutUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                Alcanzaste el límite · Upgrade a PRO
-              </a>
+              <UpgradeButton href={checkoutUrl} />
             ) : (
               <p className="text-xs text-slate-400">
                 Tenés {usage.remaining} generacion{usage.remaining !== 1 ? "es" : ""} disponible{usage.remaining !== 1 ? "s" : ""}
