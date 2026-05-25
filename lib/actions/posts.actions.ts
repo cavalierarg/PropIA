@@ -130,30 +130,34 @@ ${extras ? extras + "\n" : ""}- Destacados: ${caracteristicas || "ninguno especi
 
 CREÁ EXACTAMENTE 5 POSTS ORIENTADOS A VENTAS, con el tono preciso de cada red:
 
+HOOKS — Para la primera línea de cada post, elegí el estilo más efectivo para esta propiedad específica — NO uses siempre preguntas. Estilos disponibles: Hook de dato impactante (ej: 'Este depto en Palermo vale menos que un auto 0km'), Hook de revelación (ej: 'Lo que muy poca gente sabe de esta zona'), Hook de controversia (ej: 'La propiedad que todos quieren pero nadie se anima a comprar'), Hook de urgencia (ej: '48 horas para verla antes de que se venda'), Hook de curiosidad (ej: 'Por qué este precio no tiene sentido — y por qué eso es bueno para vos'), Hook narrativo (ej: 'Hace 3 meses esto estaba abandonado. Hoy vale esto'), Hook de beneficio directo (ej: 'Comprás esto hoy y en 2 años duplicaste tu inversión'). Variá el estilo entre los 5 posts — nunca uses el mismo tipo de hook dos veces.
+
+CTAs — Para el llamado a la acción de cada post, elegí el estilo más coherente con el hook y la red — nunca uses el genérico 'Contactame' o 'Escribime': CTA de escasez (ej: 'Solo atiendo a los primeros 3 interesados esta semana'), CTA de exclusividad (ej: 'Mandame un mensaje con la palabra PALERMO y te paso los detalles que no puse acá'), CTA de beneficio (ej: 'Escribime hoy y te consigo la visita antes de que salga al mercado'), CTA de curiosidad (ej: 'Si querés saber el precio real mandame un DM — no lo puse acá a propósito'), CTA social (ej: 'Guardá este post si conocés a alguien que esté buscando en esta zona'), CTA de urgencia (ej: 'Las consultas cierran el viernes — después de eso ya tiene dueño'). Si hay WhatsApp del agente, incorporalo en el CTA de forma natural.
+
 📸 2 POSTS PARA INSTAGRAM (visual y emocional):
-- Primera línea gancho que detenga el scroll: máx. 10 palabras de alto impacto
+- Primera línea: hook elegido según los estilos de arriba, máx. 10 palabras
 - Hacé que el lector imagine vivir o invertir ahí — describí sensaciones y estilo de vida
 - Emojis estratégicos como separadores visuales, no decorativos
 - Destacá exclusividad, smart living o la oportunidad de la zona
-- CTA directa al final: si hay WhatsApp del agente usalo ("Escribinos al [número]"), si no: "Escribinos al DM 📩" / "Consultá precio final ⬇️" / "Agendá tu visita"
+- CTA al final según los estilos de arriba — natural, no forzado
 - 5-8 hashtags relevantes al sector y la ciudad al final
 - Máximo 300 palabras
 
 📘 2 POSTS PARA FACEBOOK (narrativo y persuasivo):
-- Abrí con una pregunta o afirmación que conecte emocionalmente con el lector
+- Primera línea: hook elegido según los estilos de arriba
 - Relatá los beneficios como si describieras un día de vida real en esa propiedad
 - Mencioná ventajas concretas de la zona: conectividad, servicios, revalorización
 - Incluí un dato de valor que ancle la percepción de precio (precio/m², comparativa, potencial de renta)
-- CTA con urgencia moderada: "Consultanos hoy antes de que se vaya" / "Quedan pocas unidades disponibles"
+- CTA al final según los estilos de arriba — coherente con el hook
 - Máximo 400 palabras. Máximo 3 hashtags
 
 💼 1 POST PARA LINKEDIN (ejecutivo, orientado a inversión):
+- Primera línea: hook de dato impactante o beneficio directo — orientado al inversor
 - Enmarcá la propiedad como activo de inversión, no solo como hogar
 - Mencioná potencial de renta estimada, plusvalía de zona o costo por m² vs. mercado
 - Lenguaje financiero accesible: "rendimiento", "plusvalía", "activo tangible", "flujo de caja"
 - Datos precisos generan credibilidad: precio/m², contexto del mercado local
-- Tono ejecutivo y directo, sin exageraciones
-- CTA profesional: "¿Querés más detalles? Escribime al DM" / "Conectemos"
+- CTA profesional según los estilos de arriba — tono ejecutivo, no genérico
 - 2-3 hashtags: #InversionInmobiliaria #RealEstate #Propiedades
 - Máximo 300 palabras
 
