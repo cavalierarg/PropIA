@@ -497,6 +497,7 @@ export default function ReelsContent() {
                 key={fmt.id}
                 formato={fmt}
                 selected={formatoSeleccionado?.id === fmt.id}
+                disabled={loadingGuion}
                 onClick={() =>
                   setFormatoSeleccionado(
                     formatoSeleccionado?.id === fmt.id ? null : fmt
@@ -505,6 +506,11 @@ export default function ReelsContent() {
               />
             ))}
           </div>
+          {loadingGuion && (
+            <p className="text-xs text-amber-600 font-medium">
+              Generando guion... no cambies el formato hasta que termine.
+            </p>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
@@ -562,20 +568,23 @@ function FormatoCard({
   formato,
   selected,
   onClick,
+  disabled,
 }: {
   formato: TrendingFormat;
   selected: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
       className={`text-left border rounded-xl p-4 flex flex-col gap-3 transition-all ${
         selected
           ? "border-[#00d4d4] ring-2 ring-[#00d4d4]/30 bg-[#00d4d4]/5"
-          : "border-[#0f3460]/10 hover:border-[#0f3460]/25 bg-card"
-      }`}
+          : "border-[#0f3460]/10 bg-card"
+      } ${disabled ? "opacity-50 cursor-not-allowed" : !selected ? "hover:border-[#0f3460]/25" : ""}`}
     >
       <div className="flex items-start justify-between gap-2">
         <span className="text-sm font-bold text-[#0f3460] leading-tight">
