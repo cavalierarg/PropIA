@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import sharp from "sharp";
 
 export const runtime = "nodejs";
 
@@ -22,6 +23,55 @@ async function fetchImageAsDataUrl(url: string): Promise<string> {
   const buffer = Buffer.from(await res.arrayBuffer());
   const mime = res.headers.get("content-type") || "image/jpeg";
   return `data:${mime};base64,${buffer.toString("base64")}`;
+}
+
+async function processLogoWithTransparency(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    const inputBuf = Buffer.from(await res.arrayBuffer());
+
+    const { data, info } = await sharp(inputBuf)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    const pixels = new Uint8ClampedArray(data.buffer);
+    const { width, height } = info;
+
+    const corners = [
+      [0, 0], [width - 1, 0],
+      [0, height - 1], [width - 1, height - 1],
+    ] as const;
+
+    let sumR = 0, sumG = 0, sumB = 0;
+    for (const [x, y] of corners) {
+      const i = (y * width + x) * 4;
+      sumR += pixels[i]; sumG += pixels[i + 1]; sumB += pixels[i + 2];
+    }
+    const bgR = Math.round(sumR / 4);
+    const bgG = Math.round(sumG / 4);
+    const bgB = Math.round(sumB / 4);
+
+    const threshold = 30;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (
+        Math.abs(pixels[i] - bgR) < threshold &&
+        Math.abs(pixels[i + 1] - bgG) < threshold &&
+        Math.abs(pixels[i + 2] - bgB) < threshold
+      ) {
+        pixels[i + 3] = 0;
+      }
+    }
+
+    const pngBuf = await sharp(Buffer.from(pixels.buffer), {
+      raw: { width, height, channels: 4 },
+    }).png().toBuffer();
+
+    return `data:image/png;base64,${pngBuf.toString("base64")}`;
+  } catch {
+    return null;
+  }
 }
 
 function formatPrice(precio: string, moneda: string): string {
@@ -86,7 +136,7 @@ export async function POST(req: NextRequest) {
   catch (e) { return NextResponse.json({ error: String(e) }, { status: 400 }); }
 
   const agentLogoData: string | null = agentLogoUrl
-    ? await fetchImageAsDataUrl(agentLogoUrl).catch(() => null)
+    ? await processLogoWithTransparency(agentLogoUrl)
     : null;
 
   // Logo dimensions per format (max 20% of ad width, proportional height)
