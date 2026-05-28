@@ -17,12 +17,9 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-const PRO_MAX_CHECKOUT =
-  'https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d?checkout[custom][plan]=pro_max';
+const PRO_CHECKOUT_REDIRECT = '/checkout-redirect?plan=pro';
+const PRO_MAX_CHECKOUT_REDIRECT = '/checkout-redirect?plan=pro_max';
 
-interface LandingPageProps {
-  checkoutUrl: string;
-}
 
 // ─── Fade-in wrapper con IntersectionObserver ────────────────────────────────
 function FadeIn({
@@ -101,7 +98,7 @@ const TESTIMONIALS = [
 ];
 
 // ─── Componente principal ────────────────────────────────────────────────────
-export default function LandingPage({ checkoutUrl }: LandingPageProps) {
+export default function LandingPage() {
   const lineRef = useRef<HTMLDivElement>(null);
   const stepsRef = useRef<HTMLDivElement>(null);
 
@@ -638,14 +635,12 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
                           </li>
                         ))}
                       </ul>
-                      <a
-                        href={checkoutUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        href={PRO_CHECKOUT_REDIRECT}
                         className="mt-auto block text-center bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-black px-5 py-3 rounded-xl transition-colors text-sm shadow-lg shadow-[#00c9c9]/20"
                       >
                         Probar PRO 7 días gratis
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -686,14 +681,12 @@ export default function LandingPage({ checkoutUrl }: LandingPageProps) {
                       </li>
                     ))}
                   </ul>
-                  <a
-                    href={PRO_MAX_CHECKOUT}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={PRO_MAX_CHECKOUT_REDIRECT}
                     className="mt-auto block text-center bg-[#f59e0b] hover:bg-[#e08e00] text-white font-black px-5 py-3 rounded-xl transition-colors text-sm"
                   >
                     Probar PRO MAX 7 días gratis
-                  </a>
+                  </Link>
                 </div>
               </div>
             </FadeIn>

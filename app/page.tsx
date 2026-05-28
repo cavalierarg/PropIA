@@ -120,10 +120,7 @@ export default async function DashboardPage() {
   const { userId } = await auth();
 
   if (!userId) {
-    const checkoutUrl =
-      process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ??
-      "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2";
-    return <LandingPage checkoutUrl={checkoutUrl} />;
+    return <LandingPage />;
   }
 
   const user = await currentUser();
