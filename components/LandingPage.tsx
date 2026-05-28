@@ -239,8 +239,8 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* ── Columna derecha: mockup — solo mobile ── */}
-            <div className="lg:hidden">
+            {/* ── Columna derecha: mockup — solo desktop ── */}
+            <div className="hidden lg:block lg:w-[54%]">
               <div className="relative" style={{ transform: 'rotate(-1.5deg)' }}>
                 <div className="absolute -inset-10 bg-[#00c9c9]/10 blur-3xl rounded-full pointer-events-none" />
                 <div
