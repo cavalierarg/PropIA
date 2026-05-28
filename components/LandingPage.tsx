@@ -200,8 +200,26 @@ export default function LandingPage() {
                 </a>
               </div>
 
+              {/* Precio visible */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-4">
+                <span className="text-white/50 text-sm">
+                  Plan PRO desde{' '}
+                  <span className="text-white font-bold">$29/mes</span>
+                </span>
+                <span className="text-white/20 hidden sm:inline">·</span>
+                <span className="text-white/50 text-sm flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-[#00c9c9] shrink-0" />
+                  7 días gratis sin tarjeta
+                </span>
+                <span className="text-white/20 hidden sm:inline">·</span>
+                <span className="text-white/50 text-sm flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-[#00c9c9] shrink-0" />
+                  Cancelá cuando quieras
+                </span>
+              </div>
+
               {/* Prueba social */}
-              <div className="flex items-center gap-3 mt-7">
+              <div className="flex items-center gap-3 mt-5">
                 <div className="flex -space-x-2 shrink-0">
                   {(['M', 'L', 'C', 'J'] as const).map((initial, i) => (
                     <div
