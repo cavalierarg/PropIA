@@ -128,8 +128,8 @@ export default function LandingPage() {
         className="relative overflow-hidden"
         style={{
           background: 'linear-gradient(135deg, #0f3460 0%, #0a1628 100%)',
-          paddingTop: 88,
-          paddingBottom: 96,
+          paddingTop: 72,
+          paddingBottom: 72,
         }}
       >
         {/* Decorative blobs */}
@@ -222,7 +222,7 @@ export default function LandingPage() {
             </div>
 
             {/* ── Columna derecha: mockup ── */}
-            <div className="hidden lg:block lg:w-[54%]">
+            <div className="lg:w-[54%]">
               <div className="relative" style={{ transform: 'rotate(-1.5deg)' }}>
                 <div className="absolute -inset-10 bg-[#00c9c9]/10 blur-3xl rounded-full pointer-events-none" />
                 <div
