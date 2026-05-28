@@ -29,10 +29,6 @@ function buildCheckoutUrl(base: string, plan: string, userId?: string | null): s
 
 const PRO_MONTHLY = 29;
 const PRO_MAX_MONTHLY = 59;
-const PRO_ANNUAL_MONTHLY = Math.round(PRO_MONTHLY * 0.8); // $39/mes
-const PRO_MAX_ANNUAL_MONTHLY = Math.round(PRO_MAX_MONTHLY * 0.8); // $79/mes
-const PRO_ANNUAL_SAVINGS = PRO_MONTHLY * 12 - PRO_ANNUAL_MONTHLY * 12;
-const PRO_MAX_ANNUAL_SAVINGS = PRO_MAX_MONTHLY * 12 - PRO_MAX_ANNUAL_MONTHLY * 12;
 
 type FeatureValue = boolean | string;
 
@@ -115,12 +111,8 @@ function FeatureCell({
 }
 
 export default function PricingPage() {
-  const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { user } = useUser();
-
-  const proPrice = isAnnual ? PRO_ANNUAL_MONTHLY : PRO_MONTHLY;
-  const proMaxPrice = isAnnual ? PRO_MAX_ANNUAL_MONTHLY : PRO_MAX_MONTHLY;
 
   const checkoutUrlPro = buildCheckoutUrl(BASE_PRO, "pro", user?.id);
   const checkoutUrlProMax = buildCheckoutUrl(BASE_PRO_MAX, "pro_max", user?.id);
@@ -149,19 +141,14 @@ export default function PricingPage() {
 
           {/* Social proof */}
           <div className="flex items-center gap-2 mt-1 bg-white/8 border border-white/15 rounded-full px-5 py-2">
-            <div className="flex -space-x-1.5">
-              {["#4f7ba4", "#2d6a8f", "#5b8db8", "#3a7aab"].map((c, i) => (
-                <div
-                  key={i}
-                  className="w-6 h-6 rounded-full border-2 border-[#0f3460]"
-                  style={{ background: c }}
-                />
+            <div className="flex gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <StarIcon key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
               ))}
             </div>
             <span className="text-white/80 text-sm font-medium">
-              Más de{" "}
-              <span className="text-[#00c9c9] font-bold">50 agentes</span>{" "}
-              ya usan PropIA
+              <span className="text-white font-bold">5.0</span>
+              {" · "}Garantía de devolución 7 días
             </span>
           </div>
         </div>
@@ -189,7 +176,7 @@ export default function PricingPage() {
           <div className="w-px h-4 bg-slate-200 hidden sm:block" />
           <div className="flex items-center gap-2 text-slate-500 text-sm">
             <UsersRoundIcon className="w-4 h-4 text-[#0f3460] shrink-0" />
-            <span>+50 agentes activos</span>
+            <span>Agentes de Argentina, México y España</span>
           </div>
           <div className="w-px h-4 bg-slate-200 hidden sm:block" />
           <div className="flex items-center gap-1.5 text-slate-500 text-sm">
@@ -207,51 +194,6 @@ export default function PricingPage() {
       <section className="bg-slate-50 py-12 sm:py-16 px-4">
         <div className="max-w-5xl mx-auto">
 
-          {/* Toggle mensual / anual */}
-          <div className="flex items-center justify-center gap-3 mb-10">
-            <span
-              className={`text-sm font-medium transition-colors ${
-                !isAnnual ? "text-[#0f3460]" : "text-slate-400"
-              }`}
-            >
-              Mensual
-            </span>
-
-            <button
-              onClick={() => setIsAnnual((v) => !v)}
-              aria-label="Cambiar entre facturación mensual y anual"
-              className={`relative w-12 h-6 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00c9c9] ${
-                isAnnual ? "bg-[#0f3460]" : "bg-slate-300"
-              }`}
-            >
-              <div
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${
-                  isAnnual ? "translate-x-6" : "translate-x-0"
-                }`}
-              />
-            </button>
-
-            <div className="flex items-center gap-2">
-              <span
-                className={`text-sm font-medium transition-colors ${
-                  isAnnual ? "text-[#0f3460]" : "text-slate-400"
-                }`}
-              >
-                Anual
-              </span>
-              <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
-                −20%
-              </span>
-            </div>
-          </div>
-
-          {isAnnual && (
-            <p className="text-center text-sm text-emerald-600 font-medium -mt-6 mb-8">
-              Ahorrás hasta{" "}
-              <span className="font-bold">${PRO_MAX_ANNUAL_SAVINGS}/año</span>{" "}
-              con el plan anual
-            </p>
-          )}
 
           {/* ── Tarjetas de plan ── */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 items-start">
@@ -329,20 +271,10 @@ export default function PricingPage() {
                   </span>
                   <div className="flex items-baseline gap-1.5 mt-1">
                     <span className="text-4xl font-extrabold text-[#0f3460]">
-                      ${proPrice}
+                      ${PRO_MONTHLY}
                     </span>
                     <span className="text-slate-400 text-base">/mes</span>
-                    {isAnnual && (
-                      <span className="ml-1 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full self-center">
-                        Antes ${PRO_MONTHLY}
-                      </span>
-                    )}
                   </div>
-                  {isAnnual && (
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Ahorrás ${PRO_ANNUAL_SAVINGS}/año
-                    </p>
-                  )}
                   <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
                     Para agentes que publican contenido todos los días.
                   </p>
@@ -403,20 +335,10 @@ export default function PricingPage() {
                   </span>
                   <div className="flex items-baseline gap-1.5 mt-1">
                     <span className="text-4xl font-extrabold text-[#0f3460]">
-                      ${proMaxPrice}
+                      ${PRO_MAX_MONTHLY}
                     </span>
                     <span className="text-slate-400 text-base">/mes</span>
-                    {isAnnual && (
-                      <span className="ml-1 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full self-center">
-                        Antes ${PRO_MAX_MONTHLY}
-                      </span>
-                    )}
                   </div>
-                  {isAnnual && (
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Ahorrás ${PRO_MAX_ANNUAL_SAVINGS}/año
-                    </p>
-                  )}
                   <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
                     Todo el plan PRO más Ads avanzados, Carruseles de Instagram (5 slides 1080×1080 con tu marca) y descarga en ZIP.
                   </p>

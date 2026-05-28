@@ -267,7 +267,7 @@ export default function PropertyForm() {
             Necesitás iniciar sesión para generar posts
           </p>
           <p className="text-sm text-muted-foreground">
-            Creá tu cuenta gratis y accedé a 10 generaciones mensuales.
+            Creá tu cuenta gratis y accedé a 5 generaciones mensuales.
           </p>
           <Button asChild className="w-full sm:w-auto sm:self-start h-11 sm:h-10">
             <Link href="/sign-in" className="flex items-center gap-2">

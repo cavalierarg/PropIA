@@ -48,7 +48,11 @@ export async function POST(req: NextRequest) {
 
   const supabase = createSupabaseAdminClient();
 
-  if (eventName === "order_created" || eventName === "subscription_created") {
+  if (
+    eventName === "order_created" ||
+    eventName === "subscription_created" ||
+    eventName === "subscription_updated"
+  ) {
     const { error } = await supabase
       .from("subscriptions")
       .upsert(

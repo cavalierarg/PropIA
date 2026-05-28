@@ -219,28 +219,28 @@ export default function LandingPage() {
               </div>
 
               {/* Prueba social */}
-              <div className="flex items-center gap-3 mt-5">
-                <div className="flex -space-x-2 shrink-0">
-                  {(['M', 'L', 'C', 'J'] as const).map((initial, i) => (
-                    <div
-                      key={i}
-                      className="w-8 h-8 rounded-full border-2 border-[#0a1628] flex items-center justify-center text-xs font-bold text-white"
-                      style={{ background: i % 2 === 0 ? '#00c9c9' : '#1a4d8f' }}
-                    >
-                      {initial}
-                    </div>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-5">
+                <div className="flex items-center gap-1.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                   ))}
+                  <span className="text-white/60 text-sm ml-1">5.0</span>
                 </div>
-                <p className="text-white/40 text-sm">
-                  Más de{' '}
-                  <span className="text-white/70 font-semibold">100 agentes</span>{' '}
-                  ya usan PropIA en Latinoamérica
-                </p>
+                <div className="w-px h-4 bg-white/15 hidden sm:block" />
+                <div className="flex items-center gap-2 text-white/50 text-sm">
+                  <ShieldCheck className="w-4 h-4 text-[#00c9c9] shrink-0" />
+                  Garantía de devolución 7 días
+                </div>
+                <div className="w-px h-4 bg-white/15 hidden sm:block" />
+                <div className="flex items-center gap-2 text-white/50 text-sm">
+                  <Check className="w-4 h-4 text-[#00c9c9] shrink-0" />
+                  Funciona con Claude AI de Anthropic
+                </div>
               </div>
             </div>
 
-            {/* ── Columna derecha: mockup ── */}
-            <div className="lg:w-[54%]">
+            {/* ── Columna derecha: mockup — solo mobile ── */}
+            <div className="lg:hidden">
               <div className="relative" style={{ transform: 'rotate(-1.5deg)' }}>
                 <div className="absolute -inset-10 bg-[#00c9c9]/10 blur-3xl rounded-full pointer-events-none" />
                 <div
@@ -845,8 +845,8 @@ export default function LandingPage() {
               <h4 className="text-sm font-semibold text-white mb-4">Legal</h4>
               <ul className="space-y-2.5">
                 {[
-                  { label: 'Privacidad', href: '#' },
-                  { label: 'Términos de uso', href: '#' },
+                  { label: 'Privacidad', href: 'mailto:hola@propia.online?subject=Política de privacidad' },
+                  { label: 'Términos de uso', href: 'mailto:hola@propia.online?subject=Términos de uso' },
                   { label: 'Contacto', href: 'mailto:hola@propia.online' },
                 ].map((l) => (
                   <li key={l.label}>
