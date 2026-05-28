@@ -12,6 +12,7 @@ import { saveProperty } from "@/lib/actions/properties.actions";
 import { getUserProfile, saveUserProfile } from "@/lib/actions/user-profile.actions";
 import PostsView from "@/components/PostsView";
 import PostsSkeleton from "@/components/PostsSkeleton";
+import UpgradeModal from "@/components/UpgradeModal";
 import { ZapIcon, LogInIcon, SparklesIcon, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
@@ -79,6 +80,7 @@ export default function PropertyForm() {
   const [usageLimit, setUsageLimit] = useState<number>(5);
   const [isPro, setIsPro] = useState(false);
   const [unauthenticated, setUnauthenticated] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const hasTrackedLead = useRef(false);
 
   const isRegenerando = searchParams.get("regenerar") === "1";
@@ -137,9 +139,14 @@ export default function PropertyForm() {
       const result = await generarPosts({ ...form, amenities });
 
       if (!result.ok) {
-        if (result.error === "LIMIT_REACHED") setRemaining(0);
-        else if (result.error === "UNAUTHENTICATED") setUnauthenticated(true);
-        else setError(result.error);
+        if (result.error === "LIMIT_REACHED") {
+          setRemaining(0);
+          setShowUpgradeModal(true);
+        } else if (result.error === "UNAUTHENTICATED") {
+          setUnauthenticated(true);
+        } else {
+          setError(result.error);
+        }
         return;
       }
 
@@ -175,6 +182,10 @@ export default function PropertyForm() {
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
+
+      {showUpgradeModal && (
+        <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
+      )}
 
       {/* Banner: regenerando desde historial */}
       {isRegenerando && (

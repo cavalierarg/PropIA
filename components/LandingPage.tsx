@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
+import { trackEvent } from '@/lib/meta-pixel';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -101,6 +102,10 @@ const TESTIMONIALS = [
 export default function LandingPage() {
   const lineRef = useRef<HTMLDivElement>(null);
   const stepsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    trackEvent('ViewContent', { content_name: 'Landing', content_category: 'pricing' });
+  }, []);
 
   useEffect(() => {
     const el = stepsRef.current;
@@ -478,9 +483,105 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════════
+          SECCIÓN 3.5 — EJEMPLO DE POST GENERADO
+      ══════════════════════════════════════════════════════════════════════ */}
+      <section
+        style={{ background: '#f7f9fc', paddingTop: 96, paddingBottom: 96 }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <FadeIn className="text-center mb-12">
+            <p className="text-[#00c9c9] text-[11px] font-bold uppercase tracking-[0.2em] mb-4">
+              Resultado real
+            </p>
+            <h2
+              className="font-black text-[#0f3460]"
+              style={{ fontSize: 'clamp(28px, 3.5vw, 44px)', lineHeight: 1.1 }}
+            >
+              Así queda un post generado con PropIA
+            </h2>
+            <p className="text-slate-500 mt-4 text-base max-w-xl mx-auto">
+              Cargás los datos de la propiedad y la IA genera 5 versiones listas para publicar.
+            </p>
+          </FadeIn>
+
+          <FadeIn delay={100}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              {/* Input */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                  Datos ingresados
+                </p>
+                <div className="flex flex-col gap-2.5 text-sm text-slate-600">
+                  {[
+                    { label: 'Propiedad', value: 'Departamento' },
+                    { label: 'Ubicación', value: 'Palermo, Buenos Aires' },
+                    { label: 'Superficie', value: '65 m²' },
+                    { label: 'Precio', value: 'USD 185.000' },
+                    { label: 'Características', value: '2 ambientes · 1 baño · Balcón · Luminoso' },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex gap-2">
+                      <span className="font-semibold text-[#0f3460] min-w-[100px] shrink-0">{label}:</span>
+                      <span>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Output */}
+              <div className="relative bg-white rounded-2xl border border-[#00c9c9]/40 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#0f3460] to-[#00c9c9] flex items-center justify-center shrink-0">
+                    <Sparkles className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <p className="text-xs font-bold text-[#00c9c9] uppercase tracking-widest">
+                    Post generado — Instagram
+                  </p>
+                </div>
+                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                  {`🏠 Oportunidad única en Palermo
+
+65 m² de puro aprovechamiento. Departamento de 2 ambientes con balcón al frente, iluminación natural todo el día y ubicación inmejorable.
+
+✔️ A pasos del transporte
+✔️ Expensas bajas
+✔️ Ideal inversores o primera vivienda
+
+📍 Palermo, Buenos Aires
+💰 USD 185.000
+
+¿Querés conocerlo? Escribime y coordinamos una visita 👇`}
+                </p>
+                <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2">
+                  <span className="text-xs text-slate-400">Generado en</span>
+                  <span className="text-xs font-bold text-[#0f3460]">12 segundos</span>
+                  <span className="ml-auto flex items-center gap-1 text-xs text-slate-400">
+                    <Copy className="w-3.5 h-3.5" />
+                    Listo para copiar
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 text-center">
+              <Link
+                href="/sign-in"
+                className="inline-flex items-center gap-2 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white font-bold px-8 py-4 rounded-2xl text-sm transition-colors shadow-lg"
+              >
+                Generá tu primer post gratis
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <p className="text-xs text-slate-400 mt-3">
+                Sin tarjeta · 5 generaciones gratuitas · Listo en 60 segundos
+              </p>
+            </div>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════════════════════
           SECCIÓN 4 — TESTIMONIALES
       ══════════════════════════════════════════════════════════════════════ */}
-      <section style={{ background: '#f7f9fc', paddingTop: 120, paddingBottom: 120 }}>
+      <section style={{ background: '#fff', paddingTop: 120, paddingBottom: 120 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn className="text-center mb-16">
             <p className="text-[#00c9c9] text-[11px] font-bold uppercase tracking-[0.2em] mb-4">
@@ -840,14 +941,15 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* Legal */}
+            {/* Contacto */}
             <div>
-              <h4 className="text-sm font-semibold text-white mb-4">Legal</h4>
+              <h4 className="text-sm font-semibold text-white mb-4">Contacto</h4>
               <ul className="space-y-2.5">
                 {[
-                  { label: 'Privacidad', href: 'mailto:hola@propia.online?subject=Política de privacidad' },
-                  { label: 'Términos de uso', href: 'mailto:hola@propia.online?subject=Términos de uso' },
-                  { label: 'Contacto', href: 'mailto:hola@propia.online' },
+                  { label: 'cavalierarg@gmail.com', href: 'mailto:cavalierarg@gmail.com' },
+                  { label: '@propia.app', href: 'https://instagram.com/propia.app' },
+                  { label: 'Privacidad', href: 'mailto:cavalierarg@gmail.com?subject=Política de privacidad' },
+                  { label: 'Términos de uso', href: 'mailto:cavalierarg@gmail.com?subject=Términos de uso' },
                 ].map((l) => (
                   <li key={l.label}>
                     <a

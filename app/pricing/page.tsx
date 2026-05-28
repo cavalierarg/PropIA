@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
+import { trackEvent } from "@/lib/meta-pixel";
 import {
   CheckIcon,
   XIcon,
@@ -113,6 +114,10 @@ function FeatureCell({
 export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { user } = useUser();
+
+  useEffect(() => {
+    trackEvent("ViewContent", { content_name: "Pricing", content_category: "pricing" });
+  }, []);
 
   const checkoutUrlPro = buildCheckoutUrl(BASE_PRO, "pro", user?.id);
   const checkoutUrlProMax = buildCheckoutUrl(BASE_PRO_MAX, "pro_max", user?.id);
@@ -585,10 +590,10 @@ export default function PricingPage() {
             <p className="text-sm text-slate-500">
               ¿Tenés otra pregunta? Escribinos a{" "}
               <a
-                href="mailto:hola@propia.online"
+                href="mailto:cavalierarg@gmail.com"
                 className="text-[#0f3460] font-medium underline underline-offset-2"
               >
-                hola@propia.online
+                cavalierarg@gmail.com
               </a>
             </p>
             <Button

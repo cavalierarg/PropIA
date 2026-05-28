@@ -23,6 +23,7 @@ export default async function CheckoutRedirectPage({
   const base = isProMax ? CHECKOUT_PRO_MAX : CHECKOUT_PRO;
   const planParam = isProMax ? "pro_max" : "pro";
 
-  const url = `${base}?checkout[custom][plan]=${planParam}&checkout[custom][user_id]=${userId}`;
+  const successUrl = "https://www.propia.online/payment-success";
+  const url = `${base}?checkout[custom][plan]=${planParam}&checkout[custom][user_id]=${userId}&checkout[success_url]=${encodeURIComponent(successUrl)}`;
   redirect(url);
 }

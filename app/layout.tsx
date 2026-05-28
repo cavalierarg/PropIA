@@ -14,6 +14,7 @@ import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import OnboardingModal from "@/components/OnboardingModal";
 import MetaPixelScript from "@/components/MetaPixelScript";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import "./globals.css";
 
 const inter = Inter({
@@ -100,6 +101,7 @@ export default async function RootLayout({
           {process.env.NEXT_PUBLIC_META_PIXEL_ID && (
             <MetaPixelScript pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID} />
           )}
+          <WhatsAppButton />
           <Toaster richColors position="bottom-right" />
         </body>
       </html>
