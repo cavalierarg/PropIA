@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import {
   CheckIcon,
   XIcon,
@@ -14,10 +15,17 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const CHECKOUT_URL_PRO =
-  "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2?checkout[custom][plan]=pro";
-const CHECKOUT_URL_PRO_MAX =
-  "https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d?checkout[custom][plan]=pro_max";
+const BASE_PRO =
+  "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2";
+const BASE_PRO_MAX =
+  "https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d";
+
+function buildCheckoutUrl(base: string, plan: string, userId?: string | null): string {
+  const params = new URLSearchParams();
+  params.set("checkout[custom][plan]", plan);
+  if (userId) params.set("checkout[custom][user_id]", userId);
+  return `${base}?${params.toString()}`;
+}
 
 const PRO_MONTHLY = 29;
 const PRO_MAX_MONTHLY = 59;
@@ -109,9 +117,13 @@ function FeatureCell({
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const { user } = useUser();
 
   const proPrice = isAnnual ? PRO_ANNUAL_MONTHLY : PRO_MONTHLY;
   const proMaxPrice = isAnnual ? PRO_MAX_ANNUAL_MONTHLY : PRO_MAX_MONTHLY;
+
+  const checkoutUrlPro = buildCheckoutUrl(BASE_PRO, "pro", user?.id);
+  const checkoutUrlProMax = buildCheckoutUrl(BASE_PRO_MAX, "pro_max", user?.id);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -341,7 +353,7 @@ export default function PricingPage() {
                     asChild
                     className="h-11 text-sm font-semibold bg-[#0f3460] hover:bg-[#0f3460]/90 text-white shadow-md"
                   >
-                    <a href={CHECKOUT_URL_PRO} target="_blank" rel="noopener noreferrer">
+                    <a href={checkoutUrlPro} target="_blank" rel="noopener noreferrer">
                       Comenzar prueba gratis 7 días
                     </a>
                   </Button>
@@ -415,7 +427,7 @@ export default function PricingPage() {
                     asChild
                     className="h-11 text-sm font-semibold bg-[#f59e0b] hover:bg-[#e08e00] text-white shadow-md border-0"
                   >
-                    <a href={CHECKOUT_URL_PRO_MAX} target="_blank" rel="noopener noreferrer">
+                    <a href={checkoutUrlProMax} target="_blank" rel="noopener noreferrer">
                       Comenzar prueba gratis 7 días
                     </a>
                   </Button>
@@ -661,7 +673,7 @@ export default function PricingPage() {
               asChild
               className="h-11 px-8 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white font-semibold text-sm"
             >
-              <a href={CHECKOUT_URL_PRO} target="_blank" rel="noopener noreferrer">
+              <a href={checkoutUrlPro} target="_blank" rel="noopener noreferrer">
                 <SparklesIcon className="w-4 h-4 mr-2" />
                 Empezar prueba gratis 7 días
               </a>
