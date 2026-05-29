@@ -32,6 +32,17 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "PropIA — Generador de Posts Inmobiliarios",
   description: "Genera posts para Instagram, Facebook y LinkedIn en segundos con inteligencia artificial.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: { url: "/favicon-180x180.png", sizes: "180x180" },
+    other: [
+      { rel: "manifest-icon-192", url: "/favicon-192x192.png", sizes: "192x192" },
+      { rel: "manifest-icon-512", url: "/favicon-512x512.png", sizes: "512x512" },
+    ],
+  },
 };
 
 export default async function RootLayout({
