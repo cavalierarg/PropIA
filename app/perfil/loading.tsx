@@ -1,0 +1,22 @@
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function Loading() {
+  return (
+    <main className="flex flex-col gap-6 py-6 sm:gap-8 sm:py-8">
+      <section className="flex flex-col gap-3">
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="h-5 w-64 max-w-full" />
+        <div className="h-1 w-16 bg-[#00c9c9]/20 rounded-full" />
+      </section>
+      <div className="flex flex-col gap-4 max-w-xl">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-11 w-full rounded-lg" />
+          </div>
+        ))}
+        <Skeleton className="h-11 w-32 rounded-lg mt-2" />
+      </div>
+    </main>
+  );
+}

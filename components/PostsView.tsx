@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { CheckIcon, CopyIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, DownloadIcon } from "lucide-react";
 import { PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
 
 const COLORES_RED: Record<string, string> = {
@@ -38,6 +38,20 @@ interface PostsViewProps {
 export default function PostsView({ posts, recomendaciones }: PostsViewProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
+  const handleDownload = () => {
+    const content = posts
+      .map((post, i) => `=== ${post.red} — Post ${i + 1} ===\n\n${post.contenido}`)
+      .join("\n\n---\n\n");
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "posts-inmobiliarios.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Posts descargados");
+  };
+
   const handleCopy = async (text: string, index: number) => {
     await navigator.clipboard.writeText(text);
     setCopiedIndex(index);
@@ -58,7 +72,18 @@ export default function PostsView({ posts, recomendaciones }: PostsViewProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:gap-5">
+    <div className="flex flex-col gap-4 sm:gap-5">
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-9 px-4 text-sm gap-2"
+          onClick={handleDownload}
+        >
+          <DownloadIcon className="w-4 h-4" />
+          Descargar todos (.txt)
+        </Button>
+      </div>
       {posts.map((post, index) => (
         <div
           key={index}
@@ -110,3 +135,4 @@ export default function PostsView({ posts, recomendaciones }: PostsViewProps) {
     </div>
   );
 }
+
