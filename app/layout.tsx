@@ -15,6 +15,8 @@ import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import OnboardingModal from "@/components/OnboardingModal";
 import MetaPixelScript from "@/components/MetaPixelScript";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const inter = Inter({
@@ -103,6 +105,8 @@ export default async function RootLayout({
           )}
           <WhatsAppButton />
           <Toaster richColors position="bottom-right" />
+          <Analytics />
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>
