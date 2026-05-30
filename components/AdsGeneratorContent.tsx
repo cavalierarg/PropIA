@@ -35,6 +35,14 @@ const AD_INFO: Record<AdType, { label: string; dims: string }> = {
 };
 const AD_ORDER: AdType[] = ["feed", "story", "banner"];
 
+const COLOR_PRESETS = [
+  { label: "Azul profesional", fondo: "#0f3460", acento: "#00c9c9", texto: "#ffffff" },
+  { label: "Negro elegante",   fondo: "#0a0a0a", acento: "#c9a84c", texto: "#ffffff" },
+  { label: "Verde naturaleza", fondo: "#1a4a2e", acento: "#4caf50", texto: "#ffffff" },
+  { label: "Rojo impacto",     fondo: "#1a0a0a", acento: "#e94560", texto: "#ffffff" },
+  { label: "Blanco moderno",   fondo: "#ffffff", acento: "#0f3460", texto: "#1a1a1a" },
+] as const;
+
 const STYLES: { id: AdStyle; label: string; desc: string; palette: string[] }[] = [
   {
     id: "luxury",
@@ -134,7 +142,9 @@ export default function AdsGeneratorContent({
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
   const [estilo,     setEstilo]     = useState<AdStyle>("moderno");
-  const [colorMarca, setColorMarca] = useState("#0f3460");
+  const [colorFondo,  setColorFondo]  = useState("#0f3460");
+  const [colorAcento, setColorAcento] = useState("#00c9c9");
+  const [colorTexto,  setColorTexto]  = useState("#ffffff");
   const [moneda,     setMoneda]     = useState<string>("USD");
   const [badge,      setBadge]      = useState<string>("En Venta");
 
@@ -154,6 +164,16 @@ export default function AdsGeneratorContent({
   }, [isLoading]);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem("propia_brand_colors");
+      if (saved) {
+        const p = JSON.parse(saved);
+        if (p.colorFondo)  setColorFondo(p.colorFondo);
+        if (p.colorAcento) setColorAcento(p.colorAcento);
+        if (p.colorTexto)  setColorTexto(p.colorTexto);
+      }
+    } catch {}
+
     getAgentLogoUrl().then((url) => {
       if (url) setAgentLogoUrl(url);
     }).catch(() => {});
@@ -162,7 +182,11 @@ export default function AdsGeneratorContent({
       if (profile.whatsapp) setAgenteWhatsapp(profile.whatsapp);
       if (profile.instagram) setAgenteInstagram(profile.instagram);
       if (profile.sitio_web) setAgenteSitioWeb(profile.sitio_web);
-      if (profile.color_marca) setColorMarca(profile.color_marca);
+      try {
+        if (!localStorage.getItem("propia_brand_colors") && profile.color_marca) setColorFondo(profile.color_marca);
+      } catch {
+        if (profile.color_marca) setColorFondo(profile.color_marca);
+      }
     }).catch(() => {});
   }, []);
 
@@ -244,7 +268,7 @@ export default function AdsGeneratorContent({
             body: JSON.stringify({
               type, imageUrl: url, precio, zona, metros, car1, car2, agente,
               dormitorios, banios, cocheras, amenities, agenteWhatsapp,
-              estilo, colorMarca, moneda, badge,
+              estilo, colorMarca: colorFondo, colorAcento, colorTexto, moneda, badge,
               agentLogoUrl: agentLogoUrl ?? undefined,
             }),
           });
@@ -585,7 +609,7 @@ export default function AdsGeneratorContent({
                         <div
                           key={idx}
                           className="w-5 h-5 rounded-full border border-black/10 flex-shrink-0"
-                          style={{ backgroundColor: (showBrand && c === "brand") ? colorMarca : c }}
+                          style={{ backgroundColor: (showBrand && c === "brand") ? colorFondo : c }}
                         />
                       ))}
                     </div>
@@ -611,36 +635,61 @@ export default function AdsGeneratorContent({
             </div>
           </div>
 
-          {/* Color + Moneda + Badge */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
-            {/* Color de marca */}
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium flex items-center gap-1.5">
-                <PaletteIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                Color de marca
-              </Label>
-              <div className="flex items-center gap-3 h-12 border border-input rounded-lg px-3 bg-background">
-                <div
-                  className="w-7 h-7 rounded-full border-2 border-white shadow-sm flex-shrink-0"
-                  style={{ backgroundColor: colorMarca }}
-                />
-                <input
-                  type="color"
-                  value={colorMarca}
-                  onChange={(e) => setColorMarca(e.target.value)}
-                  className="w-0 h-0 opacity-0 absolute"
-                  id="color-picker"
-                />
-                <label htmlFor="color-picker" className="flex-1 text-sm text-muted-foreground cursor-pointer">
-                  {colorMarca.toUpperCase()}
-                </label>
-                <label htmlFor="color-picker" className="text-xs text-[#0f3460] font-medium cursor-pointer hover:underline">
-                  Cambiar
-                </label>
-              </div>
-              <p className="text-[11px] text-muted-foreground">Aplica a acentos y detalles según el estilo</p>
+          {/* Colores del ad */}
+          <div className="flex flex-col gap-3">
+            <Label className="text-sm font-medium flex items-center gap-1.5">
+              <PaletteIcon className="w-3.5 h-3.5 text-muted-foreground" />
+              Colores del ad
+            </Label>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs text-muted-foreground">Presets rápidos:</span>
+              {COLOR_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  title={preset.label}
+                  onClick={() => { setColorFondo(preset.fondo); setColorAcento(preset.acento); setColorTexto(preset.texto); saveColors(preset.fondo, preset.acento, preset.texto); }}
+                  className="w-8 h-8 rounded-full border-2 border-white shadow-md hover:scale-110 transition-transform cursor-pointer overflow-hidden"
+                  style={{ background: `linear-gradient(135deg, ${preset.fondo} 50%, ${preset.acento} 50%)` }}
+                >
+                  <span className="sr-only">{preset.label}</span>
+                </button>
+              ))}
             </div>
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
+              <div className="flex flex-col gap-2 flex-1">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-muted-foreground">Color de fondo</span>
+                  <ColorPickerRow id="cp-fondo" value={colorFondo} onChange={(v) => { setColorFondo(v); saveColors(v, colorAcento, colorTexto); }} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-muted-foreground">Color de acento — precio y botones</span>
+                  <ColorPickerRow id="cp-acento" value={colorAcento} onChange={(v) => { setColorAcento(v); saveColors(colorFondo, v, colorTexto); }} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-muted-foreground">Color de texto</span>
+                  <ColorPickerRow id="cp-texto" value={colorTexto} onChange={(v) => { setColorTexto(v); saveColors(colorFondo, colorAcento, v); }} />
+                </div>
+              </div>
+              <div
+                className="rounded-xl overflow-hidden border border-[#0f3460]/10 flex flex-col shrink-0 w-full sm:w-[280px]"
+                style={{ height: 180, backgroundColor: colorFondo }}
+              >
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "0 16px" }}>
+                  <div style={{ color: colorAcento, fontSize: 26, fontWeight: 900, lineHeight: 1 }}>USD 120.000</div>
+                  <div style={{ color: colorTexto, fontSize: 12 }}>Palermo · 3 dorm · 50 m²</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingBottom: 16 }}>
+                  <div style={{ backgroundColor: colorAcento, color: colorFondo, padding: "6px 16px", borderRadius: 100, fontSize: 11, fontWeight: 700 }}>
+                    Consultá ahora
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Moneda + Badge */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             {/* Moneda */}
             <div className="flex flex-col gap-2">
@@ -820,6 +869,24 @@ export default function AdsGeneratorContent({
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── Color utilities ── */
+function saveColors(fondo: string, acento: string, texto: string) {
+  try {
+    localStorage.setItem("propia_brand_colors", JSON.stringify({ colorFondo: fondo, colorAcento: acento, colorTexto: texto }));
+  } catch {}
+}
+
+function ColorPickerRow({ id, value, onChange }: { id: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center gap-3 h-10 border border-input rounded-lg px-3 bg-background">
+      <div className="w-6 h-6 rounded-full border-2 border-white shadow-sm flex-shrink-0" style={{ backgroundColor: value }} />
+      <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="w-0 h-0 opacity-0 absolute" id={id} />
+      <label htmlFor={id} className="flex-1 text-xs text-muted-foreground cursor-pointer font-mono">{value.toUpperCase()}</label>
+      <label htmlFor={id} className="text-xs text-[#0f3460] font-medium cursor-pointer hover:underline">Cambiar</label>
     </div>
   );
 }

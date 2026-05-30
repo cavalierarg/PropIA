@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import {
   BuildingIcon,
   CheckIcon,
-  PaletteIcon,
   PhoneIcon,
   SparklesIcon,
   UploadCloudIcon,
@@ -388,43 +387,6 @@ export default function PerfilForm({
             );
           })}
         </div>
-      </Card>
-
-      {/* ── Color de marca ────────────────────────── */}
-      <Card
-        title="Color principal de marca"
-        icon={<PaletteIcon className="w-4 h-4 text-[#0f3460]" />}
-      >
-        <div className="flex items-center gap-4 h-12 border border-input rounded-xl px-4 bg-background max-w-xs">
-          <div
-            className="w-8 h-8 rounded-full border-2 border-white shadow-sm shrink-0"
-            style={{ backgroundColor: form.color_marca }}
-          />
-          <input
-            type="color"
-            id="color-marca"
-            value={form.color_marca}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, color_marca: e.target.value }))
-            }
-            className="w-0 h-0 opacity-0 absolute"
-          />
-          <label
-            htmlFor="color-marca"
-            className="flex-1 text-sm text-muted-foreground cursor-pointer"
-          >
-            {form.color_marca.toUpperCase()}
-          </label>
-          <label
-            htmlFor="color-marca"
-            className="text-xs text-[#0f3460] font-semibold cursor-pointer hover:underline"
-          >
-            Cambiar
-          </label>
-        </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          Se usa en los ads generados para acentos y detalles de diseño.
-        </p>
       </Card>
 
       {/* ── Submit ────────────────────────────────── */}

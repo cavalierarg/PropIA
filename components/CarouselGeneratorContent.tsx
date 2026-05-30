@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,6 +19,31 @@ import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 interface Props {
   profile: AgentProfile;
+}
+
+const CAROUSEL_COLOR_PRESETS = [
+  { label: "Azul profesional", fondo: "#0f3460", acento: "#00c9c9", texto: "#ffffff" },
+  { label: "Negro elegante",   fondo: "#0a0a0a", acento: "#c9a84c", texto: "#ffffff" },
+  { label: "Verde naturaleza", fondo: "#1a4a2e", acento: "#4caf50", texto: "#ffffff" },
+  { label: "Rojo impacto",     fondo: "#1a0a0a", acento: "#e94560", texto: "#ffffff" },
+  { label: "Blanco moderno",   fondo: "#ffffff", acento: "#0f3460", texto: "#1a1a1a" },
+] as const;
+
+function carouselSaveColors(fondo: string, acento: string, texto: string) {
+  try {
+    localStorage.setItem("propia_brand_colors", JSON.stringify({ colorFondo: fondo, colorAcento: acento, colorTexto: texto }));
+  } catch {}
+}
+
+function CarouselColorPickerRow({ id, value, onChange }: { id: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center gap-3 h-10 border border-[#e2e8f0] rounded-lg px-3 bg-white">
+      <div className="w-6 h-6 rounded-full border-2 border-white shadow-sm flex-shrink-0" style={{ backgroundColor: value }} />
+      <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="w-0 h-0 opacity-0 absolute" id={id} />
+      <label htmlFor={id} className="flex-1 text-xs text-slate-400 cursor-pointer font-mono">{value.toUpperCase()}</label>
+      <label htmlFor={id} className="text-xs text-[#00c9c9] font-medium cursor-pointer hover:underline">Cambiar</label>
+    </div>
+  );
 }
 
 const SLIDE_LABELS = [
@@ -49,9 +74,24 @@ export default function CarouselGeneratorContent({ profile }: Props) {
   const [cocheras, setCocheras] = useState("");
   const [caracteristicas, setCaracteristicas] = useState<string[]>(["", "", ""]);
 
+  // Colors — editable, pre-loaded from localStorage or profile
+  const [colorFondo,  setColorFondo]  = useState(profile.color_marca ?? "#0f3460");
+  const [colorAcento, setColorAcento] = useState("#00c9c9");
+  const [colorTexto,  setColorTexto]  = useState("#ffffff");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("propia_brand_colors");
+      if (saved) {
+        const p = JSON.parse(saved);
+        if (p.colorFondo)  setColorFondo(p.colorFondo);
+        if (p.colorAcento) setColorAcento(p.colorAcento);
+        if (p.colorTexto)  setColorTexto(p.colorTexto);
+      }
+    } catch {}
+  }, []);
+
   // Agent data (from profile, read-only)
-  const colorMarca = profile.color_marca ?? "#0f3460";
-  const accentColor = "#00c9c9";
   const nombreAgente = profile.nombre_completo ?? "";
   const nombreAgencia = profile.nombre_agencia ?? "";
   const whatsapp = profile.whatsapp ?? "";
@@ -121,8 +161,9 @@ export default function CarouselGeneratorContent({ profile }: Props) {
       banios: banios.trim(),
       cocheras: cocheras.trim(),
       caracteristicas: caracteristicas.filter((c) => c.trim()),
-      colorMarca,
-      accentColor,
+      colorMarca: colorFondo,
+      accentColor: colorAcento,
+      colorTexto,
       nombreAgente,
       nombreAgencia,
       whatsapp,
@@ -337,6 +378,56 @@ export default function CarouselGeneratorContent({ profile }: Props) {
           </div>
         </div>
 
+        {/* Colores del ad */}
+        <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">
+          <h2 className="text-sm font-semibold text-[#0f3460] mb-4">Colores del carrusel</h2>
+          <div className="flex items-center gap-2 flex-wrap mb-4">
+            <span className="text-xs text-slate-400">Presets rápidos:</span>
+            {CAROUSEL_COLOR_PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                title={preset.label}
+                onClick={() => { setColorFondo(preset.fondo); setColorAcento(preset.acento); setColorTexto(preset.texto); carouselSaveColors(preset.fondo, preset.acento, preset.texto); }}
+                className="w-8 h-8 rounded-full border-2 border-white shadow-md hover:scale-110 transition-transform cursor-pointer overflow-hidden"
+                style={{ background: `linear-gradient(135deg, ${preset.fondo} 50%, ${preset.acento} 50%)` }}
+              >
+                <span className="sr-only">{preset.label}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 items-start">
+            <div className="flex flex-col gap-2 flex-1">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-slate-500">Color de fondo</span>
+                <CarouselColorPickerRow id="cc-fondo" value={colorFondo} onChange={(v) => { setColorFondo(v); carouselSaveColors(v, colorAcento, colorTexto); }} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-slate-500">Color de acento — precio y botones</span>
+                <CarouselColorPickerRow id="cc-acento" value={colorAcento} onChange={(v) => { setColorAcento(v); carouselSaveColors(colorFondo, v, colorTexto); }} />
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-slate-500">Color de texto</span>
+                <CarouselColorPickerRow id="cc-texto" value={colorTexto} onChange={(v) => { setColorTexto(v); carouselSaveColors(colorFondo, colorAcento, v); }} />
+              </div>
+            </div>
+            <div
+              className="rounded-xl overflow-hidden border border-[#e2e8f0] flex flex-col shrink-0 w-full sm:w-[280px]"
+              style={{ height: 180, backgroundColor: colorFondo }}
+            >
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "0 16px" }}>
+                <div style={{ color: colorAcento, fontSize: 26, fontWeight: 900, lineHeight: 1 }}>USD 120.000</div>
+                <div style={{ color: colorTexto, fontSize: 12 }}>Palermo · 3 dorm · 50 m²</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingBottom: 16 }}>
+                <div style={{ backgroundColor: colorAcento, color: colorFondo, padding: "6px 16px", borderRadius: 100, fontSize: 11, fontWeight: 700 }}>
+                  Consultá ahora
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Agent data (read-only) */}
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">
           <div className="flex items-center justify-between mb-4">
@@ -364,13 +455,6 @@ export default function CarouselGeneratorContent({ profile }: Props) {
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Instagram</span>
               <span className="text-sm text-slate-700">{instagram ? `@${instagram.replace(/^@/, "")}` : <span className="text-slate-300 italic">Sin configurar</span>}</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">Color de marca</span>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full border border-[#e2e8f0]" style={{ backgroundColor: colorMarca }} />
-                <span className="text-sm text-slate-700 font-mono">{colorMarca}</span>
-              </div>
             </div>
           </div>
         </div>

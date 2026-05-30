@@ -790,7 +790,7 @@ export default function LandingPage() {
                       { text: 'Todo lo del plan PRO', gold: false },
                       { text: 'Ads avanzados: hasta 3 fotos simultáneas', gold: true },
                       { text: 'Carruseles IG: 5 slides 1080×1080 con tu marca', gold: true },
-                      { text: 'Selector de color de marca completo', gold: true },
+                      { text: 'Paleta de 3 colores por ad: fondo, acento y texto', gold: true },
                       { text: 'Descarga en ZIP de todos los formatos', gold: true },
                       { text: 'Publicación directa a Instagram y Facebook (próx.)', gold: true },
                     ].map(({ text, gold }) => (

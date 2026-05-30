@@ -153,7 +153,7 @@ export default async function SubscriptionPage() {
               { text: "Todo lo del plan PRO", gold: false },
               { text: "Ads avanzados: hasta 3 fotos", gold: true },
               { text: "Carruseles IG: 5 slides 1080×1080", gold: true },
-              { text: "Selector de color de marca", gold: true },
+              { text: "Paleta de 3 colores personalizables por ad", gold: true },
               { text: "Descarga en ZIP", gold: true },
             ].map(({ text, gold }) => (
               <li key={text} className="flex items-start gap-2">
