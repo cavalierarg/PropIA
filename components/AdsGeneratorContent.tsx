@@ -23,7 +23,6 @@ import { toast } from "sonner";
 import { LockIcon } from "lucide-react";
 
 type AdType  = "feed" | "story" | "banner";
-type AdStyle = "luxury" | "moderno" | "bold" | "profesional";
 type Phase   = "idle" | "generating" | "complete";
 
 type GeneratedAd = { photoIndex: number; type: AdType; url: string };
@@ -42,33 +41,6 @@ const COLOR_PRESETS = [
   { label: "Rojo impacto",     fondo: "#1a0a0a", acento: "#e94560", texto: "#ffffff" },
   { label: "Blanco moderno",   fondo: "#ffffff", acento: "#0f3460", texto: "#1a1a1a" },
 ] as const;
-
-const STYLES: { id: AdStyle; label: string; desc: string; palette: string[] }[] = [
-  {
-    id: "luxury",
-    label: "Luxury",
-    desc: "Fondo negro, detalles dorados, tipografía elegante",
-    palette: ["#0a0a0a", "#c9a84c", "#ffffff"],
-  },
-  {
-    id: "moderno",
-    label: "Moderno",
-    desc: "Fondo blanco, foto redondeada, diseño minimalista",
-    palette: ["#ffffff", "#111111", "#e5e5e5"],
-  },
-  {
-    id: "bold",
-    label: "Bold",
-    desc: "Foto full con overlay, precio superpuesto enorme",
-    palette: ["#000000", "#ffffff", "#555555"],
-  },
-  {
-    id: "profesional",
-    label: "Profesional",
-    desc: "Fondo de color de marca, franja lateral con foto",
-    palette: ["brand", "#ffffff", "#cccccc"],
-  },
-];
 
 const CURRENCIES = ["USD", "EUR", "ARS"] as const;
 const BADGES = ["En Venta", "Alquiler", "Alquiler temporal", "Oportunidad", "Recién Llegada", "Última Unidad", "Precio Rebajado"] as const;
@@ -141,7 +113,7 @@ export default function AdsGeneratorContent({
   const [logoUploading,    setLogoUploading]    = useState(false);
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [estilo,     setEstilo]     = useState<AdStyle>("moderno");
+  const estilo = "profesional" as const;
   const [colorFondo,  setColorFondo]  = useState("#0f3460");
   const [colorAcento, setColorAcento] = useState("#00c9c9");
   const [colorTexto,  setColorTexto]  = useState("#ffffff");
@@ -301,7 +273,7 @@ export default function AdsGeneratorContent({
   const handleDownload = (url: string, photoIndex: number, type: AdType) => {
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ad-${estilo}-${type}-foto${photoIndex + 1}.png`;
+    a.download = `ad-${type}-foto${photoIndex + 1}.png`;
     a.click();
   };
 
@@ -586,55 +558,6 @@ export default function AdsGeneratorContent({
             <p className="text-sm font-semibold text-[#0f3460]">Diseño del ad</p>
           </div>
 
-          {/* Estilo */}
-          <div className="flex flex-col gap-2.5">
-            <Label className="text-sm font-medium">Estilo de plantilla</Label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {STYLES.map((s) => {
-                const active = estilo === s.id;
-                const showBrand = s.id === "profesional";
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setEstilo(s.id)}
-                    className={`flex flex-col gap-2.5 rounded-xl border-2 p-3.5 text-left transition-all cursor-pointer ${
-                      active
-                        ? "border-[#0f3460] bg-[#0f3460]/5 shadow-sm"
-                        : "border-[#0f3460]/12 bg-card hover:border-[#0f3460]/30 hover:bg-[#0f3460]/3"
-                    }`}
-                  >
-                    <div className="flex gap-1.5">
-                      {s.palette.map((c, idx) => (
-                        <div
-                          key={idx}
-                          className="w-5 h-5 rounded-full border border-black/10 flex-shrink-0"
-                          style={{ backgroundColor: (showBrand && c === "brand") ? colorFondo : c }}
-                        />
-                      ))}
-                    </div>
-                    <div>
-                      <p className={`text-sm font-bold leading-tight ${active ? "text-[#0f3460]" : "text-foreground"}`}>
-                        {s.label}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{s.desc}</p>
-                    </div>
-                    {active && (
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <div className="w-3 h-3 rounded-full bg-[#0f3460] flex items-center justify-center">
-                          <svg width="7" height="5" viewBox="0 0 7 5" fill="none">
-                            <path d="M1 2.5L2.8 4L6 1" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                        <span className="text-[10px] font-semibold text-[#0f3460]">Seleccionado</span>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Colores del ad */}
           <div className="flex flex-col gap-3">
             <Label className="text-sm font-medium flex items-center gap-1.5">
@@ -801,7 +724,7 @@ export default function AdsGeneratorContent({
           <div className="flex flex-col gap-2">
             <h2 className="text-xl font-bold text-[#0f3460] sm:text-2xl">Ads generados</h2>
             <p className="text-sm text-muted-foreground">
-              {ads.length} ad{ads.length !== 1 ? "s" : ""} · Estilo <span className="font-semibold capitalize">{estilo}</span> · listos para Meta Ads.
+              {ads.length} ad{ads.length !== 1 ? "s" : ""} listos para Meta Ads.
             </p>
             <div className="h-1 w-16 bg-[#00c9c9] rounded-full" />
           </div>
