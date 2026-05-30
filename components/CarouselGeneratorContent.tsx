@@ -80,6 +80,19 @@ export default function CarouselGeneratorContent({ profile }: Props) {
   const [colorTexto,  setColorTexto]  = useState("#ffffff");
 
   useEffect(() => {
+    // Pre-fill from "Usar en..." in Mis Propiedades
+    try {
+      const raw = localStorage.getItem("propia_property_prefill");
+      if (raw) {
+        const p = JSON.parse(raw);
+        localStorage.removeItem("propia_property_prefill");
+        if (p.ubicacion) setZona(p.ubicacion);
+        if (p.precio) setPrecio(p.precio);
+        if (p.metrosCuadrados) setMetros(p.metrosCuadrados);
+      }
+    } catch {}
+
+    // Restore saved brand colors
     try {
       const saved = localStorage.getItem("propia_brand_colors");
       if (saved) {

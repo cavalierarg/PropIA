@@ -97,6 +97,25 @@ export default function ReelsContent() {
     : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
 
   useEffect(() => {
+    // Pre-fill from "Usar en..." in Mis Propiedades
+    try {
+      const raw = localStorage.getItem("propia_property_prefill");
+      if (raw) {
+        const p = JSON.parse(raw);
+        localStorage.removeItem("propia_property_prefill");
+        setForm((prev) => ({
+          ...prev,
+          tipoPropiedad: p.tipoPropiedad || prev.tipoPropiedad,
+          ubicacion: p.ubicacion || prev.ubicacion,
+          metrosCuadrados: p.metrosCuadrados || prev.metrosCuadrados,
+          precio: p.precio || prev.precio,
+          caracteristica1: p.caracteristica1 || prev.caracteristica1,
+          caracteristica2: p.caracteristica2 || prev.caracteristica2,
+          caracteristica3: p.caracteristica3 || prev.caracteristica3,
+        }));
+      }
+    } catch {}
+
     getUserPlan().then((plan) => {
       setIsPro(plan === "pro" || plan === "pro_max");
       setPlanChecked(true);

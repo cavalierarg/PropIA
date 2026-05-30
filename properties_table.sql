@@ -20,3 +20,8 @@ ALTER TABLE public.properties ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY users_can_manage_own_properties ON public.properties
   FOR ALL USING (user_id = (auth.jwt() ->> 'sub'));
+
+-- Migration: agregar campo estado (ejecutar si la tabla ya existe)
+ALTER TABLE public.properties
+  ADD COLUMN IF NOT EXISTS estado text DEFAULT 'disponible'
+  CHECK (estado IN ('disponible', 'reservada', 'vendida', 'alquilada'));

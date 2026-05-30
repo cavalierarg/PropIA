@@ -136,6 +136,21 @@ export default function AdsGeneratorContent({
   }, [isLoading]);
 
   useEffect(() => {
+    // Pre-fill from "Usar en..." in Mis Propiedades
+    try {
+      const raw = localStorage.getItem("propia_property_prefill");
+      if (raw) {
+        const p = JSON.parse(raw);
+        localStorage.removeItem("propia_property_prefill");
+        if (p.ubicacion) setZona(p.ubicacion);
+        if (p.precio) setPrecio(p.precio);
+        if (p.metrosCuadrados) setMetros(p.metrosCuadrados);
+        if (p.caracteristica1) setCar1(p.caracteristica1);
+        if (p.caracteristica2) setCar2(p.caracteristica2);
+      }
+    } catch {}
+
+    // Restore saved brand colors
     try {
       const saved = localStorage.getItem("propia_brand_colors");
       if (saved) {

@@ -16,6 +16,8 @@ type Recomendaciones = {
   inversores: Recomendacion;
 };
 
+export type PropertyEstado = "disponible" | "reservada" | "vendida" | "alquilada";
+
 export type SavedProperty = {
   id: string;
   user_id: string;
@@ -29,6 +31,7 @@ export type SavedProperty = {
   posts: Post[];
   recomendaciones: Recomendaciones | null;
   created_at: string;
+  estado: PropertyEstado | null;
 };
 
 export async function saveProperty(data: {
@@ -69,6 +72,39 @@ export async function getUserProperties(): Promise<SavedProperty[]> {
     return [];
   }
   return (data ?? []) as SavedProperty[];
+}
+
+export async function deleteProperty(id: string): Promise<{ ok: boolean }> {
+  const { userId } = await auth();
+  if (!userId) return { ok: false };
+
+  const supabase = createSupabaseClient();
+  const { error } = await supabase
+    .from("properties")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
+
+  if (error) console.error("[properties.actions] Error al eliminar:", error);
+  return { ok: !error };
+}
+
+export async function updatePropertyStatus(
+  id: string,
+  estado: PropertyEstado,
+): Promise<{ ok: boolean }> {
+  const { userId } = await auth();
+  if (!userId) return { ok: false };
+
+  const supabase = createSupabaseClient();
+  const { error } = await supabase
+    .from("properties")
+    .update({ estado })
+    .eq("id", id)
+    .eq("user_id", userId);
+
+  if (error) console.error("[properties.actions] Error al actualizar estado:", error);
+  return { ok: !error };
 }
 
 export async function getProperty(id: string): Promise<SavedProperty | null> {
