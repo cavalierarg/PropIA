@@ -168,3 +168,19 @@ refactor(actions): extraer lógica de generación a helper
 - Hacer cambios quirúrgicos — no reescribir archivos completos
 - Confirmar antes de hacer cambios grandes o destructivos
 - Nunca agregar `Co-Authored-By: Claude` en commits salvo pedido explícito
+
+---
+
+## Equipo de agentes
+
+Este proyecto usa agentes especializados en `.claude/agents/`. Para activar un agente específico, empezá tu mensaje con su prefijo:
+
+| Prefijo | Agente | Área |
+|---------|--------|------|
+| `frontend:`, `diseño:`, `componente:`, `UI:` | frontend.md | Next.js, Tailwind, shadcn/ui |
+| `backend:`, `api:`, `supabase:`, `servidor:` | backend.md | API routes, server actions, DB |
+| `prompt:`, `ia:`, `anthropic:`, `generador:` | ia.md | Prompts de Anthropic, calidad del contenido |
+| `imagen:`, `ad:`, `carrusel:`, `flyer:` | imagenes.md | @vercel/og, sharp, Ads, Carruseles |
+| `negocio:`, `precio:`, `conversión:`, `estrategia:` | negocio.md | Producto, conversión, monetización |
+
+Cada agente tiene su propio contexto y reglas optimizadas para su área.

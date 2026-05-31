@@ -57,7 +57,23 @@
       "Bash(npm i *)",
       "Bash(xargs grep -l \"subscriptions.*table\\\\|CREATE.*subscriptions\")",
       "Bash(Get-Content .env.local)",
-      "Bash(Select-String \"SUPABASE\")"
+      "Bash(Select-String \"SUPABASE\")",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "PowerShell(Invoke-WebRequest -Uri \"https://www.propia.online\" -Method GET -TimeoutSec 15 | Select-Object StatusCode, StatusDescription)",
+      "PowerShell(vercel *)",
+      "WebFetch(domain:www.propia.online)",
+      "PowerShell(Copy-Item *)",
+      "Bash(supabase --version)",
+      "Bash(npx supabase *)",
+      "Bash(psql --version)",
+      "Bash(npx playwright *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); u=d.get\\('url',''\\); t=u.split\\('__clerk_ticket='\\)[1] if '__clerk_ticket=' in u else ''; print\\('TOKEN:', t[:50]\\)\")",
+      "Bash(curl -s -X POST https://api.clerk.com/v1/sign_in_tokens -H 'Authorization: Bearer sk_test_IgLmI38tPROG8PPGarzYqAVYToq8aMpJaprb2vSYLG' -H 'Content-Type: application/json' -d '{\"user_id\":\"user_3DoVsgBc2pxYCfZETxqDG5KHzYk\",\"expires_in_seconds\":600}')",
+      "Read(//c/Users/valen/AppData/Local/Temp/**)",
+      "Bash(Get-ChildItem *)",
+      "PowerShell(Get-ChildItem -Recurse \"C:\\\\Users\\\\valen\\\\.claude\" | Where-Object { -not $_.PSIsContainer } | Select-Object FullName, Length | Select-Object -First 100)",
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 20)"
     ]
   }
 }
