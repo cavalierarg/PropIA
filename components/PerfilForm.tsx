@@ -145,7 +145,8 @@ export default function PerfilForm({
     try {
       const result = await saveAgentProfile(form);
       if (!result.ok) {
-        toast.error("Error al guardar el perfil. Revisá los campos.");
+        const firstError = Object.values(result.errors).flat()[0];
+        toast.error(firstError ?? "Error al guardar el perfil. Intentá de nuevo.");
         return;
       }
       toast.success("Perfil guardado correctamente");

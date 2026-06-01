@@ -42,15 +42,15 @@ export type AgentProfile = {
 const schema = z.object({
   nombre_completo: z.string().max(100).optional(),
   nombre_agencia: z.string().max(100).optional(),
-  whatsapp: z.string().max(30).optional(),
-  email: z.string().email().optional().or(z.literal("")),
+  whatsapp: z.string().max(50).optional(),
+  email: z.string().max(200).optional(),
   instagram: z.string().max(100).optional(),
   sitio_web: z.string().max(200).optional(),
   zona: z.string().max(200).optional(),
   tipos_propiedad: z.array(z.string()).optional(),
   tono_voz: z.enum(["profesional", "amigable", "dinamico"]).optional(),
   logo_url: z.string().optional(),
-  color_marca: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional().or(z.literal("")),
+  color_marca: z.string().max(20).optional(),
 });
 
 export async function getAgentProfile(): Promise<AgentProfile> {
@@ -77,6 +77,7 @@ export async function saveAgentProfile(
 
   const parsed = schema.safeParse(profile);
   if (!parsed.success) {
+    console.error("[saveAgentProfile] Validation errors:", parsed.error.flatten());
     return { ok: false, errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
   }
 
@@ -94,9 +95,13 @@ export async function saveAgentProfile(
       },
       { onConflict: "user_id" }
     );
-    if (error) throw error;
+    if (error) {
+      console.error("[saveAgentProfile] Supabase error:", error);
+      throw error;
+    }
     return { ok: true };
-  } catch {
+  } catch (err) {
+    console.error("[saveAgentProfile] Unexpected error:", err);
     return { ok: false, errors: { _: ["Error al guardar. Intentá de nuevo."] } };
   }
 }
