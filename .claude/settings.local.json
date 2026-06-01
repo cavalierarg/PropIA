@@ -73,7 +73,14 @@
       "Read(//c/Users/valen/AppData/Local/Temp/**)",
       "Bash(Get-ChildItem *)",
       "PowerShell(Get-ChildItem -Recurse \"C:\\\\Users\\\\valen\\\\.claude\" | Where-Object { -not $_.PSIsContainer } | Select-Object FullName, Length | Select-Object -First 100)",
-      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 20)"
+      "PowerShell(npx tsc --noEmit 2>&1 | Select-Object -First 20)",
+      "PowerShell(npx --yes playwright@1.60.0 node -e $script 2>&1)",
+      "PowerShell($script = 'const { chromium } = require\\(\\\\\"playwright\\\\\"\\); \\(async \\(\\) => { const browser = await chromium.launch\\(\\); const page = await browser.newPage\\(\\); await page.setViewportSize\\({ width: 1280, height: 800 }\\); await page.goto\\(\\\\\"https://prop-btz8hs6o8-cavalier.vercel.app\\\\\", { waitUntil: \\\\\"networkidle\\\\\", timeout: 30000 }\\); await page.screenshot\\({ path: \\\\\"hero-prod.png\\\\\" }\\); await browser.close\\(\\); console.log\\(\\\\\"ok\\\\\"\\); }\\)\\(\\);')",
+      "PowerShell(npm list *)",
+      "mcp__plugin_vercel_vercel__get_runtime_logs",
+      "PowerShell(Get-Content .env.local | Select-String \"ANTHROPIC\" -Context 0,2 | ForEach-Object { $_.Line.Length })",
+      "PowerShell($env:ANTHROPIC_API_KEY = \\(Get-Content .env.local | Select-String \"^ANTHROPIC_API_KEY=\" | ForEach-Object { $_.Line -replace \"^ANTHROPIC_API_KEY=\", \"\" }\\); node -e \"const Anthropic = require\\('@anthropic-ai/sdk'\\); const c = new Anthropic\\({ apiKey: process.env.ANTHROPIC_API_KEY }\\); c.messages.create\\({ model: 'claude-sonnet-4-20250514', max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] }\\).then\\(r => console.log\\('OK:', r.content[0].text\\)\\).catch\\(e => console.error\\('ERROR:', e.status, e.message\\)\\)\")",
+      "PowerShell($key = \\(Get-Content .env.local | Select-String \"^ANTHROPIC_API_KEY=\" | ForEach-Object { $_.Line -replace \"^ANTHROPIC_API_KEY=\", \"\" }\\); $env:ANTHROPIC_API_KEY = $key; node -e \"const Anthropic = require\\('@anthropic-ai/sdk'\\); const c = new Anthropic\\({ apiKey: process.env.ANTHROPIC_API_KEY }\\); c.messages.create\\({ model: 'claude-sonnet-4-6', max_tokens: 10, messages: [{ role: 'user', content: 'hola' }] }\\).then\\(r => console.log\\('OK:', r.content[0].text\\)\\).catch\\(e => console.error\\('ERROR:', e.status, e.message\\)\\)\")"
     ]
   }
 }

@@ -14,7 +14,7 @@ Especialista en prompts de Anthropic API. Responsable de toda la integración co
 
 ## Reglas
 
-- Siempre usar modelo `claude-sonnet-4-20250514`
+- Siempre usar modelo `claude-sonnet-4-6`
 - Siempre inyectar fecha actual: `new Date().toLocaleDateString('es-AR', {day:'numeric', month:'long', year:'numeric'})`
 - Nunca hardcodear fechas o años
 - Usar `web_search_20250305` para features de tendencias
