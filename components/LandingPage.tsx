@@ -162,9 +162,8 @@ export default function LandingPage() {
                   letterSpacing: '-0.025em',
                 }}
               >
-                ¿Cuántas horas perdés por semana{' '}
-                <span className="text-[#00c9c9]">escribiendo posts</span>{' '}
-                de propiedades?
+                Generá 5 posts profesionales para tu propiedad{' '}
+                <span className="text-[#00c9c9]">en 60 segundos.</span>
               </h1>
 
               {/* Subtítulo */}
@@ -189,7 +188,7 @@ export default function LandingPage() {
               </p>
 
               {/* Botones */}
-              <div className="flex flex-col sm:flex-row gap-3 mt-10">
+              <div className="flex flex-col items-start sm:items-start gap-3 mt-10">
                 <Link
                   href="/sign-in"
                   className="inline-flex items-center justify-center gap-2 bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-black px-8 py-4 rounded-2xl text-base transition-all duration-200 shadow-xl shadow-[#00c9c9]/25 hover:shadow-[#00c9c9]/40 hover:-translate-y-0.5 whitespace-nowrap"
@@ -199,9 +198,9 @@ export default function LandingPage() {
                 </Link>
                 <a
                   href="#como-funciona"
-                  className="inline-flex items-center justify-center gap-2 text-white font-semibold px-8 py-4 rounded-2xl text-base transition-all duration-200 border border-white/25 hover:border-white/50 hover:bg-white/[0.06]"
+                  className="inline-flex items-center gap-1.5 text-white/50 hover:text-white/80 text-sm transition-colors duration-200"
                 >
-                  Ver cómo funciona
+                  Ver cómo funciona <ArrowRight className="w-3.5 h-3.5" />
                 </a>
               </div>
 
