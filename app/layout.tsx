@@ -75,7 +75,7 @@ export default async function RootLayout({
   }
 
   return (
-    <ClerkProvider>
+    <ClerkProvider afterSignOutUrl="/">
       <html lang="es">
         <body className={`${inter.variable} antialiased`}>
           {userId && sidebarProps ? (
