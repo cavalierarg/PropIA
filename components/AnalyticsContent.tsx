@@ -7,8 +7,6 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
   CartesianGrid,
 } from "recharts";
 import {
@@ -21,7 +19,9 @@ import {
   Sparkles,
   BarChart2,
   Activity,
+  Zap,
 } from "lucide-react";
+import Link from "next/link";
 import type { AnalyticsData } from "@/lib/actions/analytics.actions";
 
 interface Props {
@@ -66,6 +66,9 @@ export default function AnalyticsContent({ data }: Props) {
       : "Igual que el mes anterior";
 
   const maxFeatureCount = Math.max(...featureUsage.map((f) => f.count), 1);
+  const hasNoActivity =
+    featureUsage.every((f) => f.count === 0) &&
+    activityLast7Days.every((d) => d.count === 0);
   const progressPercent =
     generationsLimit && generationsLimit > 0
       ? Math.min(100, Math.round(((generationsLimit - (generationsRemaining ?? 0)) / generationsLimit) * 100))
@@ -154,74 +157,89 @@ export default function AnalyticsContent({ data }: Props) {
         </div>
       </div>
 
-      {/* Charts row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Features más usadas */}
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart2 className="w-4 h-4 text-[#00c9c9]" />
-            <h2 className="text-sm font-semibold text-[#0f3460]">Features más usadas</h2>
+      {/* Charts row or empty state */}
+      {hasNoActivity ? (
+        <div className="bg-white rounded-xl border border-[#e2e8f0] p-10 flex flex-col items-center gap-4 text-center">
+          <div className="p-4 bg-[#00c9c9]/10 rounded-2xl">
+            <Zap className="w-8 h-8 text-[#00c9c9]" />
           </div>
-          {featureUsage.every((f) => f.count === 0) ? (
-            <div className="h-52 flex items-center justify-center text-sm text-slate-400">
-              Todavía no hay actividad registrada
+          <div>
+            <p className="font-semibold text-[#0f3460] text-base">
+              Generá tu primer post para ver tu actividad aquí
+            </p>
+            <p className="text-sm text-slate-500 mt-1">
+              Tus estadísticas aparecerán después de usar PropIA por primera vez.
+            </p>
+          </div>
+          <Link
+            href="/generar-posts"
+            className="inline-flex items-center gap-2 bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-bold px-5 py-2.5 rounded-xl text-sm transition-colors"
+          >
+            <Zap className="w-4 h-4" />
+            Crear mi primer post
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Features más usadas */}
+          <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">
+            <div className="flex items-center gap-2 mb-5">
+              <BarChart2 className="w-4 h-4 text-[#00c9c9]" />
+              <h2 className="text-sm font-semibold text-[#0f3460]">Features más usadas</h2>
             </div>
-          ) : (
+            <div className="space-y-3.5">
+              {featureUsage.map((f) => (
+                <div key={f.feature} className="flex items-center gap-3">
+                  <span className="text-xs text-slate-600 w-36 shrink-0 truncate">{f.feature}</span>
+                  <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-2 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.round((f.count / maxFeatureCount) * 100)}%`,
+                        background: "linear-gradient(90deg, #0f3460, #00c9c9)",
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs font-semibold text-[#0f3460] w-6 text-right tabular-nums">
+                    {f.count}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Actividad últimos 7 días */}
+          <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Activity className="w-4 h-4 text-[#0f3460]" />
+              <h2 className="text-sm font-semibold text-[#0f3460]">Actividad — últimos 7 días</h2>
+            </div>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={featureUsage} layout="vertical" margin={{ left: 8, right: 16 }}>
-                <XAxis type="number" tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} domain={[0, maxFeatureCount]} />
-                <YAxis
-                  type="category"
-                  dataKey="feature"
-                  width={130}
-                  tick={{ fontSize: 11, fill: "#64748b" }}
+              <BarChart data={activityLast7Days} margin={{ left: 0, right: 8, top: 4, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11, fill: "#94a3b8" }}
                   tickLine={false}
                   axisLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "#94a3b8" }}
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={false}
                 />
                 <Tooltip
                   cursor={{ fill: "#f1f5f9" }}
                   contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
-                  formatter={(value) => [value, "usos"]}
+                  formatter={(value) => [value, "generaciones"]}
                 />
-                <Bar dataKey="count" fill="#00c9c9" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="count" fill="#00c9c9" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* Actividad últimos 7 días */}
-        <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity className="w-4 h-4 text-[#0f3460]" />
-            <h2 className="text-sm font-semibold text-[#0f3460]">Actividad — últimos 7 días</h2>
           </div>
-          {activityLast7Days.every((d) => d.count === 0) ? (
-            <div className="h-52 flex items-center justify-center text-sm text-slate-400">
-              Sin actividad en los últimos 7 días
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={activityLast7Days} margin={{ left: 0, right: 16, top: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 12 }}
-                  formatter={(value) => [value, "acciones"]}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#0f3460"
-                  strokeWidth={2}
-                  dot={{ fill: "#00c9c9", r: 4, strokeWidth: 0 }}
-                  activeDot={{ r: 5, fill: "#0f3460" }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
