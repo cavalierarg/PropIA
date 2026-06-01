@@ -2,7 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export type OnboardingStatus = {
   completed: boolean;
@@ -14,7 +14,7 @@ export async function getOnboardingStatus(): Promise<OnboardingStatus> {
   if (!userId) return { completed: true, steps: {} };
 
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseAdminClient();
     const { data } = await supabase
       .from("agent_profiles")
       .select("onboarding_completed, onboarding_steps")
@@ -34,7 +34,7 @@ export async function completeOnboarding(): Promise<void> {
   const { userId } = await auth();
   if (!userId) return;
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const { error } = await supabase.from("agent_profiles").upsert(
     { user_id: userId, onboarding_completed: true, updated_at: new Date().toISOString() },
     { onConflict: "user_id" }
@@ -54,7 +54,7 @@ export async function updateOnboardingStep(step: string): Promise<void> {
   const { userId } = await auth();
   if (!userId) return;
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
 
   const { data } = await supabase
     .from("agent_profiles")
