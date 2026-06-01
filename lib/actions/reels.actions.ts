@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { buildAgentContext, type AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 export type PropertyInput = {
   tipoPropiedad: string;
@@ -108,14 +109,28 @@ export async function buscarFormatosTrending(
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
-  const isPro = await getIsPro(userId);
+  const supabase = createSupabaseClient();
+  const [isPro, { data: profileRow }] = await Promise.all([
+    getIsPro(userId),
+    supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),
+  ]);
   if (!isPro) throw new Error("PRO_REQUIRED");
 
+  const profile: AgentProfile = profileRow ?? {};
+  const { contextBlock, toneInstruction } = buildAgentContext(profile);
+
+  const contactoWhatsapp = data.agenteWhatsapp || profile.whatsapp || "";
+  const contactoInstagram = data.agenteInstagram || profile.instagram || "";
+  const contactoSitioWeb = data.agenteSitioWeb || profile.sitio_web || "";
+  const propiedadData = { ...data, agenteWhatsapp: contactoWhatsapp, agenteInstagram: contactoInstagram, agenteSitioWeb: contactoSitioWeb };
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const propiedad = buildPropiedadStr(data);
+  const propiedad = buildPropiedadStr(propiedadData);
   const fechaActual = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const prompt = `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
+${contextBlock ? `\n${contextBlock}\n` : ""}
+TONO DE VOZ: ${toneInstruction}
 
 Sos un experto en marketing inmobiliario y video content para Instagram Reels y TikTok. Investigá con web search cuáles son los formatos de video que están generando más engagement para el sector inmobiliario en Instagram y TikTok en este momento.
 
@@ -195,14 +210,28 @@ export async function generarGuion(
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
-  const isPro = await getIsPro(userId);
+  const supabase = createSupabaseClient();
+  const [isPro, { data: profileRow }] = await Promise.all([
+    getIsPro(userId),
+    supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),
+  ]);
   if (!isPro) throw new Error("PRO_REQUIRED");
 
+  const profile: AgentProfile = profileRow ?? {};
+  const { contextBlock, toneInstruction } = buildAgentContext(profile);
+
+  const contactoWhatsapp = data.agenteWhatsapp || profile.whatsapp || "";
+  const contactoInstagram = data.agenteInstagram || profile.instagram || "";
+  const contactoSitioWeb = data.agenteSitioWeb || profile.sitio_web || "";
+  const propiedadData = { ...data, agenteWhatsapp: contactoWhatsapp, agenteInstagram: contactoInstagram, agenteSitioWeb: contactoSitioWeb };
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const propiedad = buildPropiedadStr(data);
+  const propiedad = buildPropiedadStr(propiedadData);
   const fechaActualGuion = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const prompt = `La fecha actual es ${fechaActualGuion}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
+${contextBlock ? `\n${contextBlock}\n` : ""}
+TONO DE VOZ: ${toneInstruction}
 
 Sos un director de contenido especialista en video marketing inmobiliario. Generá un guion completo y detallado para un Reel de Instagram usando el siguiente formato trending.
 

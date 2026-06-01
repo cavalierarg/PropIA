@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { buildAgentContext, type AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 const MONTHLY_LIMIT = 10;
 
@@ -56,7 +57,7 @@ export type ErrorGeneracion =
   | "ERROR_FORMATO";
 
 export type ResultadoGeneracion =
-  | { ok: true; posts: PostResult[]; recomendaciones: RecomendacionesResult; remaining: number; isPro: boolean }
+  | { ok: true; posts: PostResult[]; recomendaciones: RecomendacionesResult; remaining: number; isPro: boolean; profileEmpty: boolean }
   | { ok: false; error: ErrorGeneracion };
 
 export const generarPosts = async (data: PropertyData): Promise<ResultadoGeneracion> => {
@@ -66,22 +67,17 @@ export const generarPosts = async (data: PropertyData): Promise<ResultadoGenerac
   const supabase = createSupabaseClient();
   const month = getCurrentMonth();
 
-  const { data: subData } = await supabase
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const [{ data: subData }, { data: usageData }, { data: profileRow }] = await Promise.all([
+    supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
+    supabase.from("usage").select("count").eq("user_id", userId).eq("month", month).maybeSingle(),
+    supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),
+  ]);
 
   const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
-
-  const { data: usageData } = await supabase
-    .from("usage")
-    .select("count")
-    .eq("user_id", userId)
-    .eq("month", month)
-    .maybeSingle();
-
   const currentCount = usageData?.count ?? 0;
+
+  const profile: AgentProfile = profileRow ?? {};
+  const { contextBlock, toneInstruction, profileEmpty } = buildAgentContext(profile);
 
   if (!isPro && currentCount >= MONTHLY_LIMIT) {
     return { ok: false, error: "LIMIT_REACHED" };
@@ -98,6 +94,10 @@ export const generarPosts = async (data: PropertyData): Promise<ResultadoGenerac
     .filter(Boolean)
     .join(", ");
 
+  const contactoWhatsapp = data.agenteWhatsapp || profile.whatsapp || "";
+  const contactoInstagram = data.agenteInstagram || profile.instagram || "";
+  const contactoSitioWeb = data.agenteSitioWeb || profile.sitio_web || "";
+
   const extras = [
     data.dormitorios ? `- Dormitorios: ${data.dormitorios}` : "",
     data.banios ? `- Baños: ${data.banios}` : "",
@@ -106,14 +106,16 @@ export const generarPosts = async (data: PropertyData): Promise<ResultadoGenerac
     data.piso ? `- Piso: ${data.piso}` : "",
     data.expensas ? `- Expensas: ${data.expensas}` : "",
     data.amenities?.length ? `- Amenities: ${data.amenities.join(", ")}` : "",
-    data.agenteWhatsapp ? `- WhatsApp del agente: ${data.agenteWhatsapp}` : "",
-    data.agenteInstagram ? `- Instagram del agente: @${data.agenteInstagram.replace(/^@/, "")}` : "",
-    data.agenteSitioWeb ? `- Sitio web: ${data.agenteSitioWeb}` : "",
+    contactoWhatsapp ? `- WhatsApp del agente: ${contactoWhatsapp}` : "",
+    contactoInstagram ? `- Instagram del agente: @${contactoInstagram.replace(/^@/, "")}` : "",
+    contactoSitioWeb ? `- Sitio web: ${contactoSitioWeb}` : "",
   ].filter(Boolean).join("\n");
 
   const fechaActual = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const prompt = `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
+${contextBlock ? `\n${contextBlock}\n` : ""}
+TONO DE VOZ: ${toneInstruction}
 
 Eres un experto en marketing inmobiliario digital con 10 años de experiencia vendiendo propiedades de alto valor en Latinoamérica. Tu misión es crear posts que generen consultas reales y cierren ventas. Escribís en español neutro válido para México, España y Colombia. Sin regionalismos.
 
@@ -236,5 +238,6 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     recomendaciones: parsed.recomendaciones as RecomendacionesResult,
     remaining: isPro ? -1 : Math.max(0, MONTHLY_LIMIT - newCount),
     isPro,
+    profileEmpty,
   };
 };

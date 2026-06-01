@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { buildAgentContext, type AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 export type PropertyInput = {
   tipoPropiedad: string;
@@ -36,13 +37,19 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
   if (!userId) throw new Error("UNAUTHENTICATED");
 
   const supabase = createSupabaseClient();
-  const { data: subData } = await supabase
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const [{ data: subData }, { data: profileRow }] = await Promise.all([
+    supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
+    supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),
+  ]);
 
   const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
+
+  const profile: AgentProfile = profileRow ?? {};
+  const { contextBlock, toneInstruction } = buildAgentContext(profile);
+
+  const contactoWhatsapp = data.agenteWhatsapp || profile.whatsapp || "";
+  const contactoInstagram = data.agenteInstagram || profile.instagram || "";
+  const contactoSitioWeb = data.agenteSitioWeb || profile.sitio_web || "";
 
   const fechaActual = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -60,9 +67,9 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
     data.piso ? `- Piso: ${data.piso}` : "",
     data.expensas ? `- Expensas: ${data.expensas}` : "",
     data.amenities?.length ? `- Amenities: ${data.amenities.join(", ")}` : "",
-    data.agenteWhatsapp ? `- WhatsApp del agente: ${data.agenteWhatsapp}` : "",
-    data.agenteInstagram ? `- Instagram del agente: @${data.agenteInstagram.replace(/^@/, "")}` : "",
-    data.agenteSitioWeb ? `- Sitio web: ${data.agenteSitioWeb}` : "",
+    contactoWhatsapp ? `- WhatsApp del agente: ${contactoWhatsapp}` : "",
+    contactoInstagram ? `- Instagram del agente: @${contactoInstagram.replace(/^@/, "")}` : "",
+    contactoSitioWeb ? `- Sitio web: ${contactoSitioWeb}` : "",
   ].filter(Boolean).join("\n");
 
   const propiedad = [
@@ -74,9 +81,11 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
     caracteristicas ? `- Destacados: ${caracteristicas}` : "",
   ].filter(Boolean).join("\n");
 
+  const agentContextLine = contextBlock ? `\n${contextBlock}\n\nTONO DE VOZ: ${toneInstruction}\n` : `\nTONO DE VOZ: ${toneInstruction}\n`;
+
   const prompt = isPro
     ? `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
-
+${agentContextLine}
 Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre. Tu texto posiciona bien en buscadores y persuade al comprador a contactar.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
@@ -110,7 +119,7 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
   "version_larga": "texto completo versión larga"
 }`
     : `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
-
+${agentContextLine}
 Sos un redactor especialista en anuncios inmobiliarios para portales como Idealista, Zonaprop, Fotocasa y MercadoLibre.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.

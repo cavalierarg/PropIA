@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { buildAgentContext, type AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 export type CalendarDay = {
   dia: number;
@@ -33,10 +34,14 @@ function buildPrompt(
   zona: string,
   startDateStr: string,
   diasAGenerar: number,
-  offsetDia: number
+  offsetDia: number,
+  contextBlock: string,
+  toneInstruction: string
 ): string {
   const fechaActual = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
   return `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
+${contextBlock ? `\n${contextBlock}\n` : ""}
+TONO DE VOZ: ${toneInstruction}
 
 Sos un experto en marketing inmobiliario digital con 10 años de experiencia generando contenido que convierte en Latinoamérica.
 
@@ -84,7 +89,9 @@ async function generarBatch(
   zona: string,
   startDate: Date,
   diasAGenerar: number,
-  offsetDia: number
+  offsetDia: number,
+  contextBlock: string,
+  toneInstruction: string
 ): Promise<CalendarDay[]> {
   const fecha = new Date(startDate);
   fecha.setDate(fecha.getDate() + offsetDia);
@@ -95,7 +102,7 @@ async function generarBatch(
     year: "numeric",
   });
 
-  const prompt = buildPrompt(nicho, zona, startDateStr, diasAGenerar, offsetDia);
+  const prompt = buildPrompt(nicho, zona, startDateStr, diasAGenerar, offsetDia, contextBlock, toneInstruction);
 
   let message;
   try {
@@ -135,13 +142,15 @@ export async function generarCalendario(data: {
   if (!userId) throw new Error("UNAUTHENTICATED");
 
   const supabase = createSupabaseClient();
-  const { data: subData } = await supabase
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const [{ data: subData }, { data: profileRow }] = await Promise.all([
+    supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
+    supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),
+  ]);
 
   const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
+
+  const profile: AgentProfile = profileRow ?? {};
+  const { contextBlock, toneInstruction } = buildAgentContext(profile);
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -152,12 +161,12 @@ export async function generarCalendario(data: {
 
   if (!isPro) {
     // Free: 3 días en una sola llamada
-    dias = await generarBatch(client, data.nicho, data.zona, startDate, 3, 0);
+    dias = await generarBatch(client, data.nicho, data.zona, startDate, 3, 0, contextBlock, toneInstruction);
   } else {
     // Pro: 30 días en dos batches de 15 para no exceder el límite de tokens
     const [batch1, batch2] = await Promise.all([
-      generarBatch(client, data.nicho, data.zona, startDate, 15, 0),
-      generarBatch(client, data.nicho, data.zona, startDate, 15, 15),
+      generarBatch(client, data.nicho, data.zona, startDate, 15, 0, contextBlock, toneInstruction),
+      generarBatch(client, data.nicho, data.zona, startDate, 15, 15, contextBlock, toneInstruction),
     ]);
     dias = [...batch1, ...batch2];
   }

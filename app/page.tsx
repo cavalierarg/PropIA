@@ -16,6 +16,7 @@ import {
   Building2,
   BarChart3,
   GalleryHorizontal,
+  UserCircle,
 } from "lucide-react";
 import LandingPage from "@/components/LandingPage";
 import { Greeting } from "@/components/Greeting";
@@ -236,6 +237,29 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
+
+      {/* ── BANNER PERFIL INCOMPLETO ── */}
+      {!agentProfile.perfil_completado && (
+        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4">
+          <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+            <UserCircle className="w-5 h-5 text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-amber-800 leading-snug">
+              Completá tu perfil para que la IA genere contenido personalizado
+            </p>
+            <p className="text-xs text-amber-600 mt-0.5">
+              Agregá tu nombre, zona y tono de voz para mejores resultados.
+            </p>
+          </div>
+          <Link
+            href="/perfil"
+            className="shrink-0 text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+          >
+            Completar →
+          </Link>
+        </div>
+      )}
 
       {/* ── PRIMEROS PASOS ── */}
       {checklistItems.length > 0 && (

@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { buildAgentContext, type AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 export type FormatoEngagement = {
   posicion: number;
@@ -44,14 +45,16 @@ export async function buscarTendencias(): Promise<TendenciasResult> {
   if (!userId) throw new Error("UNAUTHENTICATED");
 
   const supabase = createSupabaseClient();
-  const { data } = await supabase
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const [{ data }, { data: profileRow }] = await Promise.all([
+    supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
+    supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),
+  ]);
   if (!((data?.plan === "pro" || data?.plan === "pro_max") && data?.status === "active")) {
     throw new Error("PRO_REQUIRED");
   }
+
+  const profile: AgentProfile = profileRow ?? {};
+  const { contextBlock } = buildAgentContext(profile);
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -63,7 +66,7 @@ export async function buscarTendencias(): Promise<TendenciasResult> {
   });
 
   const prompt = `Sos un analista de marketing digital especializado en el sector inmobiliario. Hoy es ${hoy}.
-
+${contextBlock ? `\n${contextBlock}\n` : ""}
 Investigá con web search las tendencias actuales de contenido inmobiliario en redes sociales. Buscá:
 1. "real estate instagram reels trending 2025 engagement"
 2. "real estate hashtags trending instagram facebook linkedin 2025"
