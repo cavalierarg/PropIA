@@ -24,6 +24,7 @@ import OnboardingChecklist, { type ChecklistItem } from "@/components/Onboarding
 import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 import { UpgradeButton } from "@/components/UpgradeLink";
+import TutorialButton from "@/components/TutorialButton";
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -399,6 +400,11 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
+
+      {/* ── VER TUTORIAL DE NUEVO ── */}
+      <div className="flex justify-center pb-2">
+        <TutorialButton />
+      </div>
     </div>
   );
 }

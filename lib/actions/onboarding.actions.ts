@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
 import { createSupabaseClient } from "@/lib/supabase";
 
 export type OnboardingStatus = {
@@ -34,10 +35,19 @@ export async function completeOnboarding(): Promise<void> {
   if (!userId) return;
 
   const supabase = createSupabaseClient();
-  await supabase.from("agent_profiles").upsert(
+  const { error } = await supabase.from("agent_profiles").upsert(
     { user_id: userId, onboarding_completed: true, updated_at: new Date().toISOString() },
     { onConflict: "user_id" }
   );
+
+  if (error) {
+    console.error("[onboarding] Error guardando onboarding_completed:", error.message);
+    return;
+  }
+
+  // Invalida el cache del layout raíz para que en la siguiente navegación
+  // el servidor no vuelva a incluir <OnboardingModal> en el árbol.
+  revalidatePath("/", "layout");
 }
 
 export async function updateOnboardingStep(step: string): Promise<void> {
