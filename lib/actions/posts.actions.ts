@@ -4,7 +4,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
-import { buildAgentContext, type AgentProfile } from "@/lib/actions/agent-profile.actions";
+import { buildAgentContext } from "@/lib/agent-context";
+import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 const MONTHLY_LIMIT = 10;
 
