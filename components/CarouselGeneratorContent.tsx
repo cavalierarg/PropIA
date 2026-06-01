@@ -246,6 +246,7 @@ export default function CarouselGeneratorContent({ profile }: Props) {
     <div className="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8">
       {/* ── FORM ── */}
       <div className="flex flex-col gap-6">
+        <fieldset disabled={generating} className="contents">
 
         {/* Photo upload */}
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">
@@ -489,6 +490,7 @@ export default function CarouselGeneratorContent({ profile }: Props) {
             <><Sparkles className="w-4 h-4" /> Generar carrusel</>
           )}
         </button>
+        </fieldset>
       </div>
 
       {/* ── SLIDES PREVIEW ── */}

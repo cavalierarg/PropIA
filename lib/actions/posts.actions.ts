@@ -7,7 +7,7 @@ import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { buildAgentContext } from "@/lib/agent-context";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
-const MONTHLY_LIMIT = 10;
+const MONTHLY_LIMIT = 5;
 
 function getCurrentMonth(): string {
   const now = new Date();
@@ -138,12 +138,24 @@ HOOKS — Para la primera línea de cada post, elegí el estilo más efectivo pa
 CTAs — Para el llamado a la acción de cada post, elegí el estilo más coherente con el hook y la red — nunca uses el genérico 'Contactame' o 'Escribime': CTA de escasez (ej: 'Solo atiendo a los primeros 3 interesados esta semana'), CTA de exclusividad (ej: 'Mandame un mensaje con la palabra PALERMO y te paso los detalles que no puse acá'), CTA de beneficio (ej: 'Escribime hoy y te consigo la visita antes de que salga al mercado'), CTA de curiosidad (ej: 'Si querés saber el precio real mandame un DM — no lo puse acá a propósito'), CTA social (ej: 'Guardá este post si conocés a alguien que esté buscando en esta zona'), CTA de urgencia (ej: 'Las consultas cierran el viernes — después de eso ya tiene dueño'). Si hay WhatsApp del agente, incorporalo en el CTA de forma natural.
 
 📸 2 POSTS PARA INSTAGRAM (visual y emocional):
-- Primera línea: hook elegido según los estilos de arriba, máx. 10 palabras
-- Hacé que el lector imagine vivir o invertir ahí — describí sensaciones y estilo de vida
-- Emojis estratégicos como separadores visuales, no decorativos
-- Destacá exclusividad, smart living o la oportunidad de la zona
-- CTA al final según los estilos de arriba — natural, no forzado
-- 5-8 hashtags relevantes al sector y la ciudad al final
+CRÍTICO: Los dos posts de Instagram DEBEN tener estructuras completamente distintas — nunca la misma forma ni el mismo tipo de hook.
+
+INSTAGRAM 1 — Storytelling emocional:
+- Primera línea: hook emocional (sensaciones, aspiraciones, estilo de vida), máx. 10 palabras
+- Estructura narrativa en 2-3 párrafos cortos que lleven al lector a imaginar vivir o invertir ahí
+- Describí texturas, luz, ritmo del barrio — hacé que el lector se vea ahí adentro
+- CTA suave al final: invitación sin presión (ej: "Si te imaginaste algo parecido, contame")
+- 3-5 emojis integrados naturalmente dentro del texto — NUNCA en bloque al final
+- 8-10 hashtags al final: mezcla de populares (#RealEstate, #Propiedades) + locales de la ciudad/zona
+- Máximo 300 palabras
+
+INSTAGRAM 2 — Datos y lista de highlights:
+- Primera línea: hook de dato concreto o número impactante (precio/m², superficie, rendimiento), máx. 10 palabras
+- Estructura en lista con viñetas o ítems numerados — cada punto breve, concreto y verificable
+- Sin párrafos narrativos — solo datos, características y ventajas directas
+- CTA directo al final: acción clara e inmediata (ej: "Mandame un DM con la palabra INTERESADO")
+- 3-5 emojis integrados naturalmente dentro del texto — NUNCA en bloque al final
+- 8-10 hashtags al final: mezcla de populares (#RealEstate, #Propiedades) + locales de la ciudad/zona
 - Máximo 300 palabras
 
 📘 2 POSTS PARA FACEBOOK (narrativo y persuasivo):
@@ -152,7 +164,7 @@ CTAs — Para el llamado a la acción de cada post, elegí el estilo más cohere
 - Mencioná ventajas concretas de la zona: conectividad, servicios, revalorización
 - Incluí un dato de valor que ancle la percepción de precio (precio/m², comparativa, potencial de renta)
 - CTA al final según los estilos de arriba — coherente con el hook
-- Máximo 400 palabras. Máximo 3 hashtags
+- Máximo 400 palabras. 3-4 hashtags discretos al final — sin hashtags virales ni de tendencia, solo del sector y la zona
 
 💼 1 POST PARA LINKEDIN (ejecutivo, orientado a inversión):
 - Primera línea: hook de dato impactante o beneficio directo — orientado al inversor
@@ -161,7 +173,7 @@ CTAs — Para el llamado a la acción de cada post, elegí el estilo más cohere
 - Lenguaje financiero accesible: "rendimiento", "plusvalía", "activo tangible", "flujo de caja"
 - Datos precisos generan credibilidad: precio/m², contexto del mercado local
 - CTA profesional según los estilos de arriba — tono ejecutivo, no genérico
-- 2-3 hashtags: #InversionInmobiliaria #RealEstate #Propiedades
+- Sin hashtags o máximo 2 muy específicos al sector (ej: #InversionInmobiliaria #RealEstateLatam) — LinkedIn penaliza el exceso de hashtags
 - Máximo 300 palabras
 
 ANÁLISIS DE EFECTIVIDAD:

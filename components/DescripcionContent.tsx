@@ -157,6 +157,7 @@ export default function DescripcionContent() {
 
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
+        <fieldset disabled={loading} className="contents">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="flex flex-col gap-2">
             <Label htmlFor="tipoPropiedad" className="text-sm font-medium">
@@ -490,6 +491,7 @@ export default function DescripcionContent() {
           <SparklesIcon className="w-4 h-4" />
           {loading ? "Generando descripción..." : "Generar descripción"}
         </Button>
+        </fieldset>
       </form>
 
       {/* Skeleton de carga */}

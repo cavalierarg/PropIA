@@ -249,6 +249,7 @@ export default function ReelsContent() {
 
       {/* Formulario */}
       <div className="border border-[#0f3460]/10 rounded-xl p-5 sm:p-6 bg-card flex flex-col gap-5">
+        <fieldset disabled={loadingFormatos} className="contents">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Tipo de propiedad *</Label>
@@ -495,6 +496,7 @@ export default function ReelsContent() {
             {loadingFormatos ? "Investigando tendencias..." : "Investigar formatos trending"}
           </Button>
         )}
+        </fieldset>
       </div>
 
       {/* Sección de formatos trending */}

@@ -19,8 +19,6 @@ import { useUser } from "@clerk/nextjs";
 import { trackEvent } from "@/lib/meta-pixel";
 import { useRef } from "react";
 
-const MONTHLY_LIMIT = 10;
-
 const TIPOS_PROPIEDAD = [
   "Casa",
   "Departamento",
@@ -178,7 +176,7 @@ export default function PropertyForm() {
 
   const isLimitReached = !isPro && remaining === 0;
   const isWarning = !isPro && remaining !== null && remaining > 0 && remaining <= 3;
-  const used = remaining !== null ? MONTHLY_LIMIT - remaining : 0;
+  const used = remaining !== null ? usageLimit - remaining : 0;
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
@@ -230,7 +228,7 @@ export default function PropertyForm() {
                   </span>
                 </div>
                 <span className="text-muted-foreground tabular-nums shrink-0 text-xs sm:text-sm">
-                  {used}/{MONTHLY_LIMIT}
+                  {used}/{usageLimit}
                 </span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -238,7 +236,7 @@ export default function PropertyForm() {
                   className={`h-full rounded-full transition-all duration-500 ${
                     isLimitReached ? "bg-red-400" : isWarning ? "bg-amber-400" : "bg-[#00d4d4]"
                   }`}
-                  style={{ width: `${(used / MONTHLY_LIMIT) * 100}%` }}
+                  style={{ width: `${usageLimit > 0 ? (used / usageLimit) * 100 : 0}%` }}
                 />
               </div>
             </>
@@ -253,7 +251,7 @@ export default function PropertyForm() {
             Agotaste tus generaciones gratuitas del mes
           </p>
           <p className="text-sm text-amber-800">
-            Tus {MONTHLY_LIMIT} generaciones mensuales ya fueron utilizadas. Se renuevan
+            Tus {usageLimit} generaciones mensuales ya fueron utilizadas. Se renuevan
             automáticamente el 1° del próximo mes.
           </p>
           <p className="text-sm text-amber-700">
@@ -291,6 +289,7 @@ export default function PropertyForm() {
 
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
+        <fieldset disabled={isPending} className="contents">
 
         {/* ── Campos principales ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -644,6 +643,7 @@ export default function PropertyForm() {
           <ZapIcon className="w-4 h-4" />
           {isPending ? "Generando con IA..." : "Generar 5 posts"}
         </Button>
+        </fieldset>
       </form>
 
       {/* Skeleton de carga */}

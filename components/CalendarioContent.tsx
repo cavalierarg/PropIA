@@ -111,6 +111,7 @@ export default function CalendarioContent() {
             <select
               value={nicho}
               onChange={(e) => setNicho(e.target.value)}
+              disabled={loading}
               className="w-full border border-input bg-background rounded-md px-3 h-12 text-base focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
             >
               <option value="">Seleccioná tu nicho</option>
@@ -125,6 +126,7 @@ export default function CalendarioContent() {
               value={zona}
               onChange={(e) => setZona(e.target.value)}
               placeholder="Ej: Palermo, Buenos Aires"
+              disabled={loading}
               className="h-12 text-base"
             />
           </div>

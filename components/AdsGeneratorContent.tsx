@@ -297,6 +297,7 @@ export default function AdsGeneratorContent({
 
       {/* ── Formulario ── */}
       <div className="border border-[#0f3460]/10 rounded-xl p-5 sm:p-6 bg-card flex flex-col gap-7">
+        <fieldset disabled={isLoading} className="contents">
 
         {/* Fotos */}
         <div className="flex flex-col gap-2">
@@ -694,6 +695,7 @@ export default function AdsGeneratorContent({
           <SparklesIcon className="w-4 h-4" />
           {isLoading ? "Generando ads..." : phase === "complete" ? "Regenerar ads" : "Generar ads"}
         </Button>
+        </fieldset>
       </div>
 
       {/* ── Loading ── */}
