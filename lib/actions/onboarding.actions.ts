@@ -15,24 +15,36 @@ export async function getOnboardingStatus(): Promise<OnboardingStatus> {
 
   try {
     const supabase = createSupabaseAdminClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("agent_profiles")
       .select("onboarding_completed, onboarding_steps")
       .eq("user_id", userId)
       .maybeSingle();
 
+    if (error) {
+      console.error("[onboarding] getOnboardingStatus error:", error.message);
+    }
+
+    console.log(`[onboarding] getOnboardingStatus user=${userId} completed=${data?.onboarding_completed ?? null}`);
+
     return {
       completed: data?.onboarding_completed ?? false,
       steps: (data?.onboarding_steps as Record<string, boolean>) ?? {},
     };
-  } catch {
+  } catch (e) {
+    console.error("[onboarding] getOnboardingStatus exception:", e);
     return { completed: false, steps: {} };
   }
 }
 
 export async function completeOnboarding(): Promise<void> {
   const { userId } = await auth();
-  if (!userId) return;
+  if (!userId) {
+    console.error("[onboarding] completeOnboarding: no userId");
+    return;
+  }
+
+  console.log(`[onboarding] completeOnboarding START user=${userId}`);
 
   const supabase = createSupabaseAdminClient();
   const { error } = await supabase.from("agent_profiles").upsert(
@@ -41,12 +53,11 @@ export async function completeOnboarding(): Promise<void> {
   );
 
   if (error) {
-    console.error("[onboarding] Error guardando onboarding_completed:", error.message);
+    console.error("[onboarding] completeOnboarding upsert error:", error.message, error.code);
     return;
   }
 
-  // Invalida el cache del layout raíz para que en la siguiente navegación
-  // el servidor no vuelva a incluir <OnboardingModal> en el árbol.
+  console.log(`[onboarding] completeOnboarding OK user=${userId}`);
   revalidatePath("/", "layout");
 }
 
