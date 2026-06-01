@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseClient, createSupabaseAdminClient } from "@/lib/supabase";
 
 // Run once in Supabase dashboard:
 // CREATE TABLE IF NOT EXISTS public.agent_profiles (
@@ -57,7 +57,7 @@ export async function getAgentProfile(): Promise<AgentProfile> {
   const { userId } = await auth();
   if (!userId) return {};
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseAdminClient();
     const { data } = await supabase
       .from("agent_profiles")
       .select("*")
@@ -85,7 +85,7 @@ export async function saveAgentProfile(
   const perfil_completado = !!(data.nombre_completo?.trim() && data.whatsapp?.trim());
 
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseAdminClient();
     const { error } = await supabase.from("agent_profiles").upsert(
       {
         user_id: userId,
