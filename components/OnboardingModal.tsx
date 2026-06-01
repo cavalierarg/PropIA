@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { X, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 import { completeOnboarding } from "@/lib/actions/onboarding.actions";
 import { trackEvent } from "@/lib/meta-pixel";
@@ -42,6 +43,7 @@ const TOUR_STEPS = [
 ];
 
 export default function OnboardingModal({ firstName, plan }: OnboardingModalProps) {
+  const router = useRouter();
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -56,7 +58,8 @@ export default function OnboardingModal({ firstName, plan }: OnboardingModalProp
   const handleSkip = useCallback(async () => {
     setVisible(false);
     await completeOnboarding();
-  }, []);
+    router.refresh();
+  }, [router]);
 
   const handleStartTour = useCallback(async () => {
     setVisible(false);
@@ -86,7 +89,7 @@ export default function OnboardingModal({ firstName, plan }: OnboardingModalProp
       doneBtnText: "Entendido, empezar",
       steps,
       onDestroyed: () => {
-        completeOnboarding();
+        completeOnboarding().then(() => router.refresh());
       },
     });
 
