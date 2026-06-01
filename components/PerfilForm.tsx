@@ -120,9 +120,13 @@ export default function PerfilForm({
     try {
       const fd = new FormData();
       fd.append("logo", file);
-      const url = await uploadAgentLogo(fd);
+      const { url, bgRemoved } = await uploadAgentLogo(fd);
       setForm((prev) => ({ ...prev, logo_url: url }));
-      toast.success("Logo subido correctamente");
+      if (bgRemoved) {
+        toast.success("Logo subido con fondo transparente");
+      } else {
+        toast.success("Logo subido · El fondo no se pudo remover automáticamente");
+      }
     } catch {
       toast.error("No se pudo subir el logo. Intentá de nuevo.");
       setLogoPreview(null);

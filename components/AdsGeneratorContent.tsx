@@ -193,9 +193,9 @@ export default function AdsGeneratorContent({
     try {
       const fd = new FormData();
       fd.append("logo", file);
-      const url = await uploadAgentLogo(fd);
+      const { url, bgRemoved } = await uploadAgentLogo(fd);
       setAgentLogoUrl(url);
-      toast.success("Logo guardado correctamente");
+      toast.success(bgRemoved ? "Logo con fondo transparente" : "Logo guardado · Sin remoción de fondo");
     } catch {
       toast.error("No se pudo subir el logo. Intentá de nuevo.");
       setAgentLogoPreview(null);

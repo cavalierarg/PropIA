@@ -6,48 +6,39 @@ import { createSupabaseAdminClient } from "@/lib/supabase";
 
 const BUCKET = "agent-logos";
 
-async function removeLogoBackground(input: Buffer): Promise<Buffer> {
-  const { data, info } = await sharp(input)
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-
-  const pixels = new Uint8ClampedArray(data.buffer);
-  const { width, height } = info;
-
-  // Sample 4 corners to detect background color
-  const corners = [
-    [0, 0], [width - 1, 0],
-    [0, height - 1], [width - 1, height - 1],
-  ] as const;
-
-  let sumR = 0, sumG = 0, sumB = 0;
-  for (const [x, y] of corners) {
-    const i = (y * width + x) * 4;
-    sumR += pixels[i]; sumG += pixels[i + 1]; sumB += pixels[i + 2];
+async function removeBackground(input: Buffer): Promise<{ buffer: Buffer; success: boolean }> {
+  const apiKey = process.env.REMOVEBG_API_KEY;
+  if (!apiKey) {
+    console.warn("[removeBackground] REMOVEBG_API_KEY no configurada — guardando original");
+    return { buffer: input, success: false };
   }
-  const bgR = Math.round(sumR / 4);
-  const bgG = Math.round(sumG / 4);
-  const bgB = Math.round(sumB / 4);
 
-  // Make pixels within threshold of background color fully transparent
-  const threshold = 30;
-  for (let i = 0; i < pixels.length; i += 4) {
-    if (
-      Math.abs(pixels[i]     - bgR) < threshold &&
-      Math.abs(pixels[i + 1] - bgG) < threshold &&
-      Math.abs(pixels[i + 2] - bgB) < threshold
-    ) {
-      pixels[i + 3] = 0;
+  try {
+    const fd = new FormData();
+    fd.append("image_file", new Blob([input], { type: "image/png" }), "logo.png");
+    fd.append("size", "auto");
+
+    const response = await fetch("https://api.remove.bg/v1.0/removebg", {
+      method: "POST",
+      headers: { "X-Api-Key": apiKey },
+      body: fd,
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("[removeBackground] remove.bg error:", response.status, errText);
+      return { buffer: input, success: false };
     }
-  }
 
-  return sharp(Buffer.from(pixels.buffer), {
-    raw: { width, height, channels: 4 },
-  }).png().toBuffer();
+    const resultBuffer = Buffer.from(await response.arrayBuffer());
+    return { buffer: resultBuffer, success: true };
+  } catch (err) {
+    console.error("[removeBackground] Error al llamar remove.bg:", err);
+    return { buffer: input, success: false };
+  }
 }
 
-export async function uploadAgentLogo(formData: FormData): Promise<string> {
+export async function uploadAgentLogo(formData: FormData): Promise<{ url: string; bgRemoved: boolean }> {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
@@ -56,9 +47,12 @@ export async function uploadAgentLogo(formData: FormData): Promise<string> {
   if (file.size > 2 * 1024 * 1024) throw new Error("El archivo supera los 2 MB");
 
   const rawBuffer = Buffer.from(await file.arrayBuffer());
-  const processedBuffer = await removeLogoBackground(rawBuffer);
 
-  // Always save as PNG to preserve transparency
+  const { buffer: processedBuffer, success: bgRemoved } = await removeBackground(rawBuffer);
+
+  // Convertir a PNG (preserve transparency si remove.bg lo procesó; convierte el original si no)
+  const outputBuffer = await sharp(processedBuffer).png().toBuffer();
+
   const fileName = `${userId}/logo.png`;
   const supabase = createSupabaseAdminClient();
 
@@ -66,11 +60,12 @@ export async function uploadAgentLogo(formData: FormData): Promise<string> {
 
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(fileName, processedBuffer, { contentType: "image/png", upsert: true });
+    .upload(fileName, outputBuffer, { contentType: "image/png", upsert: true });
 
   if (error) throw new Error(`Upload fallido: ${error.message}`);
 
-  return supabase.storage.from(BUCKET).getPublicUrl(fileName).data.publicUrl;
+  const url = supabase.storage.from(BUCKET).getPublicUrl(fileName).data.publicUrl;
+  return { url, bgRemoved };
 }
 
 export async function getAgentLogoUrl(): Promise<string | null> {
