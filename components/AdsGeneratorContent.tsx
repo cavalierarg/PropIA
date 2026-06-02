@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { uploadPropertyImage } from "@/lib/actions/flyers.actions";
 import { uploadAgentLogo, getAgentLogoUrl } from "@/lib/actions/agent-logo.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -18,10 +18,11 @@ import {
   TagIcon,
   DollarSignIcon,
   ChevronDown,
+  Building2,
 } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { LockIcon } from "lucide-react";
-import PropertySelector from "@/components/PropertySelector";
 import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 
 type AdType  = "feed" | "story" | "banner";
@@ -85,6 +86,7 @@ export default function AdsGeneratorContent({
   proMaxCheckoutUrl?: string;
 }) {
   const isProMax = plan === "pro_max";
+  const router = useRouter();
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null]);
 
   const [images,   setImages]   = useState<(File | null)[]>([null, null, null]);
@@ -105,10 +107,7 @@ export default function AdsGeneratorContent({
   const [agenteInstagram,setAgenteInstagram]= useState("");
   const [agenteSitioWeb, setAgenteSitioWeb] = useState("");
 
-  const [showDatos,    setShowDatos]    = useState(false);
-  const [showAmenities,setShowAmenities]= useState(false);
-  const [showContacto, setShowContacto] = useState(false);
-  const [showLogo,     setShowLogo]     = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
 
   const [agentLogoUrl,     setAgentLogoUrl]     = useState<string | null>(null);
   const [agentLogoPreview, setAgentLogoPreview] = useState<string | null>(null);
@@ -130,7 +129,7 @@ export default function AdsGeneratorContent({
 
   const activeCount = images.filter(Boolean).length;
   const isLoading   = phase === "generating";
-  const canGenerate = activeCount > 0 && !!precio && !!zona && !!metros;
+  const canGenerate = !!loadedProperty && activeCount > 0;
 
   useEffect(() => {
     if (!isLoading) return;
@@ -310,19 +309,26 @@ export default function AdsGeneratorContent({
             ubicacion={loadedProperty.ubicacion}
             precio={loadedProperty.precio}
             metros={loadedProperty.metros}
-            onClear={() => setLoadedProperty(null)}
+            onClear={() => router.push("/mis-propiedades")}
           />
         ) : (
-          <PropertySelector
-            onSelect={(prefill) => {
-              setZona(prefill.ubicacion);
-              setPrecio(prefill.precio);
-              setMetros(prefill.metrosCuadrados);
-              setCar1(prefill.caracteristica1);
-              setCar2(prefill.caracteristica2);
-              setLoadedProperty({ tipo: prefill.tipoPropiedad, ubicacion: prefill.ubicacion, precio: prefill.precio, metros: prefill.metrosCuadrados });
-            }}
-          />
+          <div className="flex flex-col items-center gap-4 py-10 text-center border-2 border-dashed border-[#0f3460]/15 rounded-xl bg-[#0f3460]/3">
+            <div className="w-14 h-14 rounded-2xl bg-[#0f3460]/8 flex items-center justify-center">
+              <Building2 className="w-7 h-7 text-[#0f3460]/40" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <p className="text-sm font-semibold text-[#0f3460]">Seleccioná una propiedad primero</p>
+              <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+                Cargá tu propiedad en Mis Propiedades y generá contenido desde ahí con un clic.
+              </p>
+            </div>
+            <Link
+              href="/mis-propiedades"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#0f3460] hover:bg-[#0f3460]/90 px-5 py-2.5 rounded-xl transition-colors"
+            >
+              Ir a Mis Propiedades →
+            </Link>
+          </div>
         )}
 
         {/* Fotos */}
@@ -363,159 +369,6 @@ export default function AdsGeneratorContent({
               ? "Cada foto genera 3 formatos (Feed · Story · Banner) · JPG, PNG o WEBP · Máx 10 MB"
               : "Tu plan PRO incluye 1 foto · 3 formatos (Feed · Story · Banner) · Actualizá a PRO MAX para agregar hasta 3 fotos"}
           </p>
-        </div>
-
-        {/* Datos de la propiedad */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium">Precio *</Label>
-            <Input value={precio} onChange={(e) => setPrecio(e.target.value)} placeholder="Ej: 185.000" className="h-12 text-base" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium">Zona *</Label>
-            <Input value={zona} onChange={(e) => setZona(e.target.value)} placeholder="Ej: Palermo, CABA" className="h-12 text-base" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium">Metros cuadrados *</Label>
-            <Input type="number" value={metros} onChange={(e) => setMetros(e.target.value)} placeholder="Ej: 85" className="h-12 text-base" min={1} />
-          </div>
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              Referencia de ubicación
-              <span className="text-xs font-normal bg-[#0f3460]/10 text-[#0f3460] px-2 py-0.5 rounded-full">aparece en el ad</span>
-            </Label>
-            <Input value={agente} onChange={(e) => setAgente(e.target.value)} placeholder="Ej: A 1 cuadra de Av. Roca, esquina con Belgrano" className="h-12 text-base" />
-          </div>
-          <p className="text-xs text-muted-foreground sm:col-span-2 -mb-1">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium">Característica 1</Label>
-            <Input value={car1} onChange={(e) => setCar1(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-12 text-base" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium">Característica 2</Label>
-            <Input value={car2} onChange={(e) => setCar2(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-12 text-base" />
-          </div>
-        </div>
-
-        {/* ── Sección colapsable: Datos de la propiedad ── */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setShowDatos(!showDatos)}
-            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="text-sm font-semibold text-[#0f3460]">Datos de la propiedad</span>
-              <span className="hidden sm:inline text-xs text-slate-400 font-normal">dormitorios, baños, cocheras…</span>
-            </div>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${showDatos ? "rotate-180" : ""}`} />
-          </button>
-          {showDatos && (
-            <div className="p-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Dormitorios</Label>
-                <select value={dormitorios} onChange={(e) => setDormitorios(e.target.value)} className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none">
-                  <option value="">No tiene</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5+">5+</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Baños</Label>
-                <select value={banios} onChange={(e) => setBanios(e.target.value)} className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none">
-                  <option value="">No tiene</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4+">4+</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Cocheras</Label>
-                <select value={cocheras} onChange={(e) => setCocheras(e.target.value)} className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none">
-                  <option value="">No tiene</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3+">3+</option>
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Sección colapsable: Amenities ── */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setShowAmenities(!showAmenities)}
-            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="text-sm font-semibold text-[#0f3460]">Características adicionales</span>
-              {amenities.length > 0 ? (
-                <span className="text-xs bg-[#0f3460] text-white px-2 py-0.5 rounded-full font-semibold">
-                  {amenities.length} seleccionado{amenities.length !== 1 ? "s" : ""}
-                </span>
-              ) : (
-                <span className="hidden sm:inline text-xs text-slate-400 font-normal">pileta, gimnasio, seguridad, jardín…</span>
-              )}
-            </div>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${showAmenities ? "rotate-180" : ""}`} />
-          </button>
-          {showAmenities && (
-            <div className="p-4 border-t border-slate-100">
-              <p className="text-xs text-muted-foreground mb-3">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {AMENITIES_LIST.map((amenity) => (
-                  <label key={amenity} className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={amenities.includes(amenity)}
-                      onChange={(e) => setAmenities((prev) => e.target.checked ? [...prev, amenity] : prev.filter((a) => a !== amenity))}
-                      className="w-4 h-4 rounded border-slate-300 text-[#0f3460] focus:ring-[#0f3460] cursor-pointer"
-                    />
-                    <span className="text-sm text-slate-700 group-hover:text-[#0f3460] transition-colors">{amenity}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Sección colapsable: Contacto del agente ── */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setShowContacto(!showContacto)}
-            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="text-sm font-semibold text-[#0f3460]">Contacto del agente</span>
-              <span className="hidden sm:inline text-xs text-slate-400 font-normal">WhatsApp, Instagram, sitio web</span>
-            </div>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${showContacto ? "rotate-180" : ""}`} />
-          </button>
-          {showContacto && (
-            <div className="p-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">WhatsApp</Label>
-                <Input value={agenteWhatsapp} onChange={(e) => setAgenteWhatsapp(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-10 text-sm" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Instagram</Label>
-                <Input value={agenteInstagram} onChange={(e) => setAgenteInstagram(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-10 text-sm" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Sitio web</Label>
-                <Input value={agenteSitioWeb} onChange={(e) => setAgenteSitioWeb(e.target.value)} placeholder="Opcional — dejar vacío si no aplica" className="h-10 text-sm" />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* ── Sección colapsable: Tu logo ── */}

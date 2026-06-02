@@ -20,6 +20,7 @@ import {
   GalleryHorizontal,
 } from "lucide-react";
 import { trackEvent } from "@/lib/meta-pixel";
+import TutorialButton from "@/components/TutorialButton";
 
 type Plan = "free" | "pro" | "pro_max";
 
@@ -107,6 +108,8 @@ export default function Sidebar({ plan, firstName, usageCount, usageLimit, isPro
                   ? "nav-generar-posts"
                   : item.href === "/mis-propiedades"
                   ? "nav-mis-propiedades"
+                  : item.href === "/perfil"
+                  ? "nav-perfil"
                   : undefined
               }
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
@@ -174,6 +177,11 @@ export default function Sidebar({ plan, firstName, usageCount, usageLimit, isPro
             {plan === "pro_max" ? "Plan PRO MAX — todo incluido" : "Generaciones ilimitadas"}
           </p>
         )}
+      </div>
+
+      {/* Tutorial button */}
+      <div className="px-4 py-3 border-t border-[#e2e8f0] flex justify-center shrink-0">
+        <TutorialButton />
       </div>
     </aside>
   );

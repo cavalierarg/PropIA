@@ -34,9 +34,8 @@ function buildRegenerateUrl(property: {
     caracteristica1: property.caracteristica1 ?? "",
     caracteristica2: property.caracteristica2 ?? "",
     caracteristica3: property.caracteristica3 ?? "",
-    regenerar: "1",
   });
-  return `/?${params.toString()}`;
+  return `/posts?${params.toString()}`;
 }
 
 export default async function PropertyDetailPage({

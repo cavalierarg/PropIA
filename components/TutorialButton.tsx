@@ -7,21 +7,11 @@ import "driver.js/dist/driver.css";
 
 const TOUR_STEPS = [
   {
-    element: "#nav-generar-posts",
-    popover: {
-      title: "Generá posts con IA",
-      description:
-        "Acá generás posts para todas tus redes. Cargás los datos de tu propiedad y la IA escribe todo.",
-      side: "right" as const,
-      align: "center" as const,
-    },
-  },
-  {
     element: "#main-content",
     popover: {
-      title: "Tu panel principal",
+      title: "Bienvenido a PropIA 🚀",
       description:
-        "Este es tu panel principal. Ves tus generaciones del mes y accedés a todas las herramientas.",
+        "Este es tu panel de control. Desde acá ves tus estadísticas, accedés a todo y seguís tu progreso del mes.",
       side: "bottom" as const,
       align: "center" as const,
     },
@@ -29,19 +19,29 @@ const TOUR_STEPS = [
   {
     element: "#nav-mis-propiedades",
     popover: {
-      title: "Mis Propiedades",
+      title: "Empezá por tus propiedades 🏠",
       description:
-        "Acá guardamos todas las propiedades que generaste. Podés volver a ver los posts cuando quieras.",
+        "Cargá tus propiedades una sola vez y usálas en todas las herramientas. Es el corazón de PropIA.",
       side: "right" as const,
       align: "center" as const,
     },
   },
   {
-    element: "#sidebar-plan-badge",
+    element: "#nav-generar-posts",
     popover: {
-      title: "Tu plan actual",
+      title: "Generá contenido en segundos ⚡",
       description:
-        "Desde acá podés ver tu plan y upgradear cuando lo necesites.",
+        "Desde cada propiedad elegís qué generar: posts, reels, ads, carruseles, calendario y más. La IA escribe, vos cerrás ventas.",
+      side: "right" as const,
+      align: "center" as const,
+    },
+  },
+  {
+    element: "#nav-perfil",
+    popover: {
+      title: "Personalizá tu contenido 🎨",
+      description:
+        "Completá tu perfil de marca una vez y la IA usará tu nombre, zona y estilo en todo el contenido que genere.",
       side: "right" as const,
       align: "center" as const,
     },
@@ -55,8 +55,7 @@ export default function TutorialButton() {
     if (running || typeof window === "undefined") return;
 
     if (window.innerWidth < 1024) {
-      // En mobile el tour no encaja bien — abrimos directamente /perfil como ayuda
-      window.location.href = "/perfil";
+      window.location.href = "/mis-propiedades";
       return;
     }
 
@@ -66,10 +65,10 @@ export default function TutorialButton() {
 
     const driverObj = driver({
       showProgress: true,
-      progressText: "Paso {{current}} de {{total}}",
+      progressText: "{{current}}/{{total}}",
       nextBtnText: "Siguiente →",
-      prevBtnText: "← Anterior",
-      doneBtnText: "Entendido",
+      prevBtnText: "← Atrás",
+      doneBtnText: "¡Listo!",
       steps: TOUR_STEPS,
       onDestroyed: () => {
         setRunning(false);

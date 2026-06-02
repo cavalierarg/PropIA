@@ -127,3 +127,106 @@
     @apply pt-6 px-4 sm:pt-8 sm:px-6 lg:px-8 max-w-7xl mx-auto;
   }
 }
+
+/* ─── Driver.js — PropIA Custom Theme ────────────────────── */
+.driver-popover {
+  background: linear-gradient(135deg, #0f3460 0%, #0a1628 100%) !important;
+  border: 1px solid rgba(0, 201, 201, 0.2) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45) !important;
+  padding: 20px 24px 22px !important;
+  max-width: 320px !important;
+  min-width: 260px !important;
+}
+
+.driver-popover-title {
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  margin-bottom: 8px !important;
+  font-family: inherit !important;
+  line-height: 1.4 !important;
+}
+
+.driver-popover-description {
+  color: rgba(255, 255, 255, 0.75) !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+  font-family: inherit !important;
+}
+
+.driver-popover-progress-text {
+  color: rgba(0, 201, 201, 0.8) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+}
+
+.driver-popover-footer {
+  margin-top: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.driver-popover-prev-btn,
+.driver-popover-next-btn,
+.driver-popover-done-btn {
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 7px 14px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  outline: none !important;
+  font-family: inherit !important;
+}
+
+.driver-popover-prev-btn {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.driver-popover-prev-btn:hover {
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.driver-popover-next-btn,
+.driver-popover-done-btn {
+  background: #00c9c9 !important;
+  border: 1px solid #00c9c9 !important;
+  color: #0f3460 !important;
+}
+
+.driver-popover-next-btn:hover,
+.driver-popover-done-btn:hover {
+  background: #00b3b3 !important;
+  border-color: #00b3b3 !important;
+}
+
+.driver-popover-close-btn {
+  color: rgba(255, 255, 255, 0.35) !important;
+  top: 10px !important;
+  right: 12px !important;
+  font-size: 17px !important;
+  line-height: 1 !important;
+}
+
+.driver-popover-close-btn:hover {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.driver-popover-arrow-side-left .driver-popover-arrow {
+  border-right-color: #0a1628 !important;
+}
+.driver-popover-arrow-side-right .driver-popover-arrow {
+  border-left-color: #0a1628 !important;
+}
+.driver-popover-arrow-side-top .driver-popover-arrow {
+  border-bottom-color: #0a1628 !important;
+}
+.driver-popover-arrow-side-bottom .driver-popover-arrow {
+  border-top-color: #0a1628 !important;
+}

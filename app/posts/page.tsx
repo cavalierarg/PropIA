@@ -42,7 +42,7 @@ export default async function GenerarPostsPage() {
           Generador de Posts Inmobiliarios
         </h1>
         <p className="text-base text-muted-foreground sm:text-lg max-w-2xl">
-          Completá los datos de la propiedad y generá 5 posts listos para Instagram, Facebook y LinkedIn.
+          Seleccioná una propiedad desde Mis Propiedades y generá 5 posts listos para Instagram, Facebook y LinkedIn.
         </p>
         <div className="h-1 w-16 bg-[#00c9c9] rounded-full sm:w-20" />
       </section>

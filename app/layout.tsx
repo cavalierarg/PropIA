@@ -61,7 +61,7 @@ export default async function RootLayout({
       redirect("/perfil");
     }
 
-    const checkoutUrl = `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? ""}?checkout[custom][user_id]=${userId}`;
+    const checkoutUrl = `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? ""}?checkout[custom][plan]=pro&checkout[custom][user_id]=${userId}`;
 
     sidebarProps = {
       plan,

@@ -24,7 +24,6 @@ import OnboardingChecklist, { type ChecklistItem } from "@/components/Onboarding
 import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 import { UpgradeButton } from "@/components/UpgradeLink";
-import TutorialButton from "@/components/TutorialButton";
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -175,7 +174,7 @@ export default async function DashboardPage() {
       ]
     : [];
 
-  const checkoutUrl = `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? ""}?checkout[custom][user_id]=${userId}`;
+  const checkoutUrl = `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? ""}?checkout[custom][plan]=pro&checkout[custom][user_id]=${userId}`;
 
   return (
     <div className="py-6 px-4 sm:px-6 lg:px-8 space-y-7 pb-10">
@@ -419,10 +418,6 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      {/* ── VER TUTORIAL DE NUEVO ── */}
-      <div className="flex justify-center pb-2">
-        <TutorialButton />
-      </div>
     </div>
   );
 }

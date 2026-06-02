@@ -4,21 +4,21 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { generarCalendario, CalendarDay } from "@/lib/actions/calendario.actions";
 import { getUserPlan } from "@/lib/actions/subscription.actions";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   CheckIcon,
   CopyIcon,
   DownloadIcon,
-  LoaderIcon,
   LockIcon,
   SparklesIcon,
   CalendarIcon,
+  Building2,
 } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import PropertySelector from "@/components/PropertySelector";
 import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 
 const NICHOS = [
@@ -41,6 +41,7 @@ const TOTAL_DAYS = 30;
 
 export default function CalendarioContent() {
   const { user } = useUser();
+  const router = useRouter();
   const [nicho, setNicho] = useState("");
   const [zona, setZona] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,7 +54,7 @@ export default function CalendarioContent() {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const checkoutUrl = user
-    ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][user_id]=${user.id}`
+    ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][plan]=pro&checkout[custom][user_id]=${user.id}`
     : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
 
   useEffect(() => {
@@ -143,37 +144,40 @@ export default function CalendarioContent() {
           <PropertyLoadedCard
             tipo={loadedProperty.tipo}
             ubicacion={loadedProperty.ubicacion}
-            onClear={() => { setLoadedProperty(null); setZona(""); }}
+            onClear={() => router.push("/mis-propiedades")}
           />
         ) : (
-          <PropertySelector onSelect={(prefill) => { setZona(prefill.ubicacion); setLoadedProperty({ tipo: prefill.tipoPropiedad, ubicacion: prefill.ubicacion }); }} />
+          <div className="flex flex-col items-center gap-4 py-10 text-center border-2 border-dashed border-[#0f3460]/15 rounded-xl bg-[#0f3460]/3">
+            <div className="w-14 h-14 rounded-2xl bg-[#0f3460]/8 flex items-center justify-center">
+              <Building2 className="w-7 h-7 text-[#0f3460]/40" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <p className="text-sm font-semibold text-[#0f3460]">Seleccioná una propiedad primero</p>
+              <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+                Cargá tu propiedad en Mis Propiedades y generá contenido desde ahí.
+              </p>
+            </div>
+            <Link href="/mis-propiedades" className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#0f3460] hover:bg-[#0f3460]/90 px-5 py-2.5 rounded-xl transition-colors">
+              Ir a Mis Propiedades →
+            </Link>
+          </div>
         )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+        {loadedProperty && (
           <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium">Tu nicho *</Label>
+            <Label className="text-sm font-medium">Tipo de contenido</Label>
             <select
               value={nicho}
               onChange={(e) => setNicho(e.target.value)}
               disabled={loading}
               className="w-full border border-input bg-background rounded-md px-3 h-12 text-base focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
             >
-              <option value="">Seleccioná tu nicho</option>
+              <option value="">Seleccioná el tipo de contenido</option>
               {NICHOS.map((n) => (
                 <option key={n} value={n}>{n}</option>
               ))}
             </select>
           </div>
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium">Zona donde trabajás *</Label>
-            <Input
-              value={zona}
-              onChange={(e) => setZona(e.target.value)}
-              placeholder="Ej: Palermo, Buenos Aires"
-              disabled={loading}
-              className="h-12 text-base"
-            />
-          </div>
-        </div>
+        )}
 
         {error && <p className="text-destructive text-sm">{error}</p>}
 

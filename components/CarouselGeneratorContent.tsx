@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Upload,
   Loader2,
@@ -13,8 +14,8 @@ import {
   Plus,
   X,
   Sparkles,
+  Building2,
 } from "lucide-react";
-import PropertySelector from "@/components/PropertySelector";
 import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 import { uploadCarouselPhoto } from "@/lib/actions/carousel-photo.actions";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
@@ -59,6 +60,7 @@ const SLIDE_LABELS = [
 const OPERACIONES = ["En Venta", "Alquiler", "Alquiler temporal"];
 
 export default function CarouselGeneratorContent({ profile }: Props) {
+  const router = useRouter();
   // Photo upload state
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [localPreview, setLocalPreview] = useState<string | null>(null);
@@ -259,17 +261,26 @@ export default function CarouselGeneratorContent({ profile }: Props) {
             ubicacion={loadedProperty.ubicacion}
             precio={loadedProperty.precio}
             metros={loadedProperty.metros}
-            onClear={() => setLoadedProperty(null)}
+            onClear={() => router.push("/mis-propiedades")}
           />
         ) : (
-          <PropertySelector
-            onSelect={(prefill) => {
-              setZona(prefill.ubicacion);
-              setPrecio(prefill.precio);
-              setMetros(prefill.metrosCuadrados);
-              setLoadedProperty({ tipo: prefill.tipoPropiedad, ubicacion: prefill.ubicacion, precio: prefill.precio, metros: prefill.metrosCuadrados });
-            }}
-          />
+          <div className="flex flex-col items-center gap-4 py-10 text-center border-2 border-dashed border-[#0f3460]/15 rounded-xl bg-[#0f3460]/3">
+            <div className="w-14 h-14 rounded-2xl bg-[#0f3460]/8 flex items-center justify-center">
+              <Building2 className="w-7 h-7 text-[#0f3460]/40" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <p className="text-sm font-semibold text-[#0f3460]">Seleccioná una propiedad primero</p>
+              <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+                Cargá tu propiedad en Mis Propiedades y generá contenido desde ahí con un clic.
+              </p>
+            </div>
+            <Link
+              href="/mis-propiedades"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#0f3460] hover:bg-[#0f3460]/90 px-5 py-2.5 rounded-xl transition-colors"
+            >
+              Ir a Mis Propiedades →
+            </Link>
+          </div>
         )}
 
         {/* Photo upload */}

@@ -1,53 +1,27 @@
 "use client";
 
-import { useState, useEffect, useTransition, useMemo } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useTransition } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
 import type { ErrorGeneracion } from "@/lib/actions/posts.actions";
 import { getUsage } from "@/lib/actions/usage.actions";
 import { saveProperty } from "@/lib/actions/properties.actions";
-import { getUserProfile, saveUserProfile } from "@/lib/actions/user-profile.actions";
+import { getUserProfile } from "@/lib/actions/user-profile.actions";
 import PostsView from "@/components/PostsView";
 import PostsSkeleton from "@/components/PostsSkeleton";
 import UpgradeModal from "@/components/UpgradeModal";
-import { ZapIcon, LogInIcon, SparklesIcon, ChevronDown } from "lucide-react";
+import { ZapIcon, LogInIcon, SparklesIcon, BuildingIcon } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { trackEvent } from "@/lib/meta-pixel";
 import { useRef } from "react";
-import PropertySelector, { type PropertyPrefill } from "@/components/PropertySelector";
-import PropertySaveModal from "@/components/PropertySaveModal";
 import PropertyLoadedCard from "@/components/PropertyLoadedCard";
-
-const TIPOS_PROPIEDAD = [
-  "Casa",
-  "Departamento",
-  "PH",
-  "Oficina",
-  "Local comercial",
-  "Terreno",
-  "Cochera",
-];
-
-const AMENITIES_LIST = [
-  "Pileta",
-  "Gimnasio",
-  "Seguridad 24hs",
-  "Jardín",
-  "Terraza",
-  "Balcón",
-  "Vista panorámica",
-  "Parrilla",
-  "Quincho",
-  "Apto mascotas",
-];
 
 export default function PropertyForm() {
   const { user } = useUser();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [form, setForm] = useState({
     tipoPropiedad: searchParams.get("tipoPropiedad") ?? "",
@@ -67,11 +41,6 @@ export default function PropertyForm() {
     agenteInstagram: "",
     agenteSitioWeb: "",
   });
-  const [amenities, setAmenities] = useState<string[]>([]);
-
-  const [showDatos, setShowDatos] = useState(false);
-  const [showAmenities, setShowAmenities] = useState(false);
-  const [showContacto, setShowContacto] = useState(false);
 
   const [posts, setPosts] = useState<PostResult[]>([]);
   const [recomendaciones, setRecomendaciones] = useState<RecomendacionesResult | null>(null);
@@ -82,14 +51,11 @@ export default function PropertyForm() {
   const [isPro, setIsPro] = useState(false);
   const [unauthenticated, setUnauthenticated] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showSaveLibModal, setShowSaveLibModal] = useState(false);
   const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const hasTrackedLead = useRef(false);
 
-  const isRegenerando = searchParams.get("regenerar") === "1";
-
   const checkoutUrl = user
-    ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][user_id]=${user.id}`
+    ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][plan]=pro&checkout[custom][user_id]=${user.id}`
     : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
 
   useEffect(() => {
@@ -106,7 +72,6 @@ export default function PropertyForm() {
         agenteSitioWeb: profile.sitio_web ?? "",
       }));
     });
-    // Detectar propiedad precargada desde URL params (viene de Mis Propiedades)
     const tipo = searchParams.get("tipoPropiedad");
     const ubicacion = searchParams.get("ubicacion");
     if (tipo && ubicacion) {
@@ -119,22 +84,11 @@ export default function PropertyForm() {
     }
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleAmenityChange = (amenity: string, checked: boolean) => {
-    setAmenities((prev) =>
-      checked ? [...prev, amenity] : prev.filter((a) => a !== amenity)
-    );
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setPosts([]);
     setRecomendaciones(null);
-    setShowSaveLibModal(false);
     setUnauthenticated(false);
 
     if (!form.tipoPropiedad || !form.ubicacion || !form.metrosCuadrados || !form.precio) {
@@ -143,15 +97,7 @@ export default function PropertyForm() {
     }
 
     startTransition(async () => {
-      if (form.agenteWhatsapp || form.agenteInstagram || form.agenteSitioWeb) {
-        saveUserProfile({
-          whatsapp: form.agenteWhatsapp || undefined,
-          instagram: form.agenteInstagram || undefined,
-          sitio_web: form.agenteSitioWeb || undefined,
-        }).catch(() => {});
-      }
-
-      const result = await generarPosts({ ...form, amenities });
+      const result = await generarPosts({ ...form, amenities: [] });
 
       if (!result.ok) {
         if (result.error === "LIMIT_REACHED") {
@@ -195,31 +141,11 @@ export default function PropertyForm() {
   const isWarning = !isPro && remaining !== null && remaining > 0 && remaining <= 3;
   const used = remaining !== null ? usageLimit - remaining : 0;
 
-  const saveLibPrefill = useMemo(() => ({
-    tipo_propiedad: form.tipoPropiedad,
-    ubicacion: form.ubicacion,
-    precio: form.precio,
-    metros_cuadrados: form.metrosCuadrados,
-    caracteristica1: form.caracteristica1,
-    caracteristica2: form.caracteristica2,
-    caracteristica3: form.caracteristica3,
-  }), [form.tipoPropiedad, form.ubicacion, form.precio, form.metrosCuadrados, form.caracteristica1, form.caracteristica2, form.caracteristica3]);
-
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
 
       {showUpgradeModal && (
         <UpgradeModal onClose={() => setShowUpgradeModal(false)} />
-      )}
-
-      {/* Banner: regenerando desde historial */}
-      {isRegenerando && (
-        <div className="border border-[#00d4d4]/30 bg-[#00d4d4]/5 rounded-xl p-3 sm:p-4 flex items-center gap-3">
-          <SparklesIcon className="w-4 h-4 text-[#00d4d4] shrink-0" />
-          <p className="text-sm text-[#0f3460]">
-            Formulario pre-cargado desde tu historial. Modificá lo que quieras y generá nuevos posts.
-          </p>
-        </div>
       )}
 
       {/* Indicador de uso */}
@@ -271,7 +197,7 @@ export default function PropertyForm() {
         </div>
       )}
 
-      {/* Mensaje de límite alcanzado */}
+      {/* Límite alcanzado */}
       {isLimitReached && (
         <div className="border border-amber-200 bg-amber-50 rounded-xl p-4 sm:p-5 flex flex-col gap-3">
           <p className="font-semibold text-amber-900 text-sm sm:text-base">
@@ -288,7 +214,13 @@ export default function PropertyForm() {
             asChild
             className="w-full sm:w-auto sm:self-start h-11 sm:h-10 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white"
           >
-            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("InitiateCheckout")} className="flex items-center gap-2">
+            <a
+              href={checkoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent("InitiateCheckout")}
+              className="flex items-center gap-2"
+            >
               <SparklesIcon className="w-4 h-4" />
               Upgrade a PRO — generaciones ilimitadas
             </a>
@@ -296,7 +228,7 @@ export default function PropertyForm() {
         </div>
       )}
 
-      {/* Banner: sesión requerida */}
+      {/* Sesión requerida */}
       {unauthenticated && (
         <div className="border border-[#0f3460]/20 bg-[#0f3460]/5 rounded-xl p-4 sm:p-5 flex flex-col gap-3">
           <p className="font-semibold text-[#0f3460] text-sm sm:text-base">
@@ -318,394 +250,61 @@ export default function PropertyForm() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
         <fieldset disabled={isPending} className="contents">
 
-        {/* ── Propiedad cargada o selector ── */}
-        {loadedProperty ? (
-          <PropertyLoadedCard
-            tipo={loadedProperty.tipo}
-            ubicacion={loadedProperty.ubicacion}
-            precio={loadedProperty.precio}
-            metros={loadedProperty.metros}
-            onClear={() => setLoadedProperty(null)}
-          />
-        ) : (
-          <PropertySelector
-            onSelect={(prefill: PropertyPrefill) => {
-              setForm((prev) => ({
-                ...prev,
-                tipoPropiedad: prefill.tipoPropiedad,
-                ubicacion: prefill.ubicacion,
-                precio: prefill.precio,
-                metrosCuadrados: prefill.metrosCuadrados,
-                caracteristica1: prefill.caracteristica1,
-                caracteristica2: prefill.caracteristica2,
-                caracteristica3: prefill.caracteristica3,
-              }));
-              setLoadedProperty({
-                tipo: prefill.tipoPropiedad,
-                ubicacion: prefill.ubicacion,
-                precio: prefill.precio,
-                metros: prefill.metrosCuadrados,
-              });
-            }}
-          />
-        )}
+          {loadedProperty ? (
+            <PropertyLoadedCard
+              tipo={loadedProperty.tipo}
+              ubicacion={loadedProperty.ubicacion}
+              precio={loadedProperty.precio}
+              metros={loadedProperty.metros}
+              onClear={() => router.push("/mis-propiedades")}
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-4 py-10 text-center border-2 border-dashed border-[#0f3460]/15 rounded-xl bg-[#0f3460]/3">
+              <div className="w-14 h-14 rounded-2xl bg-[#0f3460]/8 flex items-center justify-center">
+                <BuildingIcon className="w-7 h-7 text-[#0f3460]/40" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <p className="text-sm font-semibold text-[#0f3460]">Seleccioná una propiedad primero</p>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+                  Cargá tu propiedad en Mis Propiedades y generá contenido desde ahí con un clic.
+                </p>
+              </div>
+              <Link
+                href="/mis-propiedades"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#0f3460] hover:bg-[#0f3460]/90 px-5 py-2.5 rounded-xl transition-colors"
+              >
+                Ir a Mis Propiedades →
+              </Link>
+            </div>
+          )}
 
-        {/* ── Campos principales ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          {loadedProperty && error && error !== "CAMPOS_INCOMPLETOS" && (
+            <p className="text-destructive text-sm">
+              {error === "ERROR_API"
+                ? "Error al conectar con la IA. Verificá tu conexión e intentá de nuevo."
+                : error === "ERROR_FORMATO"
+                ? "La IA devolvió una respuesta inesperada. Intentá de nuevo."
+                : error === "API_KEY_FALTANTE"
+                ? "Clave de API no configurada. Contactá al soporte."
+                : "Ocurrió un error al generar los posts. Intentá de nuevo."}
+            </p>
+          )}
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="tipoPropiedad" className="text-sm font-medium">
-              Tipo de propiedad *
-            </Label>
-            <select
-              id="tipoPropiedad"
-              name="tipoPropiedad"
-              value={form.tipoPropiedad}
-              onChange={handleChange}
-              className="w-full border border-input bg-background rounded-md px-3 h-12 text-base focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
-              required
+          {loadedProperty && (
+            <Button
+              type="submit"
+              disabled={isPending || isLimitReached}
+              className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
             >
-              <option value="">Seleccioná un tipo</option>
-              {TIPOS_PROPIEDAD.map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="ubicacion" className="text-sm font-medium">
-              Ubicación *
-            </Label>
-            <Input
-              id="ubicacion"
-              name="ubicacion"
-              placeholder="Ej: Polanco, Ciudad de México"
-              value={form.ubicacion}
-              onChange={handleChange}
-              required
-              className="h-12 text-base"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="metrosCuadrados" className="text-sm font-medium">
-              Metros cuadrados *
-            </Label>
-            <Input
-              id="metrosCuadrados"
-              name="metrosCuadrados"
-              type="number"
-              inputMode="numeric"
-              placeholder="Ej: 85"
-              value={form.metrosCuadrados}
-              onChange={handleChange}
-              required
-              min={1}
-              className="h-12 text-base"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="precio" className="text-sm font-medium">
-              Precio *
-            </Label>
-            <Input
-              id="precio"
-              name="precio"
-              placeholder="Ej: USD 120.000"
-              value={form.precio}
-              onChange={handleChange}
-              required
-              className="h-12 text-base"
-            />
-          </div>
-        </div>
-
-        {/* Características */}
-        <div className="flex flex-col gap-3">
-          <Label className="text-sm font-medium">3 Características destacadas</Label>
-          <p className="text-xs text-muted-foreground -mt-1">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            <Input
-              name="caracteristica1"
-              placeholder="Ej: Luminoso"
-              value={form.caracteristica1}
-              onChange={handleChange}
-              className="h-12 text-base"
-            />
-            <Input
-              name="caracteristica2"
-              placeholder="Ej: Terraza propia"
-              value={form.caracteristica2}
-              onChange={handleChange}
-              className="h-12 text-base"
-            />
-            <Input
-              name="caracteristica3"
-              placeholder="Ej: A 2 cuadras del subte"
-              value={form.caracteristica3}
-              onChange={handleChange}
-              className="h-12 text-base"
-            />
-          </div>
-        </div>
-
-        {/* ── Sección colapsable: Datos de la propiedad ── */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setShowDatos(!showDatos)}
-            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="text-sm font-semibold text-[#0f3460]">Datos de la propiedad</span>
-              <span className="hidden sm:inline text-xs text-slate-400 font-normal">
-                dormitorios, baños, cocheras…
-              </span>
-            </div>
-            <ChevronDown
-              className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
-                showDatos ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {showDatos && (
-            <div className="p-4 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Dormitorios</Label>
-                <select
-                  name="dormitorios"
-                  value={form.dormitorios}
-                  onChange={handleChange}
-                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
-                >
-                  <option value="">No tiene</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5+">5+</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Baños</Label>
-                <select
-                  name="banios"
-                  value={form.banios}
-                  onChange={handleChange}
-                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
-                >
-                  <option value="">No tiene</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4+">4+</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Cocheras</Label>
-                <select
-                  name="cocheras"
-                  value={form.cocheras}
-                  onChange={handleChange}
-                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
-                >
-                  <option value="">No tiene</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3+">3+</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Antigüedad</Label>
-                <select
-                  name="antiguedad"
-                  value={form.antiguedad}
-                  onChange={handleChange}
-                  className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
-                >
-                  <option value="">—</option>
-                  <option value="A estrenar">A estrenar</option>
-                  <option value="0-5 años">0–5 años</option>
-                  <option value="5-10 años">5–10 años</option>
-                  <option value="10-20 años">10–20 años</option>
-                  <option value="20+ años">20+ años</option>
-                </select>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">
-                  Piso{" "}
-                  <span className="text-slate-400 font-normal">(opcional)</span>
-                </Label>
-                <Input
-                  name="piso"
-                  placeholder="Opcional — dejar vacío si no aplica"
-                  value={form.piso}
-                  onChange={handleChange}
-                  className="h-10 text-sm"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2 col-span-2 sm:col-span-1">
-                <Label className="text-sm font-medium text-slate-600">
-                  Expensas{" "}
-                  <span className="text-slate-400 font-normal">(opcional)</span>
-                </Label>
-                <Input
-                  name="expensas"
-                  placeholder="Opcional — dejar vacío si no aplica"
-                  value={form.expensas}
-                  onChange={handleChange}
-                  className="h-10 text-sm"
-                />
-              </div>
-            </div>
+              <ZapIcon className="w-4 h-4" />
+              {isPending ? "Generando con IA..." : "Generar 5 posts"}
+            </Button>
           )}
-        </div>
 
-        {/* ── Sección colapsable: Amenities ── */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setShowAmenities(!showAmenities)}
-            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="text-sm font-semibold text-[#0f3460]">Características adicionales</span>
-              {amenities.length > 0 ? (
-                <span className="text-xs bg-[#0f3460] text-white px-2 py-0.5 rounded-full font-semibold">
-                  {amenities.length} seleccionado{amenities.length !== 1 ? "s" : ""}
-                </span>
-              ) : (
-                <span className="hidden sm:inline text-xs text-slate-400 font-normal">
-                  pileta, gimnasio, seguridad, jardín…
-                </span>
-              )}
-            </div>
-            <ChevronDown
-              className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
-                showAmenities ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {showAmenities && (
-            <div className="p-4 border-t border-slate-100">
-              <p className="text-xs text-muted-foreground mb-3">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {AMENITIES_LIST.map((amenity) => (
-                  <label key={amenity} className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={amenities.includes(amenity)}
-                      onChange={(e) => handleAmenityChange(amenity, e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-300 text-[#0f3460] focus:ring-[#0f3460] cursor-pointer"
-                    />
-                    <span className="text-sm text-slate-700 group-hover:text-[#0f3460] transition-colors">
-                      {amenity}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Sección colapsable: Contacto del agente ── */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <button
-            type="button"
-            onClick={() => setShowContacto(!showContacto)}
-            className="w-full flex items-center justify-between px-4 py-3.5 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-          >
-            <div className="flex items-center gap-2.5">
-              <span className="text-sm font-semibold text-[#0f3460]">Contacto del agente</span>
-              <span className="hidden sm:inline text-xs text-slate-400 font-normal">
-                WhatsApp, Instagram, sitio web
-              </span>
-            </div>
-            <ChevronDown
-              className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
-                showContacto ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {showContacto && (
-            <div className="p-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <p className="text-xs text-muted-foreground col-span-full">Todos los campos son opcionales. Completá solo los que aplican a tu propiedad.</p>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">WhatsApp</Label>
-                <Input
-                  name="agenteWhatsapp"
-                  placeholder="Opcional — dejar vacío si no aplica"
-                  value={form.agenteWhatsapp}
-                  onChange={handleChange}
-                  className="h-10 text-sm"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Instagram</Label>
-                <Input
-                  name="agenteInstagram"
-                  placeholder="Opcional — dejar vacío si no aplica"
-                  value={form.agenteInstagram}
-                  onChange={handleChange}
-                  className="h-10 text-sm"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-slate-600">Sitio web</Label>
-                <Input
-                  name="agenteSitioWeb"
-                  placeholder="Opcional — dejar vacío si no aplica"
-                  value={form.agenteSitioWeb}
-                  onChange={handleChange}
-                  className="h-10 text-sm"
-                />
-              </div>
-              <p className="col-span-full text-xs text-slate-400">
-                Tu información de contacto se guarda automáticamente al generar posts y se usa en las CTAs.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {error && error !== "CAMPOS_INCOMPLETOS" && (
-          <p className="text-destructive text-sm">
-            {error === "ERROR_API"
-              ? "Error al conectar con la IA. Verificá tu conexión e intentá de nuevo."
-              : error === "ERROR_FORMATO"
-              ? "La IA devolvió una respuesta inesperada. Intentá de nuevo."
-              : error === "API_KEY_FALTANTE"
-              ? "Clave de API no configurada. Contactá al soporte."
-              : "Ocurrió un error al generar los posts. Intentá de nuevo."}
-          </p>
-        )}
-        {error === "CAMPOS_INCOMPLETOS" && (
-          <p className="text-destructive text-sm">Por favor completá todos los campos obligatorios.</p>
-        )}
-
-        <Button
-          type="submit"
-          disabled={isPending || isLimitReached}
-          className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
-        >
-          <ZapIcon className="w-4 h-4" />
-          {isPending ? "Generando con IA..." : "Generar 5 posts"}
-        </Button>
         </fieldset>
       </form>
 
-      {/* Skeleton de carga */}
+      {/* Skeleton */}
       {isPending && <PostsSkeleton />}
 
       {/* Resultados */}
@@ -726,31 +325,7 @@ export default function PropertyForm() {
             <div className="h-1 w-16 bg-[#00d4d4] rounded-full" />
           </div>
           <PostsView posts={posts} recomendaciones={recomendaciones} />
-
-          {/* ── Banner: guardar en biblioteca ── */}
-          <div className="border border-[#00c9c9]/30 bg-[#00c9c9]/5 rounded-xl px-4 py-3.5 flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <p className="text-sm font-semibold text-[#0f3460]">¿Querés guardar esta propiedad en tu biblioteca?</p>
-              <p className="text-xs text-slate-500 mt-0.5">Cargala una vez y reutilizala en todas las herramientas sin volver a escribir.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowSaveLibModal(true)}
-              className="shrink-0 h-9 px-4 text-sm font-semibold text-[#0f3460] bg-[#00c9c9]/15 hover:bg-[#00c9c9]/25 border border-[#00c9c9]/30 rounded-xl transition-colors"
-            >
-              Guardar propiedad
-            </button>
-          </div>
         </div>
-      )}
-
-      {showSaveLibModal && (
-        <PropertySaveModal
-          open={showSaveLibModal}
-          onClose={() => setShowSaveLibModal(false)}
-          onSaved={() => setShowSaveLibModal(false)}
-          prefill={saveLibPrefill}
-        />
       )}
     </div>
   );
