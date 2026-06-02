@@ -86,7 +86,8 @@
       "PowerShell(Tail *)",
       "Bash(Select-Object -First 30)",
       "WebFetch(domain:propia.online)",
-      "Bash(grep -E \"\\\\.tsx?$\")"
+      "Bash(grep -E \"\\\\.tsx?$\")",
+      "PowerShell(Select-String *)"
     ]
   }
 }

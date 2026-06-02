@@ -15,6 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import PropertySelector from "@/components/PropertySelector";
+import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 import { uploadCarouselPhoto } from "@/lib/actions/carousel-photo.actions";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
@@ -90,6 +91,9 @@ export default function CarouselGeneratorContent({ profile }: Props) {
         if (p.ubicacion) setZona(p.ubicacion);
         if (p.precio) setPrecio(p.precio);
         if (p.metrosCuadrados) setMetros(p.metrosCuadrados);
+        if (p.tipoPropiedad && p.ubicacion) {
+          setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
+        }
       }
     } catch {}
 
@@ -114,6 +118,7 @@ export default function CarouselGeneratorContent({ profile }: Props) {
 
   // Generation state
   const [generating, setGenerating] = useState(false);
+  const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [slideUrls, setSlideUrls] = useState<string[]>([]);
   const [slideBlobs, setSlideBlobs] = useState<Blob[]>([]);
@@ -248,13 +253,24 @@ export default function CarouselGeneratorContent({ profile }: Props) {
       {/* ── FORM ── */}
       <div className="flex flex-col gap-6">
         <fieldset disabled={generating} className="contents">
-        <PropertySelector
-          onSelect={(prefill) => {
-            setZona(prefill.ubicacion);
-            setPrecio(prefill.precio);
-            setMetros(prefill.metrosCuadrados);
-          }}
-        />
+        {loadedProperty ? (
+          <PropertyLoadedCard
+            tipo={loadedProperty.tipo}
+            ubicacion={loadedProperty.ubicacion}
+            precio={loadedProperty.precio}
+            metros={loadedProperty.metros}
+            onClear={() => setLoadedProperty(null)}
+          />
+        ) : (
+          <PropertySelector
+            onSelect={(prefill) => {
+              setZona(prefill.ubicacion);
+              setPrecio(prefill.precio);
+              setMetros(prefill.metrosCuadrados);
+              setLoadedProperty({ tipo: prefill.tipoPropiedad, ubicacion: prefill.ubicacion, precio: prefill.precio, metros: prefill.metrosCuadrados });
+            }}
+          />
+        )}
 
         {/* Photo upload */}
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">

@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { LockIcon } from "lucide-react";
 import PropertySelector from "@/components/PropertySelector";
+import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 
 type AdType  = "feed" | "story" | "banner";
 type Phase   = "idle" | "generating" | "complete";
@@ -122,6 +123,7 @@ export default function AdsGeneratorContent({
   const [badge,      setBadge]      = useState<string>("En Venta");
 
   const [phase,      setPhase]      = useState<Phase>("idle");
+  const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const [loadingTip, setLoadingTip] = useState(0);
   const [error,      setError]      = useState("");
   const [ads,        setAds]        = useState<GeneratedAd[]>([]);
@@ -148,6 +150,9 @@ export default function AdsGeneratorContent({
         if (p.metrosCuadrados) setMetros(p.metrosCuadrados);
         if (p.caracteristica1) setCar1(p.caracteristica1);
         if (p.caracteristica2) setCar2(p.caracteristica2);
+        if (p.tipoPropiedad && p.ubicacion) {
+          setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
+        }
       }
     } catch {}
 
@@ -299,15 +304,26 @@ export default function AdsGeneratorContent({
       {/* ── Formulario ── */}
       <div className="border border-[#0f3460]/10 rounded-xl p-5 sm:p-6 bg-card flex flex-col gap-7">
         <fieldset disabled={isLoading} className="contents">
-        <PropertySelector
-          onSelect={(prefill) => {
-            setZona(prefill.ubicacion);
-            setPrecio(prefill.precio);
-            setMetros(prefill.metrosCuadrados);
-            setCar1(prefill.caracteristica1);
-            setCar2(prefill.caracteristica2);
-          }}
-        />
+        {loadedProperty ? (
+          <PropertyLoadedCard
+            tipo={loadedProperty.tipo}
+            ubicacion={loadedProperty.ubicacion}
+            precio={loadedProperty.precio}
+            metros={loadedProperty.metros}
+            onClear={() => setLoadedProperty(null)}
+          />
+        ) : (
+          <PropertySelector
+            onSelect={(prefill) => {
+              setZona(prefill.ubicacion);
+              setPrecio(prefill.precio);
+              setMetros(prefill.metrosCuadrados);
+              setCar1(prefill.caracteristica1);
+              setCar2(prefill.caracteristica2);
+              setLoadedProperty({ tipo: prefill.tipoPropiedad, ubicacion: prefill.ubicacion, precio: prefill.precio, metros: prefill.metrosCuadrados });
+            }}
+          />
+        )}
 
         {/* Fotos */}
         <div className="flex flex-col gap-2">

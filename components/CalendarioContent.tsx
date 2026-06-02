@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import PropertySelector from "@/components/PropertySelector";
+import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 
 const NICHOS = [
   "Casas",
@@ -45,6 +46,7 @@ export default function CalendarioContent() {
   const [loading, setLoading] = useState(false);
   const [retryDisabled, setRetryDisabled] = useState(false);
   const [error, setError] = useState("");
+  const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string } | null>(null);
   const [dias, setDias] = useState<CalendarDay[]>([]);
   const [isPro, setIsPro] = useState(false);
   const [planChecked, setPlanChecked] = useState(false);
@@ -59,6 +61,14 @@ export default function CalendarioContent() {
       setIsPro(plan === "pro" || plan === "pro_max");
       setPlanChecked(true);
     });
+    try {
+      const raw = localStorage.getItem("propia_property_prefill");
+      if (raw) {
+        const p = JSON.parse(raw);
+        localStorage.removeItem("propia_property_prefill");
+        if (p.ubicacion) { setZona(p.ubicacion); setLoadedProperty({ tipo: p.tipoPropiedad ?? "", ubicacion: p.ubicacion }); }
+      }
+    } catch {}
   }, []);
 
   const handleGenerar = async () => {
@@ -129,7 +139,15 @@ export default function CalendarioContent() {
 
       {/* Formulario */}
       <div className="border border-[#0f3460]/10 rounded-xl p-5 sm:p-6 bg-card flex flex-col gap-5">
-        <PropertySelector onSelect={(prefill) => setZona(prefill.ubicacion)} />
+        {loadedProperty ? (
+          <PropertyLoadedCard
+            tipo={loadedProperty.tipo}
+            ubicacion={loadedProperty.ubicacion}
+            onClear={() => { setLoadedProperty(null); setZona(""); }}
+          />
+        ) : (
+          <PropertySelector onSelect={(prefill) => { setZona(prefill.ubicacion); setLoadedProperty({ tipo: prefill.tipoPropiedad, ubicacion: prefill.ubicacion }); }} />
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Tu nicho *</Label>

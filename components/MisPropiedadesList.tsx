@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PropertySaveModal from "@/components/PropertySaveModal";
+import GenerarModal from "@/components/GenerarModal";
+import { SparklesIcon } from "lucide-react";
 
 /* ── Constants ── */
 
@@ -122,6 +124,7 @@ export default function MisPropiedadesList({
   const [deleting, setDeleting] = useState(false);
   const [editProperty, setEditProperty] = useState<SavedProperty | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [generarProperty, setGenerarProperty] = useState<SavedProperty | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Close dropdowns on outside click
@@ -461,6 +464,15 @@ export default function MisPropiedadesList({
                       )}
                     </div>
 
+                    {/* Generar contenido */}
+                    <button
+                      onClick={() => setGenerarProperty(property)}
+                      className="flex items-center gap-1 text-xs bg-[#0f3460] hover:bg-[#0f3460]/90 text-white font-semibold px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <SparklesIcon className="w-3 h-3" />
+                      Generar
+                    </button>
+
                     {/* Usar en... */}
                     <div className="relative ml-auto">
                       <button
@@ -511,6 +523,15 @@ export default function MisPropiedadesList({
             })}
           </div>
         </>
+      )}
+
+      {/* ── Generar contenido modal ── */}
+      {generarProperty && (
+        <GenerarModal
+          property={generarProperty}
+          open={!!generarProperty}
+          onClose={() => setGenerarProperty(null)}
+        />
       )}
 
       {/* ── New property modal ── */}

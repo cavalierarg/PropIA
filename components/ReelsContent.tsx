@@ -28,6 +28,7 @@ import {
   VideoIcon,
 } from "lucide-react";
 import PropertySelector from "@/components/PropertySelector";
+import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 import { toast } from "sonner";
 
 const TIPOS_PROPIEDAD = [
@@ -87,6 +88,7 @@ export default function ReelsContent() {
   const [guion, setGuion] = useState<GuionResult | null>(null);
   const [loadingFormatos, setLoadingFormatos] = useState(false);
   const [loadingGuion, setLoadingGuion] = useState(false);
+  const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const [error, setError] = useState("");
   const [isPro, setIsPro] = useState(false);
   const [planChecked, setPlanChecked] = useState(false);
@@ -114,6 +116,9 @@ export default function ReelsContent() {
           caracteristica2: p.caracteristica2 || prev.caracteristica2,
           caracteristica3: p.caracteristica3 || prev.caracteristica3,
         }));
+        if (p.tipoPropiedad && p.ubicacion) {
+          setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
+        }
       }
     } catch {}
 
@@ -255,18 +260,31 @@ export default function ReelsContent() {
       {/* Formulario */}
       <div className="border border-[#0f3460]/10 rounded-xl p-5 sm:p-6 bg-card flex flex-col gap-5">
         <fieldset disabled={loadingFormatos} className="contents">
-        <PropertySelector
-          onSelect={(prefill) => setForm((prev) => ({
-            ...prev,
-            tipoPropiedad: prefill.tipoPropiedad,
-            ubicacion: prefill.ubicacion,
-            precio: prefill.precio,
-            metrosCuadrados: prefill.metrosCuadrados,
-            caracteristica1: prefill.caracteristica1,
-            caracteristica2: prefill.caracteristica2,
-            caracteristica3: prefill.caracteristica3,
-          }))}
-        />
+        {loadedProperty ? (
+          <PropertyLoadedCard
+            tipo={loadedProperty.tipo}
+            ubicacion={loadedProperty.ubicacion}
+            precio={loadedProperty.precio}
+            metros={loadedProperty.metros}
+            onClear={() => setLoadedProperty(null)}
+          />
+        ) : (
+          <PropertySelector
+            onSelect={(prefill) => {
+              setForm((prev) => ({
+                ...prev,
+                tipoPropiedad: prefill.tipoPropiedad,
+                ubicacion: prefill.ubicacion,
+                precio: prefill.precio,
+                metrosCuadrados: prefill.metrosCuadrados,
+                caracteristica1: prefill.caracteristica1,
+                caracteristica2: prefill.caracteristica2,
+                caracteristica3: prefill.caracteristica3,
+              }));
+              setLoadedProperty({ tipo: prefill.tipoPropiedad, ubicacion: prefill.ubicacion, precio: prefill.precio, metros: prefill.metrosCuadrados });
+            }}
+          />
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Tipo de propiedad *</Label>

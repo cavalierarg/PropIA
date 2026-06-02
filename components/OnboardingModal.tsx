@@ -14,24 +14,24 @@ interface OnboardingModalProps {
 
 const TOUR_STEPS = [
   {
-    element: "#nav-generar-posts",
-    title: "Generá posts con IA",
-    description:
-      "Acá generás posts para todas tus redes. Cargás los datos de tu propiedad y la IA escribe todo.",
-    side: "right" as const,
-  },
-  {
     element: "#main-content",
-    title: "Tu panel principal",
+    title: "Tu centro de control",
     description:
-      "Este es tu panel principal. Ves tus generaciones del mes y accedés a todas las herramientas.",
+      "Este es tu dashboard. Desde acá ves el uso del mes, tus propiedades y accedés a todo.",
     side: "bottom" as const,
   },
   {
     element: "#nav-mis-propiedades",
-    title: "Mis Propiedades",
+    title: "Primero cargá tus propiedades",
     description:
-      "Acá guardamos todas las propiedades que generaste. Podés volver a ver los posts cuando quieras.",
+      "Este es tu punto de partida. Cargá cada propiedad una sola vez y después generás todo el contenido desde acá, sin volver a escribir los datos.",
+    side: "right" as const,
+  },
+  {
+    element: "#nav-generar-posts",
+    title: "Las herramientas de generación",
+    description:
+      "Posts, calendario, descripciones, reels, ads y carruseles — todo se genera con un clic una vez que cargaste tu propiedad.",
     side: "right" as const,
   },
   {

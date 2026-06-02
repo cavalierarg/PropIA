@@ -149,15 +149,21 @@ export default async function DashboardPage() {
   const checklistItems: ChecklistItem[] = onboarding.completed
     ? [
         {
-          id: "primer_post",
-          label: "Generá tu primer post",
-          done: usage.count > 0,
-          href: "/posts",
+          id: "perfil_completado",
+          label: "Completá tu perfil de marca",
+          done: !!agentProfile.perfil_completado,
+          href: "/perfil",
         },
         {
           id: "propiedad_guardada",
-          label: "Guardá una propiedad",
+          label: "Cargá tu primera propiedad",
           done: totalProperties > 0,
+          href: "/mis-propiedades",
+        },
+        {
+          id: "primer_post",
+          label: "Generá contenido desde Mis Propiedades",
+          done: usage.count > 0,
           href: "/mis-propiedades",
         },
         {
@@ -165,12 +171,6 @@ export default async function DashboardPage() {
           label: "Explorá el Calendario de Contenido",
           done: !!onboarding.steps.calendario_visitado,
           href: "/calendario",
-        },
-        {
-          id: "perfil_completado",
-          label: "Completá tu perfil de marca",
-          done: !!agentProfile.perfil_completado,
-          href: "/perfil",
         },
       ]
     : [];

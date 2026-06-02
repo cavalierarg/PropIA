@@ -20,6 +20,7 @@ import { trackEvent } from "@/lib/meta-pixel";
 import { useRef } from "react";
 import PropertySelector, { type PropertyPrefill } from "@/components/PropertySelector";
 import PropertySaveModal from "@/components/PropertySaveModal";
+import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 
 const TIPOS_PROPIEDAD = [
   "Casa",
@@ -82,6 +83,7 @@ export default function PropertyForm() {
   const [unauthenticated, setUnauthenticated] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showSaveLibModal, setShowSaveLibModal] = useState(false);
+  const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const hasTrackedLead = useRef(false);
 
   const isRegenerando = searchParams.get("regenerar") === "1";
@@ -104,6 +106,17 @@ export default function PropertyForm() {
         agenteSitioWeb: profile.sitio_web ?? "",
       }));
     });
+    // Detectar propiedad precargada desde URL params (viene de Mis Propiedades)
+    const tipo = searchParams.get("tipoPropiedad");
+    const ubicacion = searchParams.get("ubicacion");
+    if (tipo && ubicacion) {
+      setLoadedProperty({
+        tipo,
+        ubicacion,
+        precio: searchParams.get("precio") ?? "",
+        metros: searchParams.get("metrosCuadrados") ?? "",
+      });
+    }
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -305,21 +318,37 @@ export default function PropertyForm() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
         <fieldset disabled={isPending} className="contents">
 
-        {/* ── Selector de propiedad guardada ── */}
-        <PropertySelector
-          onSelect={(prefill: PropertyPrefill) => {
-            setForm((prev) => ({
-              ...prev,
-              tipoPropiedad: prefill.tipoPropiedad,
-              ubicacion: prefill.ubicacion,
-              precio: prefill.precio,
-              metrosCuadrados: prefill.metrosCuadrados,
-              caracteristica1: prefill.caracteristica1,
-              caracteristica2: prefill.caracteristica2,
-              caracteristica3: prefill.caracteristica3,
-            }));
-          }}
-        />
+        {/* ── Propiedad cargada o selector ── */}
+        {loadedProperty ? (
+          <PropertyLoadedCard
+            tipo={loadedProperty.tipo}
+            ubicacion={loadedProperty.ubicacion}
+            precio={loadedProperty.precio}
+            metros={loadedProperty.metros}
+            onClear={() => setLoadedProperty(null)}
+          />
+        ) : (
+          <PropertySelector
+            onSelect={(prefill: PropertyPrefill) => {
+              setForm((prev) => ({
+                ...prev,
+                tipoPropiedad: prefill.tipoPropiedad,
+                ubicacion: prefill.ubicacion,
+                precio: prefill.precio,
+                metrosCuadrados: prefill.metrosCuadrados,
+                caracteristica1: prefill.caracteristica1,
+                caracteristica2: prefill.caracteristica2,
+                caracteristica3: prefill.caracteristica3,
+              }));
+              setLoadedProperty({
+                tipo: prefill.tipoPropiedad,
+                ubicacion: prefill.ubicacion,
+                precio: prefill.precio,
+                metros: prefill.metrosCuadrados,
+              });
+            }}
+          />
+        )}
 
         {/* ── Campos principales ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">

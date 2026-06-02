@@ -25,8 +25,8 @@ type Plan = "free" | "pro" | "pro_max";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/posts", label: "Generar Posts", icon: FileText },
   { href: "/mis-propiedades", label: "Mis Propiedades", icon: Building2 },
+  { href: "/posts", label: "Generar Posts", icon: FileText },
   { href: "/calendario", label: "Calendario", icon: CalendarDays, requiredPlan: "pro" as Plan },
   { href: "/descripcion", label: "Portal Inmobiliario", icon: Home, requiredPlan: "pro" as Plan },
   { href: "/reels", label: "Guiones Reels", icon: Video, requiredPlan: "pro" as Plan },

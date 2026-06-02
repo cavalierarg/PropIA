@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckIcon, CopyIcon, LockIcon, SparklesIcon, ChevronDown } from "lucide-react";
 import PropertySelector from "@/components/PropertySelector";
+import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -62,6 +63,7 @@ export default function DescripcionContent() {
   const [showContacto, setShowContacto] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const [result, setResult] = useState<DescripcionResult | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [copiedShort, setCopiedShort] = useState(false);
@@ -88,6 +90,9 @@ export default function DescripcionContent() {
           caracteristica2: p.caracteristica2 || prev.caracteristica2,
           caracteristica3: p.caracteristica3 || prev.caracteristica3,
         }));
+        if (p.tipoPropiedad && p.ubicacion) {
+          setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
+        }
       }
     } catch {}
 
@@ -159,18 +164,31 @@ export default function DescripcionContent() {
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
         <fieldset disabled={loading} className="contents">
-        <PropertySelector
-          onSelect={(prefill) => setForm((prev) => ({
-            ...prev,
-            tipoPropiedad: prefill.tipoPropiedad,
-            ubicacion: prefill.ubicacion,
-            precio: prefill.precio,
-            metrosCuadrados: prefill.metrosCuadrados,
-            caracteristica1: prefill.caracteristica1,
-            caracteristica2: prefill.caracteristica2,
-            caracteristica3: prefill.caracteristica3,
-          }))}
-        />
+        {loadedProperty ? (
+          <PropertyLoadedCard
+            tipo={loadedProperty.tipo}
+            ubicacion={loadedProperty.ubicacion}
+            precio={loadedProperty.precio}
+            metros={loadedProperty.metros}
+            onClear={() => setLoadedProperty(null)}
+          />
+        ) : (
+          <PropertySelector
+            onSelect={(prefill) => {
+              setForm((prev) => ({
+                ...prev,
+                tipoPropiedad: prefill.tipoPropiedad,
+                ubicacion: prefill.ubicacion,
+                precio: prefill.precio,
+                metrosCuadrados: prefill.metrosCuadrados,
+                caracteristica1: prefill.caracteristica1,
+                caracteristica2: prefill.caracteristica2,
+                caracteristica3: prefill.caracteristica3,
+              }));
+              setLoadedProperty({ tipo: prefill.tipoPropiedad, ubicacion: prefill.ubicacion, precio: prefill.precio, metros: prefill.metrosCuadrados });
+            }}
+          />
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="flex flex-col gap-2">
             <Label htmlFor="tipoPropiedad" className="text-sm font-medium">

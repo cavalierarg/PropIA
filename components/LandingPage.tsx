@@ -174,8 +174,7 @@ export default function LandingPage() {
                 className="text-white/60 mt-7 leading-relaxed"
                 style={{ fontSize: 'clamp(16px, 1.8vw, 20px)' }}
               >
-                PropIA genera 5 posts profesionales para Instagram, Facebook y
-                LinkedIn en{' '}
+                Cargá tu propiedad una vez →{' '}
                 <span
                   className="text-white font-bold"
                   style={{
@@ -185,9 +184,9 @@ export default function LandingPage() {
                     paddingBottom: '3px',
                   }}
                 >
-                  60 segundos
+                  elegí qué generar
                 </span>
-                . La IA escribe, vos cerrás ventas.
+                {' '}→ listo en 60 segundos. La IA escribe, vos cerrás ventas.
               </p>
 
               {/* Botones */}
