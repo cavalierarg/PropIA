@@ -5,8 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
 import type { ErrorGeneracion } from "@/lib/actions/posts.actions";
-import { getUsage } from "@/lib/actions/usage.actions";
 import { saveProperty } from "@/lib/actions/properties.actions";
+import { useUsage } from "@/lib/context/usage-context";
 import { getUserProfile } from "@/lib/actions/user-profile.actions";
 import PostsView from "@/components/PostsView";
 import PostsSkeleton from "@/components/PostsSkeleton";
@@ -42,13 +42,13 @@ export default function PropertyForm() {
     agenteSitioWeb: "",
   });
 
+  const { count, remaining: ctxRemaining, limit: usageLimit, isPro, setUsage } = useUsage();
+  const remaining = isPro ? null : ctxRemaining;
+
   const [posts, setPosts] = useState<PostResult[]>([]);
   const [recomendaciones, setRecomendaciones] = useState<RecomendacionesResult | null>(null);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<ErrorGeneracion | "CAMPOS_INCOMPLETOS" | null>(null);
-  const [remaining, setRemaining] = useState<number | null>(null);
-  const [usageLimit, setUsageLimit] = useState<number>(5);
-  const [isPro, setIsPro] = useState(false);
   const [unauthenticated, setUnauthenticated] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
@@ -59,11 +59,6 @@ export default function PropertyForm() {
     : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
 
   useEffect(() => {
-    getUsage().then((usage) => {
-      setIsPro(usage.isPro);
-      setRemaining(usage.isPro ? null : usage.remaining);
-      setUsageLimit(usage.limit);
-    });
     getUserProfile().then((profile) => {
       setForm((prev) => ({
         ...prev,
@@ -101,7 +96,6 @@ export default function PropertyForm() {
 
       if (!result.ok) {
         if (result.error === "LIMIT_REACHED") {
-          setRemaining(0);
           setShowUpgradeModal(true);
         } else if (result.error === "UNAUTHENTICATED") {
           setUnauthenticated(true);
@@ -120,8 +114,9 @@ export default function PropertyForm() {
 
       setPosts(newPosts);
       setRecomendaciones(newRecs);
-      setIsPro(newIsPro);
-      setRemaining(newIsPro ? null : newRemaining);
+      if (!newIsPro) {
+        setUsage({ remaining: newRemaining, count: usageLimit - newRemaining });
+      }
 
       saveProperty({
         tipo_propiedad: form.tipoPropiedad,

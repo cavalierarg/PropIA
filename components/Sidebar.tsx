@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { trackEvent } from "@/lib/meta-pixel";
 import TutorialButton from "@/components/TutorialButton";
+import { useUsage } from "@/lib/context/usage-context";
 
 type Plan = "free" | "pro" | "pro_max";
 
@@ -28,18 +29,16 @@ const NAV_ITEMS = [
 interface SidebarProps {
   plan: Plan;
   firstName: string;
-  usageCount: number;
-  usageLimit: number;
-  isPro: boolean;
   checkoutUrl: string;
 }
 
-export default function Sidebar({ plan, firstName, usageCount, usageLimit, isPro, checkoutUrl }: SidebarProps) {
+export default function Sidebar({ plan, firstName, checkoutUrl }: SidebarProps) {
   const pathname = usePathname();
+  const { count, limit } = useUsage();
   const hasUnlimitedGenerations = plan === "pro" || plan === "pro_max";
   const progressPercent = hasUnlimitedGenerations
     ? 100
-    : usageLimit > 0 ? Math.min(100, Math.round((usageCount / usageLimit) * 100)) : 0;
+    : limit > 0 ? Math.min(100, Math.round((count / limit) * 100)) : 0;
 
   const planBadge =
     plan === "pro_max" ? (
@@ -118,7 +117,7 @@ export default function Sidebar({ plan, firstName, usageCount, usageLimit, isPro
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs text-slate-500 font-medium">Generaciones este mes</span>
               <span className="text-xs font-bold text-[#0f3460]">
-                {usageCount}/{usageLimit}
+                {count}/{limit}
               </span>
             </div>
             <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden mb-3">

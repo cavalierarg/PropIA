@@ -13,6 +13,7 @@ import { getUsage } from "@/lib/actions/usage.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import OnboardingModal from "@/components/OnboardingModal";
+import { UsageProvider } from "@/lib/context/usage-context";
 import MetaPixelScript from "@/components/MetaPixelScript";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { Analytics } from "@vercel/analytics/next";
@@ -66,11 +67,14 @@ export default async function RootLayout({
     sidebarProps = {
       plan,
       firstName: user?.firstName ?? "Usuario",
-      usageCount: usage.count,
-      usageLimit: usage.limit,
-      isPro: usage.isPro,
       checkoutUrl,
       onboardingCompleted: onboarding.completed,
+      usage: {
+        count: usage.count,
+        remaining: usage.remaining,
+        limit: usage.limit,
+        isPro: usage.isPro,
+      },
     };
   }
 
@@ -79,15 +83,17 @@ export default async function RootLayout({
       <html lang="es">
         <body className={`${inter.variable} antialiased`}>
           {userId && sidebarProps ? (
-            <div className="flex min-h-screen bg-[#f8fafc]">
-              <Sidebar {...sidebarProps} />
-              <div className="flex-1 flex flex-col lg:pl-60 min-w-0">
-                <MobileNav plan={sidebarProps.plan} checkoutUrl={sidebarProps.checkoutUrl} />
-                <div id="main-content" className="flex-1">
-                  {children}
+            <UsageProvider initial={sidebarProps.usage}>
+              <div className="flex min-h-screen bg-[#f8fafc]">
+                <Sidebar {...sidebarProps} />
+                <div className="flex-1 flex flex-col lg:pl-60 min-w-0">
+                  <MobileNav plan={sidebarProps.plan} checkoutUrl={sidebarProps.checkoutUrl} />
+                  <div id="main-content" className="flex-1">
+                    {children}
+                  </div>
                 </div>
               </div>
-            </div>
+            </UsageProvider>
           ) : (
             <>
               <Navbar />
