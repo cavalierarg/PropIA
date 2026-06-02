@@ -6,12 +6,6 @@ import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import {
-  FileText,
-  CalendarDays,
-  Home,
-  Video,
-  TrendingUp,
-  Layers,
   LayoutDashboard,
   Building2,
   Sparkles,
@@ -20,21 +14,13 @@ import {
   Tag,
   UserCircle2,
   BarChart2,
-  GalleryHorizontal,
 } from "lucide-react";
 
 type Plan = "free" | "pro" | "pro_max";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/posts", label: "Generar Posts", icon: FileText },
   { href: "/mis-propiedades", label: "Mis Propiedades", icon: Building2 },
-  { href: "/calendario", label: "Calendario", icon: CalendarDays, requiredPlan: "pro" as Plan },
-  { href: "/descripcion", label: "Portal Inmobiliario", icon: Home, requiredPlan: "pro" as Plan },
-  { href: "/reels", label: "Guiones Reels", icon: Video, requiredPlan: "pro" as Plan },
-  { href: "/tendencias", label: "Tendencias", icon: TrendingUp, requiredPlan: "pro" as Plan },
-  { href: "/ads-generator", label: "Generador de Ads", icon: Layers, requiredPlan: "pro" as Plan },
-  { href: "/carousels", label: "Carruseles IG", icon: GalleryHorizontal, requiredPlan: "pro_max" as Plan },
   { href: "/pricing", label: "Precios y planes", icon: Tag },
   { href: "/analytics", label: "Estadísticas", icon: BarChart2 },
   { href: "/perfil", label: "Mi Perfil", icon: UserCircle2 },
@@ -107,8 +93,6 @@ export default function MobileNav({ plan, checkoutUrl }: MobileNavProps) {
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
             const Icon = item.icon;
-            const isLockedPro = item.requiredPlan === "pro" && plan === "free";
-            const isLockedProMax = item.requiredPlan === "pro_max" && plan !== "pro_max";
 
             return (
               <Link
@@ -127,16 +111,6 @@ export default function MobileNav({ plan, checkoutUrl }: MobileNavProps) {
                   }`}
                 />
                 <span className="flex-1">{item.label}</span>
-                {isLockedProMax && (
-                  <span className="text-[10px] font-bold text-[#f59e0b] bg-[#f59e0b]/10 px-1.5 py-0.5 rounded">
-                    MAX
-                  </span>
-                )}
-                {isLockedPro && (
-                  <span className="text-[10px] font-bold text-[#00c9c9] bg-[#00c9c9]/10 px-1.5 py-0.5 rounded">
-                    PRO
-                  </span>
-                )}
               </Link>
             );
           })}

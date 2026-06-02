@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { X, ArrowRight, Sparkles, LayoutDashboard, Building2, Palette } from "lucide-react";
+import { X, ArrowRight, Sparkles, LayoutDashboard, Building2, Palette, Zap } from "lucide-react";
 import { completeOnboarding } from "@/lib/actions/onboarding.actions";
 import { trackEvent } from "@/lib/meta-pixel";
 import "driver.js/dist/driver.css";
@@ -14,31 +14,39 @@ interface OnboardingModalProps {
 
 const TOUR_STEPS = [
   {
-    element: "#main-content",
+    element: "#main-content" as string | undefined,
     title: "Bienvenido a PropIA 🚀",
     description:
-      "Este es tu panel de control. Desde acá ves tus estadísticas, accedés a todo y seguís tu progreso del mes.",
+      "Tu panel de control con estadísticas y acceso rápido a todo.",
     side: "bottom" as const,
   },
   {
-    element: "#nav-mis-propiedades",
+    element: "#nav-mis-propiedades" as string | undefined,
     title: "Todo arranca acá 🏠",
     description:
-      "Cargá tus propiedades una sola vez y desde acá generás posts, reels, ads, carruseles, calendario y más — todo con un clic.",
+      "Cargá tus propiedades una sola vez. Desde acá elegís qué herramienta usar.",
     side: "right" as const,
   },
   {
-    element: "#nav-perfil",
+    element: undefined,
+    title: "7 herramientas disponibles ⚡",
+    description:
+      "Posts, reels, ads, carruseles, calendario, portal y tendencias. Seleccioná una propiedad y hacé clic en la que necesitás — la IA genera todo.",
+    side: "bottom" as const,
+  },
+  {
+    element: "#nav-perfil" as string | undefined,
     title: "Personalizá tu contenido 🎨",
     description:
-      "Completá tu perfil de marca una vez y la IA usará tu nombre, zona y estilo en todo el contenido que genere.",
+      "Completá tu perfil de marca y la IA usará tu nombre, zona y estilo en todo el contenido que genere.",
     side: "right" as const,
   },
 ];
 
 const STEPS_PREVIEW = [
   { icon: LayoutDashboard, label: "Dashboard → punto de control" },
-  { icon: Building2, label: "Mis Propiedades → hub central de herramientas" },
+  { icon: Building2, label: "Mis Propiedades → hub central" },
+  { icon: Zap, label: "7 herramientas → posts, reels, ads y más" },
   { icon: Palette, label: "Perfil de marca → personalizá la IA" },
 ];
 
@@ -67,15 +75,18 @@ export default function OnboardingModal({ firstName, plan }: OnboardingModalProp
     try {
       const { driver } = await import("driver.js");
 
-      const steps = TOUR_STEPS.map((s) => ({
-        element: s.element,
-        popover: {
-          title: s.title,
-          description: s.description,
-          side: s.side,
-          align: "center" as const,
-        },
-      }));
+      const steps = TOUR_STEPS.map((s) => {
+        const step: Record<string, unknown> = {
+          popover: {
+            title: s.title,
+            description: s.description,
+            side: s.side,
+            align: "center",
+          },
+        };
+        if (s.element) step.element = s.element;
+        return step;
+      });
 
       const driverObj = driver({
         showProgress: true,
