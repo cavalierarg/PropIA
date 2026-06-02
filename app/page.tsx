@@ -150,7 +150,7 @@ export default async function DashboardPage() {
           id: "propiedad_guardada",
           label: "Guardá una propiedad",
           done: totalProperties > 0,
-          href: "/posts",
+          href: "/mis-propiedades",
         },
         {
           id: "calendario_visitado",
