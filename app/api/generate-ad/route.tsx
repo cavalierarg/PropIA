@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import sharp from "sharp";
 
 export const runtime = "nodejs";
@@ -105,6 +106,9 @@ function badgeColor(badge: string): { bg: string; text: string } {
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const usage = await checkAndIncrementUsage(userId);
+  if (!usage.allowed) return NextResponse.json({ error: "LIMIT_REACHED" }, { status: 403 });
 
   let body: {
     type: AdType; estilo: AdStyle; imageUrl: string;

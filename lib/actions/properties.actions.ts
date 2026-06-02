@@ -57,7 +57,7 @@ export type PropertyManualData = {
   foto_urls?: string[];
 };
 
-/* ── Guardar desde herramientas (con posts generados) ── */
+/* ── Guardar desde herramientas (con posts generados) — con deduplicación ── */
 export async function saveProperty(data: {
   tipo_propiedad: string;
   ubicacion: string;
@@ -73,6 +73,26 @@ export async function saveProperty(data: {
   if (!userId) return;
 
   const supabase = createSupabaseAdminClient();
+
+  // Verificar si ya existe una propiedad con los mismos datos para evitar duplicados
+  const { data: existing } = await supabase
+    .from("properties")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("tipo_propiedad", data.tipo_propiedad)
+    .eq("ubicacion", data.ubicacion)
+    .maybeSingle();
+
+  if (existing) {
+    // Actualizar los posts en la propiedad existente en vez de crear un duplicado
+    await supabase
+      .from("properties")
+      .update({ posts: data.posts, recomendaciones: data.recomendaciones })
+      .eq("id", existing.id)
+      .eq("user_id", userId);
+    return;
+  }
+
   const { error } = await supabase.from("properties").insert([{ user_id: userId, ...data }]);
   if (error) console.error("[properties.actions] Error al guardar:", error);
 }

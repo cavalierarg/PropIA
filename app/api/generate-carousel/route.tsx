@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import sharp from "sharp";
 
 export const runtime = "nodejs";
@@ -96,6 +97,9 @@ export async function POST(req: NextRequest) {
   if (sub?.plan !== "pro_max" || sub?.status !== "active") {
     return NextResponse.json({ error: "PRO_MAX_REQUIRED" }, { status: 403 });
   }
+
+  const usage = await checkAndIncrementUsage(userId);
+  if (!usage.allowed) return NextResponse.json({ error: "LIMIT_REACHED" }, { status: 403 });
 
   let body: {
     slide: number;

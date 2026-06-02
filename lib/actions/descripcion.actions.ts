@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import { buildAgentContext } from "@/lib/agent-context";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
@@ -37,13 +38,16 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
+  const usage = await checkAndIncrementUsage(userId);
+  if (!usage.allowed) throw new Error("LIMIT_REACHED");
+
   const supabase = createSupabaseClient();
   const [{ data: subData }, { data: profileRow }] = await Promise.all([
     supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
     supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),
   ]);
 
-  const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
+  const isPro = usage.isPro || ((subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active");
 
   const profile: AgentProfile = profileRow ?? {};
   const { contextBlock, toneInstruction } = buildAgentContext(profile);

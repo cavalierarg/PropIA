@@ -146,6 +146,8 @@ export default function ReelsContent() {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHENTICATED") {
         setError("Necesitás iniciar sesión para usar esta feature.");
+      } else if (err instanceof Error && err.message === "LIMIT_REACHED") {
+        setError("Alcanzaste el límite de 5 generaciones del mes. Actualizá a PRO para continuar sin límites.");
       } else {
         setError("Ocurrió un error al generar el guion. Intentá de nuevo.");
       }

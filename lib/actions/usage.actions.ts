@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseClient, createSupabaseAdminClient } from "@/lib/supabase";
 
 const MONTHLY_LIMIT = 5;
 
@@ -42,4 +42,38 @@ export async function getUsage(): Promise<{
 
   const count = data?.count ?? 0;
   return { count, remaining: Math.max(0, MONTHLY_LIMIT - count), limit: MONTHLY_LIMIT, isPro: false };
+}
+
+/* ── Verificar límite e incrementar contador (admin client — funciona en API routes) ── */
+export async function checkAndIncrementUsage(userId: string): Promise<{
+  allowed: boolean;
+  isPro: boolean;
+  remaining: number;
+}> {
+  const supabase = createSupabaseAdminClient();
+  const month = getCurrentMonth();
+
+  const [{ data: subData }, { data: usageData }] = await Promise.all([
+    supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
+    supabase.from("usage").select("count").eq("user_id", userId).eq("month", month).maybeSingle(),
+  ]);
+
+  const isPro =
+    (subData?.plan === "pro" || subData?.plan === "pro_max") &&
+    subData?.status === "active";
+
+  if (isPro) return { allowed: true, isPro: true, remaining: -1 };
+
+  const currentCount = usageData?.count ?? 0;
+
+  if (currentCount >= MONTHLY_LIMIT) {
+    return { allowed: false, isPro: false, remaining: 0 };
+  }
+
+  const newCount = currentCount + 1;
+  await supabase
+    .from("usage")
+    .upsert({ user_id: userId, month, count: newCount }, { onConflict: "user_id,month" });
+
+  return { allowed: true, isPro: false, remaining: Math.max(0, MONTHLY_LIMIT - newCount) };
 }

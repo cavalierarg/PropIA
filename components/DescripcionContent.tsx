@@ -92,6 +92,8 @@ export default function DescripcionContent() {
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHENTICATED") {
         setError("Necesitás iniciar sesión para generar descripciones.");
+      } else if (err instanceof Error && err.message === "LIMIT_REACHED") {
+        setError("Alcanzaste el límite de 5 generaciones del mes. Actualizá a PRO para continuar sin límites.");
       } else {
         setError("Ocurrió un error al generar la descripción. Intentá de nuevo.");
       }

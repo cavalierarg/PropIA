@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import { buildAgentContext } from "@/lib/agent-context";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
@@ -210,6 +211,9 @@ export async function generarGuion(
 ): Promise<GuionResult> {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
+
+  const usage = await checkAndIncrementUsage(userId);
+  if (!usage.allowed) throw new Error("LIMIT_REACHED");
 
   const supabase = createSupabaseClient();
   const [isPro, { data: profileRow }] = await Promise.all([
