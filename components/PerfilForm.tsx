@@ -106,6 +106,12 @@ export default function PerfilForm({
     }));
   };
 
+  const handleRemoveLogo = async () => {
+    setLogoPreview(null);
+    setForm((p) => ({ ...p, logo_url: "" }));
+    await saveAgentProfile({ logo_url: "" }).catch(() => {});
+  };
+
   const handleLogoFile = async (file: File) => {
     if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
       toast.error("Solo se aceptan archivos PNG o JPG");
@@ -154,8 +160,8 @@ export default function PerfilForm({
         return;
       }
       toast.success("Perfil guardado correctamente");
-      // Hard navigate to flush middleware cookie
-      window.location.href = "/";
+      router.refresh();
+      router.push("/");
     } catch {
       toast.error("No se pudo guardar el perfil. Intentá de nuevo.");
     } finally {
@@ -194,7 +200,7 @@ export default function PerfilForm({
               )}
               <button
                 type="button"
-                onClick={() => { setLogoPreview(null); setForm((p) => ({ ...p, logo_url: "" })); }}
+                onClick={handleRemoveLogo}
                 className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <XIcon className="w-3.5 h-3.5" />

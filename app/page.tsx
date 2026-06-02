@@ -230,6 +230,13 @@ export default async function DashboardPage() {
             </div>
             {usage.remaining === 0 ? (
               <UpgradeButton href={checkoutUrl} />
+            ) : usage.remaining <= 2 ? (
+              <div className="flex flex-col gap-1.5">
+                <p className="text-xs text-amber-600 font-medium">
+                  Te {usage.remaining === 1 ? "queda" : "quedan"} {usage.remaining} generaci{usage.remaining !== 1 ? "ones" : "ón"} este mes
+                </p>
+                <UpgradeButton href={checkoutUrl} />
+              </div>
             ) : (
               <p className="text-xs text-slate-400">
                 Tenés {usage.remaining} generacion{usage.remaining !== 1 ? "es" : ""} disponible{usage.remaining !== 1 ? "s" : ""}

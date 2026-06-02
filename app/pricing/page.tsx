@@ -119,8 +119,8 @@ export default function PricingPage() {
     trackEvent("ViewContent", { content_name: "Pricing", content_category: "pricing" });
   }, []);
 
-  const checkoutUrlPro = buildCheckoutUrl(BASE_PRO, "pro", user?.id);
-  const checkoutUrlProMax = buildCheckoutUrl(BASE_PRO_MAX, "pro_max", user?.id);
+  const checkoutUrlPro = user ? buildCheckoutUrl(BASE_PRO, "pro", user.id) : "/sign-up";
+  const checkoutUrlProMax = user ? buildCheckoutUrl(BASE_PRO_MAX, "pro_max", user.id) : "/sign-up";
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -290,7 +290,7 @@ export default function PricingPage() {
                     asChild
                     className="h-11 text-sm font-semibold bg-[#0f3460] hover:bg-[#0f3460]/90 text-white shadow-md"
                   >
-                    <a href={checkoutUrlPro} target="_blank" rel="noopener noreferrer">
+                    <a href={checkoutUrlPro} target={user ? "_blank" : "_self"} rel="noopener noreferrer">
                       Comenzar prueba gratis 7 días
                     </a>
                   </Button>
@@ -354,7 +354,7 @@ export default function PricingPage() {
                     asChild
                     className="h-11 text-sm font-semibold bg-[#f59e0b] hover:bg-[#e08e00] text-white shadow-md border-0"
                   >
-                    <a href={checkoutUrlProMax} target="_blank" rel="noopener noreferrer">
+                    <a href={checkoutUrlProMax} target={user ? "_blank" : "_self"} rel="noopener noreferrer">
                       Comenzar prueba gratis 7 días
                     </a>
                   </Button>
@@ -600,7 +600,7 @@ export default function PricingPage() {
               asChild
               className="h-11 px-8 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white font-semibold text-sm"
             >
-              <a href={checkoutUrlPro} target="_blank" rel="noopener noreferrer">
+              <a href={checkoutUrlPro} target={user ? "_blank" : "_self"} rel="noopener noreferrer">
                 <SparklesIcon className="w-4 h-4 mr-2" />
                 Empezar prueba gratis 7 días
               </a>
