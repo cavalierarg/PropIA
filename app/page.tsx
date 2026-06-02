@@ -1,7 +1,7 @@
 import React from "react";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { getUsage } from "@/lib/actions/usage.actions";
+import { getUsage, getHasEverGenerated } from "@/lib/actions/usage.actions";
 import { getUserProperties } from "@/lib/actions/properties.actions";
 import {
   FileText,
@@ -135,11 +135,12 @@ export default async function DashboardPage() {
   const firstName = user?.firstName ?? "Usuario";
   const nextRenewal = getNextRenewalDate();
 
-  const [usage, allProperties, onboarding, agentProfile] = await Promise.all([
+  const [usage, allProperties, onboarding, agentProfile, hasGenerated] = await Promise.all([
     getUsage(),
     getUserProperties(),
     getOnboardingStatus(),
     getAgentProfile(),
+    getHasEverGenerated(),
   ]);
 
   const recentProperties = allProperties.slice(0, 3);
@@ -162,14 +163,14 @@ export default async function DashboardPage() {
         {
           id: "primer_post",
           label: "Generá contenido desde Mis Propiedades",
-          done: usage.count > 0,
+          done: hasGenerated,
           href: "/mis-propiedades",
         },
         {
-          id: "calendario_visitado",
-          label: "Explorá el Calendario de Contenido",
-          done: !!onboarding.steps.calendario_visitado,
-          href: "/calendario",
+          id: "primer_post_publicado",
+          label: "Copiá y publicá tu primer post en Instagram",
+          done: !!onboarding.steps.primer_post_publicado,
+          stepKey: "primer_post_publicado",
         },
       ]
     : [];

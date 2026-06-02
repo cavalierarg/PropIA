@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Circle, ChevronDown, ChevronUp, PartyPopper } from "lucide-react";
+import { CheckCircle2, Circle, ChevronDown, ChevronUp, PartyPopper, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { updateOnboardingStep } from "@/lib/actions/onboarding.actions";
 
 export interface ChecklistItem {
   id: string;
   label: string;
   done: boolean;
   href?: string;
+  stepKey?: string;
 }
 
 interface OnboardingChecklistProps {
@@ -17,6 +20,8 @@ interface OnboardingChecklistProps {
 
 export default function OnboardingChecklist({ items }: OnboardingChecklistProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [toggling, setToggling] = useState<string | null>(null);
+  const router = useRouter();
   const doneCount = items.filter((i) => i.done).length;
   const allDone = doneCount === items.length;
 
@@ -71,17 +76,34 @@ export default function OnboardingChecklist({ items }: OnboardingChecklistProps)
 
           <div className="space-y-3">
             {items.map((item) => {
+              const isToggling = toggling === item.id;
+
+              const handleManualToggle = async () => {
+                if (item.done || !item.stepKey || isToggling) return;
+                setToggling(item.id);
+                await updateOnboardingStep(item.stepKey);
+                router.refresh();
+                setToggling(null);
+              };
+
+              const icon = item.done ? (
+                <CheckCircle2 className="w-4 h-4 text-[#00c9c9] shrink-0" />
+              ) : isToggling ? (
+                <Loader2 className="w-4 h-4 text-slate-300 shrink-0 animate-spin" />
+              ) : (
+                <Circle
+                  className={`w-4 h-4 shrink-0 ${item.stepKey ? "text-slate-300 cursor-pointer hover:text-[#00c9c9] transition-colors" : "text-slate-300"}`}
+                  onClick={item.stepKey ? handleManualToggle : undefined}
+                />
+              );
+
               const content = (
                 <div
                   className={`flex items-center gap-3 py-0.5 ${
                     !item.done && item.href ? "cursor-pointer" : ""
                   }`}
                 >
-                  {item.done ? (
-                    <CheckCircle2 className="w-4 h-4 text-[#00c9c9] shrink-0" />
-                  ) : (
-                    <Circle className="w-4 h-4 text-slate-300 shrink-0" />
-                  )}
+                  {icon}
                   <span
                     className={`text-sm ${
                       item.done
@@ -91,6 +113,9 @@ export default function OnboardingChecklist({ items }: OnboardingChecklistProps)
                   >
                     {item.label}
                   </span>
+                  {!item.done && item.stepKey && (
+                    <span className="text-xs text-slate-400 ml-auto">(tildá cuando lo hagas)</span>
+                  )}
                 </div>
               );
 

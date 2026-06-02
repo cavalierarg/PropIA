@@ -45,6 +45,18 @@ export async function getUsage(): Promise<{
 }
 
 /* ── Verificar límite e incrementar contador (admin client — funciona en API routes) ── */
+export async function getHasEverGenerated(): Promise<boolean> {
+  const { userId } = await auth();
+  if (!userId) return false;
+  const supabase = createSupabaseClient();
+  const { count } = await supabase
+    .from("usage")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gt("count", 0);
+  return (count ?? 0) > 0;
+}
+
 export async function checkAndIncrementUsage(userId: string): Promise<{
   allowed: boolean;
   isPro: boolean;
