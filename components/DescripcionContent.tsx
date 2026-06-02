@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckIcon, CopyIcon, LockIcon, SparklesIcon, ChevronDown } from "lucide-react";
+import PropertySelector from "@/components/PropertySelector";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -158,6 +159,18 @@ export default function DescripcionContent() {
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
         <fieldset disabled={loading} className="contents">
+        <PropertySelector
+          onSelect={(prefill) => setForm((prev) => ({
+            ...prev,
+            tipoPropiedad: prefill.tipoPropiedad,
+            ubicacion: prefill.ubicacion,
+            precio: prefill.precio,
+            metrosCuadrados: prefill.metrosCuadrados,
+            caracteristica1: prefill.caracteristica1,
+            caracteristica2: prefill.caracteristica2,
+            caracteristica3: prefill.caracteristica3,
+          }))}
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className="flex flex-col gap-2">
             <Label htmlFor="tipoPropiedad" className="text-sm font-medium">

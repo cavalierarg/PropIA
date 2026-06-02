@@ -23,7 +23,7 @@ export default async function MisPropiedadesPage() {
               Mis Propiedades
             </h1>
             <p className="text-base text-muted-foreground sm:text-lg max-w-2xl">
-              Historial de propiedades, posts generados y acceso rápido a todas las herramientas.
+              Tu biblioteca de propiedades. Cargalas una vez y reutilizalas en cualquier herramienta con un clic.
             </p>
           </div>
           <Button

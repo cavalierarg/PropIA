@@ -80,7 +80,13 @@
       "mcp__plugin_vercel_vercel__get_runtime_logs",
       "PowerShell(Get-Content .env.local | Select-String \"ANTHROPIC\" -Context 0,2 | ForEach-Object { $_.Line.Length })",
       "PowerShell($env:ANTHROPIC_API_KEY = \\(Get-Content .env.local | Select-String \"^ANTHROPIC_API_KEY=\" | ForEach-Object { $_.Line -replace \"^ANTHROPIC_API_KEY=\", \"\" }\\); node -e \"const Anthropic = require\\('@anthropic-ai/sdk'\\); const c = new Anthropic\\({ apiKey: process.env.ANTHROPIC_API_KEY }\\); c.messages.create\\({ model: 'claude-sonnet-4-20250514', max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] }\\).then\\(r => console.log\\('OK:', r.content[0].text\\)\\).catch\\(e => console.error\\('ERROR:', e.status, e.message\\)\\)\")",
-      "PowerShell($key = \\(Get-Content .env.local | Select-String \"^ANTHROPIC_API_KEY=\" | ForEach-Object { $_.Line -replace \"^ANTHROPIC_API_KEY=\", \"\" }\\); $env:ANTHROPIC_API_KEY = $key; node -e \"const Anthropic = require\\('@anthropic-ai/sdk'\\); const c = new Anthropic\\({ apiKey: process.env.ANTHROPIC_API_KEY }\\); c.messages.create\\({ model: 'claude-sonnet-4-6', max_tokens: 10, messages: [{ role: 'user', content: 'hola' }] }\\).then\\(r => console.log\\('OK:', r.content[0].text\\)\\).catch\\(e => console.error\\('ERROR:', e.status, e.message\\)\\)\")"
+      "PowerShell($key = \\(Get-Content .env.local | Select-String \"^ANTHROPIC_API_KEY=\" | ForEach-Object { $_.Line -replace \"^ANTHROPIC_API_KEY=\", \"\" }\\); $env:ANTHROPIC_API_KEY = $key; node -e \"const Anthropic = require\\('@anthropic-ai/sdk'\\); const c = new Anthropic\\({ apiKey: process.env.ANTHROPIC_API_KEY }\\); c.messages.create\\({ model: 'claude-sonnet-4-6', max_tokens: 10, messages: [{ role: 'user', content: 'hola' }] }\\).then\\(r => console.log\\('OK:', r.content[0].text\\)\\).catch\\(e => console.error\\('ERROR:', e.status, e.message\\)\\)\")",
+      "mcp__plugin_vercel_vercel__list_teams",
+      "mcp__plugin_vercel_vercel__list_projects",
+      "PowerShell(Tail *)",
+      "Bash(Select-Object -First 30)",
+      "WebFetch(domain:propia.online)",
+      "Bash(grep -E \"\\\\.tsx?$\")"
     ]
   }
 }

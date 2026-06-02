@@ -18,6 +18,8 @@ import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { trackEvent } from "@/lib/meta-pixel";
 import { useRef } from "react";
+import PropertySelector, { type PropertyPrefill } from "@/components/PropertySelector";
+import PropertySaveModal from "@/components/PropertySaveModal";
 
 const TIPOS_PROPIEDAD = [
   "Casa",
@@ -79,6 +81,7 @@ export default function PropertyForm() {
   const [isPro, setIsPro] = useState(false);
   const [unauthenticated, setUnauthenticated] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showSaveLibModal, setShowSaveLibModal] = useState(false);
   const hasTrackedLead = useRef(false);
 
   const isRegenerando = searchParams.get("regenerar") === "1";
@@ -290,6 +293,22 @@ export default function PropertyForm() {
       {/* Formulario */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-5 sm:gap-6">
         <fieldset disabled={isPending} className="contents">
+
+        {/* ── Selector de propiedad guardada ── */}
+        <PropertySelector
+          onSelect={(prefill: PropertyPrefill) => {
+            setForm((prev) => ({
+              ...prev,
+              tipoPropiedad: prefill.tipoPropiedad,
+              ubicacion: prefill.ubicacion,
+              precio: prefill.precio,
+              metrosCuadrados: prefill.metrosCuadrados,
+              caracteristica1: prefill.caracteristica1,
+              caracteristica2: prefill.caracteristica2,
+              caracteristica3: prefill.caracteristica3,
+            }));
+          }}
+        />
 
         {/* ── Campos principales ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -667,7 +686,39 @@ export default function PropertyForm() {
             <div className="h-1 w-16 bg-[#00d4d4] rounded-full" />
           </div>
           <PostsView posts={posts} recomendaciones={recomendaciones} />
+
+          {/* ── Banner: guardar en biblioteca ── */}
+          <div className="border border-[#00c9c9]/30 bg-[#00c9c9]/5 rounded-xl px-4 py-3.5 flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold text-[#0f3460]">¿Querés guardar esta propiedad en tu biblioteca?</p>
+              <p className="text-xs text-slate-500 mt-0.5">Cargala una vez y reutilizala en todas las herramientas sin volver a escribir.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSaveLibModal(true)}
+              className="shrink-0 h-9 px-4 text-sm font-semibold text-[#0f3460] bg-[#00c9c9]/15 hover:bg-[#00c9c9]/25 border border-[#00c9c9]/30 rounded-xl transition-colors"
+            >
+              Guardar propiedad
+            </button>
+          </div>
         </div>
+      )}
+
+      {showSaveLibModal && (
+        <PropertySaveModal
+          open={showSaveLibModal}
+          onClose={() => setShowSaveLibModal(false)}
+          onSaved={() => {}}
+          prefill={{
+            tipo_propiedad: form.tipoPropiedad,
+            ubicacion: form.ubicacion,
+            precio: form.precio,
+            metros_cuadrados: form.metrosCuadrados,
+            caracteristica1: form.caracteristica1,
+            caracteristica2: form.caracteristica2,
+            caracteristica3: form.caracteristica3,
+          }}
+        />
       )}
     </div>
   );

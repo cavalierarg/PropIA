@@ -14,6 +14,7 @@ import {
   X,
   Sparkles,
 } from "lucide-react";
+import PropertySelector from "@/components/PropertySelector";
 import { uploadCarouselPhoto } from "@/lib/actions/carousel-photo.actions";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
@@ -247,6 +248,13 @@ export default function CarouselGeneratorContent({ profile }: Props) {
       {/* ── FORM ── */}
       <div className="flex flex-col gap-6">
         <fieldset disabled={generating} className="contents">
+        <PropertySelector
+          onSelect={(prefill) => {
+            setZona(prefill.ubicacion);
+            setPrecio(prefill.precio);
+            setMetros(prefill.metrosCuadrados);
+          }}
+        />
 
         {/* Photo upload */}
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">

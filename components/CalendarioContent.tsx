@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import PropertySelector from "@/components/PropertySelector";
 
 const NICHOS = [
   "Casas",
@@ -128,6 +129,7 @@ export default function CalendarioContent() {
 
       {/* Formulario */}
       <div className="border border-[#0f3460]/10 rounded-xl p-5 sm:p-6 bg-card flex flex-col gap-5">
+        <PropertySelector onSelect={(prefill) => setZona(prefill.ubicacion)} />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-medium">Tu nicho *</Label>

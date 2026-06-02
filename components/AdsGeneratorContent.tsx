@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { LockIcon } from "lucide-react";
+import PropertySelector from "@/components/PropertySelector";
 
 type AdType  = "feed" | "story" | "banner";
 type Phase   = "idle" | "generating" | "complete";
@@ -298,6 +299,15 @@ export default function AdsGeneratorContent({
       {/* ── Formulario ── */}
       <div className="border border-[#0f3460]/10 rounded-xl p-5 sm:p-6 bg-card flex flex-col gap-7">
         <fieldset disabled={isLoading} className="contents">
+        <PropertySelector
+          onSelect={(prefill) => {
+            setZona(prefill.ubicacion);
+            setPrecio(prefill.precio);
+            setMetros(prefill.metrosCuadrados);
+            setCar1(prefill.caracteristica1);
+            setCar2(prefill.caracteristica2);
+          }}
+        />
 
         {/* Fotos */}
         <div className="flex flex-col gap-2">

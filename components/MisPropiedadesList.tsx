@@ -19,8 +19,10 @@ import {
   TrashIcon,
   ExternalLinkIcon,
   FileTextIcon,
+  PencilIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PropertySaveModal from "@/components/PropertySaveModal";
 
 /* ── Constants ── */
 
@@ -118,6 +120,8 @@ export default function MisPropiedadesList({
   const [openStatusId, setOpenStatusId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [editProperty, setEditProperty] = useState<SavedProperty | null>(null);
+  const [showNewModal, setShowNewModal] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   // Close dropdowns on outside click
@@ -217,36 +221,49 @@ export default function MisPropiedadesList({
   /* ── Empty state ── */
   if (properties.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-5 py-16 text-center">
-        <div className="flex justify-center">
-          <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-            <circle cx="50" cy="50" r="50" fill="#0f3460" fillOpacity="0.05" />
-            <rect x="20" y="42" width="60" height="40" rx="5" fill="#0f3460" fillOpacity="0.12" />
-            <path d="M50 22L78 42H22L50 22Z" fill="#0f3460" fillOpacity="0.18" />
-            <rect x="38" y="58" width="24" height="24" rx="3" fill="#00c9c9" fillOpacity="0.4" />
-            <circle cx="72" cy="68" r="7" fill="none" stroke="#f59e0b" strokeWidth="2.5" />
-            <rect x="76.5" y="66.5" width="10" height="3" rx="1" fill="#f59e0b" />
-            <rect x="83" y="66.5" width="3" height="5" rx="1" fill="#f59e0b" />
-          </svg>
-        </div>
-        <div className="flex flex-col gap-2">
-          <p className="font-bold text-[#0f3460] text-xl">Todavía no guardaste ninguna propiedad</p>
-          <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-            Generá posts para una propiedad y aparecerá acá con todas sus herramientas.
-          </p>
-        </div>
-        <Button asChild className="bg-[#00c9c9] hover:bg-[#00b3b3] text-white font-bold h-11 px-6">
-          <Link href="/posts" className="flex items-center gap-2">
+      <>
+        <div className="flex flex-col items-center gap-5 py-16 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#0f3460]/8 flex items-center justify-center">
+            <BuildingIcon className="w-8 h-8 text-[#0f3460]/40" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="font-bold text-[#0f3460] text-xl">Tu biblioteca está vacía</p>
+            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+              Cargá tus propiedades una vez y reutilizalas en cualquier herramienta con un clic.
+            </p>
+          </div>
+          <Button
+            onClick={() => setShowNewModal(true)}
+            className="bg-[#00c9c9] hover:bg-[#00b3b3] text-white font-bold h-11 px-6 flex items-center gap-2"
+          >
             <PlusIcon className="w-4 h-4" />
-            Generar mi primer post
-          </Link>
-        </Button>
-      </div>
+            Agregar primera propiedad
+          </Button>
+        </div>
+        {showNewModal && (
+          <PropertySaveModal
+            open={showNewModal}
+            onClose={() => setShowNewModal(false)}
+            onSaved={(p) => setProperties((prev) => [p, ...prev])}
+          />
+        )}
+      </>
     );
   }
 
   return (
     <div ref={menuRef} className="flex flex-col gap-5">
+      {/* ── Nueva propiedad button ── */}
+      <div className="flex justify-end">
+        <Button
+          onClick={() => setShowNewModal(true)}
+          className="h-9 px-4 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white text-sm gap-1.5"
+        >
+          <PlusIcon className="w-4 h-4" />
+          Nueva propiedad
+        </Button>
+      </div>
+
       {/* ── Search + Filters ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <div className="relative flex-1">
@@ -315,17 +332,29 @@ export default function MisPropiedadesList({
                     inactive ? "opacity-60 hover:opacity-80" : ""
                   } border-[#0f3460]/10`}
                 >
+                  {/* Foto thumbnail */}
+                  {(property.foto_urls ?? []).length > 0 && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={property.foto_urls![0]}
+                      alt=""
+                      className="w-full h-32 object-cover"
+                    />
+                  )}
+
                   {/* Card header */}
                   <div className="bg-[#0f3460] px-4 py-3 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <BuildingIcon className="w-3.5 h-3.5 text-white/60 shrink-0" />
                       <span className="text-sm font-semibold text-white truncate">
-                        {property.tipo_propiedad}
+                        {property.titulo || property.tipo_propiedad}
                       </span>
                     </div>
-                    <span className="text-xs text-[#00c9c9] font-medium shrink-0">
-                      {property.posts.length} posts
-                    </span>
+                    {property.posts.length > 0 && (
+                      <span className="text-xs text-[#00c9c9] font-medium shrink-0">
+                        {property.posts.length} posts
+                      </span>
+                    )}
                   </div>
 
                   {/* Card body */}
@@ -372,14 +401,25 @@ export default function MisPropiedadesList({
                   {/* Card footer — actions */}
                   <div className="px-3 py-2.5 border-t border-[#0f3460]/5 bg-card flex items-center gap-1.5 flex-wrap">
 
-                    {/* Ver posts */}
-                    <Link
-                      href={`/mis-propiedades/${property.id}`}
+                    {/* Editar */}
+                    <button
+                      onClick={() => setEditProperty(property)}
                       className="flex items-center gap-1 text-xs text-[#0f3460] hover:text-[#00c9c9] font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-[#0f3460]/5"
                     >
-                      <FileTextIcon className="w-3.5 h-3.5" />
-                      Ver posts
-                    </Link>
+                      <PencilIcon className="w-3.5 h-3.5" />
+                      Editar
+                    </button>
+
+                    {/* Ver posts */}
+                    {property.posts.length > 0 && (
+                      <Link
+                        href={`/mis-propiedades/${property.id}`}
+                        className="flex items-center gap-1 text-xs text-[#0f3460] hover:text-[#00c9c9] font-medium transition-colors px-2 py-1.5 rounded-lg hover:bg-[#0f3460]/5"
+                      >
+                        <FileTextIcon className="w-3.5 h-3.5" />
+                        Ver posts
+                      </Link>
+                    )}
 
                     {/* Cambiar estado */}
                     <div className="relative">
@@ -471,6 +511,30 @@ export default function MisPropiedadesList({
             })}
           </div>
         </>
+      )}
+
+      {/* ── New property modal ── */}
+      {showNewModal && (
+        <PropertySaveModal
+          open={showNewModal}
+          onClose={() => setShowNewModal(false)}
+          onSaved={(p) => setProperties((prev) => [p, ...prev])}
+        />
+      )}
+
+      {/* ── Edit property modal ── */}
+      {editProperty && (
+        <PropertySaveModal
+          open={!!editProperty}
+          onClose={() => setEditProperty(null)}
+          editProperty={editProperty}
+          onSaved={(updated) => {
+            setProperties((prev) =>
+              prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
+            );
+            setEditProperty(null);
+          }}
+        />
       )}
 
       {/* ── Delete confirmation modal ── */}
