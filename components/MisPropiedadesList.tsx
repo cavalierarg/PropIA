@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   type SavedProperty,
@@ -15,7 +14,6 @@ import {
   CalendarDays,
   CalendarIcon,
   ChevronDownIcon,
-  ExternalLinkIcon,
   FileTextIcon,
   GalleryHorizontal,
   Home,
@@ -27,7 +25,6 @@ import {
   TrashIcon,
   TrendingUp,
   Video,
-  XIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PropertySaveModal from "@/components/PropertySaveModal";
@@ -60,15 +57,6 @@ const ESTADO_CONFIG: Record<
     badge: "bg-blue-50 text-blue-700 border-blue-200",
   },
 };
-
-const HERRAMIENTAS = [
-  { label: "Generar Posts", href: "/posts", useParams: true },
-  { label: "Calendario de Contenido", href: "/calendario" },
-  { label: "Descripción para Portal", href: "/descripcion" },
-  { label: "Guion para Reels", href: "/reels" },
-  { label: "Generador de Ads", href: "/ads-generator" },
-  { label: "Generador de Carruseles", href: "/carousels" },
-] as const;
 
 const TOOL_CARDS = [
   {
@@ -150,23 +138,6 @@ function formatDate(dateStr: string) {
   });
 }
 
-function savePrefill(property: SavedProperty) {
-  try {
-    localStorage.setItem(
-      "propia_property_prefill",
-      JSON.stringify({
-        tipoPropiedad: property.tipo_propiedad,
-        ubicacion: property.ubicacion,
-        precio: property.precio,
-        metrosCuadrados: property.metros_cuadrados,
-        caracteristica1: property.caracteristica1 ?? "",
-        caracteristica2: property.caracteristica2 ?? "",
-        caracteristica3: property.caracteristica3 ?? "",
-      })
-    );
-  } catch {}
-}
-
 /* ── Main component ── */
 
 export default function MisPropiedadesList({
@@ -174,30 +145,23 @@ export default function MisPropiedadesList({
 }: {
   initialProperties: SavedProperty[];
 }) {
-  const router = useRouter();
   const [properties, setProperties] = useState(initialProperties);
   const [search, setSearch] = useState("");
   const [filtro, setFiltro] = useState("todas");
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [openStatusId, setOpenStatusId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [editProperty, setEditProperty] = useState<SavedProperty | null>(null);
   const [showNewModal, setShowNewModal] = useState(false);
   const [generarProperty, setGenerarProperty] = useState<SavedProperty | null>(null);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
-  const [highlightProperties, setHighlightProperties] = useState(false);
 
   const menuRef = useRef<HTMLDivElement | null>(null);
   const propiedadesRef = useRef<HTMLDivElement | null>(null);
-
-  const selectedProperty = properties.find((p) => p.id === selectedPropertyId) ?? null;
 
   // Close dropdowns on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpenMenuId(null);
         setOpenStatusId(null);
       }
     }
@@ -235,55 +199,6 @@ export default function MisPropiedadesList({
   };
 
   /* ── Actions ── */
-  const handleUseIn = (
-    property: SavedProperty,
-    href: string,
-    useParams?: boolean
-  ) => {
-    savePrefill(property);
-    setOpenMenuId(null);
-    if (useParams) {
-      const params = new URLSearchParams({
-        tipoPropiedad: property.tipo_propiedad,
-        ubicacion: property.ubicacion,
-        metrosCuadrados: property.metros_cuadrados,
-        precio: property.precio,
-        caracteristica1: property.caracteristica1 ?? "",
-        caracteristica2: property.caracteristica2 ?? "",
-        caracteristica3: property.caracteristica3 ?? "",
-      });
-      router.push(`${href}?${params.toString()}`);
-    } else {
-      router.push(href);
-    }
-  };
-
-  const handleToolSelect = (tool: (typeof TOOL_CARDS)[number]) => {
-    if (!selectedProperty) {
-      propiedadesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      setHighlightProperties(true);
-      setTimeout(() => setHighlightProperties(false), 2500);
-      return;
-    }
-
-    savePrefill(selectedProperty);
-
-    if ("useParams" in tool && tool.useParams) {
-      const params = new URLSearchParams({
-        tipoPropiedad: selectedProperty.tipo_propiedad,
-        ubicacion: selectedProperty.ubicacion,
-        metrosCuadrados: selectedProperty.metros_cuadrados,
-        precio: selectedProperty.precio,
-        caracteristica1: selectedProperty.caracteristica1 ?? "",
-        caracteristica2: selectedProperty.caracteristica2 ?? "",
-        caracteristica3: selectedProperty.caracteristica3 ?? "",
-      });
-      router.push(`${tool.href}?${params.toString()}`);
-    } else {
-      router.push(tool.href);
-    }
-  };
-
   const handleStatusChange = async (id: string, estado: PropertyEstado) => {
     setOpenStatusId(null);
     const result = await updatePropertyStatus(id, estado);
@@ -302,7 +217,6 @@ export default function MisPropiedadesList({
     setDeleting(true);
     const result = await deleteProperty(deleteId);
     if (result.ok) {
-      if (selectedPropertyId === deleteId) setSelectedPropertyId(null);
       setProperties((prev) => prev.filter((p) => p.id !== deleteId));
       toast.success("Propiedad eliminada");
     } else {
@@ -317,28 +231,7 @@ export default function MisPropiedadesList({
 
       {/* ── ¿Qué querés generar? ── */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="text-base font-bold text-[#0f3460]">¿Qué querés generar?</h2>
-          {selectedProperty ? (
-            <div className="flex items-center gap-2 bg-[#00c9c9]/10 border border-[#00c9c9]/30 rounded-full px-3 py-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00c9c9] shrink-0" />
-              <span className="text-xs font-semibold text-[#0f3460] truncate max-w-[200px]">
-                {selectedProperty.titulo || selectedProperty.tipo_propiedad} — {selectedProperty.ubicacion}
-              </span>
-              <button
-                onClick={() => setSelectedPropertyId(null)}
-                className="text-slate-400 hover:text-slate-600 transition-colors ml-1 shrink-0"
-                aria-label="Quitar selección"
-              >
-                <XIcon className="w-3 h-3" />
-              </button>
-            </div>
-          ) : (
-            <p className="text-xs text-slate-400">
-              Seleccioná una propiedad abajo primero
-            </p>
-          )}
-        </div>
+        <h2 className="text-base font-bold text-[#0f3460]">¿Qué podés generar con PropIA?</h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {TOOL_CARDS.map((tool) => {
@@ -349,15 +242,9 @@ export default function MisPropiedadesList({
             const iconColor = isProMax ? "text-[#f59e0b]" : isPro ? "text-[#00c9c9]" : "text-[#0f3460]";
 
             return (
-              <button
+              <div
                 key={tool.href}
-                type="button"
-                onClick={() => handleToolSelect(tool)}
-                className={`flex flex-col gap-2.5 p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                  selectedProperty
-                    ? "border-[#0f3460]/12 hover:border-[#00c9c9]/50 hover:bg-[#00c9c9]/4 hover:shadow-sm"
-                    : "border-dashed border-[#0f3460]/15 bg-slate-50/60 hover:bg-slate-100/80"
-                }`}
+                className="flex flex-col gap-2.5 p-3.5 rounded-xl border border-[#0f3460]/10 bg-slate-50/40"
               >
                 <div className={`w-8 h-8 rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-4 h-4 ${iconColor}`} />
@@ -380,17 +267,10 @@ export default function MisPropiedadesList({
                     {tool.desc}
                   </span>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
-
-        {highlightProperties && (
-          <div className="flex items-center gap-2 text-sm text-[#0f3460] font-medium bg-[#00c9c9]/10 border border-[#00c9c9]/25 rounded-xl px-4 py-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
-            <span>👇</span>
-            Seleccioná una propiedad de tu biblioteca para continuar
-          </div>
-        )}
       </div>
 
       <div className="h-px bg-[#e2e8f0]" />
@@ -486,64 +366,38 @@ export default function MisPropiedadesList({
                       property.caracteristica2,
                       property.caracteristica3,
                     ].filter(Boolean);
-                    const isMenuOpen = openMenuId === property.id;
                     const isStatusOpen = openStatusId === property.id;
-                    const isSelected = selectedPropertyId === property.id;
 
                     return (
                       <div
                         key={property.id}
-                        className={`flex flex-col rounded-xl overflow-hidden shadow-sm transition-all ${
-                          inactive ? "opacity-60 hover:opacity-80" : ""
-                        } ${
-                          isSelected
-                            ? "ring-2 ring-[#00c9c9] border border-[#00c9c9]/40 shadow-[#00c9c9]/15"
-                            : "border border-[#0f3460]/10"
+                        className={`flex flex-col rounded-xl overflow-hidden shadow-sm border border-[#0f3460]/10 ${
+                          inactive ? "opacity-60" : ""
                         }`}
                       >
-                        {/* Foto thumbnail — clickable to select */}
+                        {/* Foto thumbnail */}
                         {property.foto_urls?.[0] && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={property.foto_urls[0]}
                             alt=""
-                            onClick={() =>
-                              setSelectedPropertyId((prev) =>
-                                prev === property.id ? null : property.id
-                              )
-                            }
-                            className="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            className="w-full h-32 object-cover"
                           />
                         )}
 
-                        {/* Card header — clickable to select */}
-                        <div
-                          className={`px-4 py-3 flex items-center justify-between gap-2 cursor-pointer transition-colors ${
-                            isSelected
-                              ? "bg-[#00c9c9]"
-                              : "bg-[#0f3460] hover:bg-[#0f3460]/90"
-                          }`}
-                          onClick={() =>
-                            setSelectedPropertyId((prev) =>
-                              prev === property.id ? null : property.id
-                            )
-                          }
-                        >
+                        {/* Card header */}
+                        <div className="px-4 py-3 flex items-center justify-between gap-2 bg-[#0f3460]">
                           <div className="flex items-center gap-2 min-w-0">
                             <BuildingIcon className="w-3.5 h-3.5 text-white/60 shrink-0" />
                             <span className="text-sm font-semibold text-white truncate">
                               {property.titulo || property.tipo_propiedad}
                             </span>
                           </div>
-                          {isSelected ? (
-                            <span className="text-[10px] font-bold text-white bg-white/20 px-2 py-0.5 rounded-full shrink-0">
-                              ✓ Seleccionada
-                            </span>
-                          ) : property.posts.length > 0 ? (
+                          {property.posts.length > 0 && (
                             <span className="text-xs text-[#00c9c9] font-medium shrink-0">
                               {property.posts.length} posts
                             </span>
-                          ) : null}
+                          )}
                         </div>
 
                         {/* Card body */}
@@ -652,49 +506,11 @@ export default function MisPropiedadesList({
                           {/* Generar contenido */}
                           <button
                             onClick={() => setGenerarProperty(property)}
-                            className="flex items-center gap-1 text-xs bg-[#0f3460] hover:bg-[#0f3460]/90 text-white font-semibold px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                            className="flex items-center gap-1 text-xs bg-[#0f3460] hover:bg-[#0f3460]/90 text-white font-semibold px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer ml-auto"
                           >
                             <SparklesIcon className="w-3 h-3" />
                             Generar
                           </button>
-
-                          {/* Usar en... */}
-                          <div className="relative ml-auto">
-                            <button
-                              onClick={() =>
-                                setOpenMenuId(isMenuOpen ? null : property.id)
-                              }
-                              className="flex items-center gap-1 text-xs bg-[#00c9c9] hover:bg-[#00b3b3] text-white font-semibold px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
-                            >
-                              <ExternalLinkIcon className="w-3 h-3" />
-                              Usar en...
-                              <ChevronDownIcon
-                                className={`w-3 h-3 transition-transform ${isMenuOpen ? "rotate-180" : ""}`}
-                              />
-                            </button>
-                            {isMenuOpen && (
-                              <div className="absolute bottom-full right-0 mb-1 z-20 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden min-w-[200px]">
-                                <p className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
-                                  Redirigir con datos cargados
-                                </p>
-                                {HERRAMIENTAS.map((h) => (
-                                  <button
-                                    key={h.href}
-                                    onClick={() =>
-                                      handleUseIn(
-                                        property,
-                                        h.href,
-                                        "useParams" in h ? h.useParams : false
-                                      )
-                                    }
-                                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-slate-700 hover:bg-[#00c9c9]/8 hover:text-[#0f3460] transition-colors cursor-pointer text-left"
-                                  >
-                                    {h.label}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
 
                           {/* Eliminar */}
                           <button
