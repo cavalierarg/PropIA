@@ -333,10 +333,10 @@ export default function MisPropiedadesList({
                   } border-[#0f3460]/10`}
                 >
                   {/* Foto thumbnail */}
-                  {(property.foto_urls ?? []).length > 0 && (
+                  {property.foto_urls?.[0] && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={property.foto_urls![0]}
+                      src={property.foto_urls[0]}
                       alt=""
                       className="w-full h-32 object-cover"
                     />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,6 +121,7 @@ export default function PropertyForm() {
     setError(null);
     setPosts([]);
     setRecomendaciones(null);
+    setShowSaveLibModal(false);
     setUnauthenticated(false);
 
     if (!form.tipoPropiedad || !form.ubicacion || !form.metrosCuadrados || !form.precio) {
@@ -180,6 +181,16 @@ export default function PropertyForm() {
   const isLimitReached = !isPro && remaining === 0;
   const isWarning = !isPro && remaining !== null && remaining > 0 && remaining <= 3;
   const used = remaining !== null ? usageLimit - remaining : 0;
+
+  const saveLibPrefill = useMemo(() => ({
+    tipo_propiedad: form.tipoPropiedad,
+    ubicacion: form.ubicacion,
+    precio: form.precio,
+    metros_cuadrados: form.metrosCuadrados,
+    caracteristica1: form.caracteristica1,
+    caracteristica2: form.caracteristica2,
+    caracteristica3: form.caracteristica3,
+  }), [form.tipoPropiedad, form.ubicacion, form.precio, form.metrosCuadrados, form.caracteristica1, form.caracteristica2, form.caracteristica3]);
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
@@ -708,16 +719,8 @@ export default function PropertyForm() {
         <PropertySaveModal
           open={showSaveLibModal}
           onClose={() => setShowSaveLibModal(false)}
-          onSaved={() => {}}
-          prefill={{
-            tipo_propiedad: form.tipoPropiedad,
-            ubicacion: form.ubicacion,
-            precio: form.precio,
-            metros_cuadrados: form.metrosCuadrados,
-            caracteristica1: form.caracteristica1,
-            caracteristica2: form.caracteristica2,
-            caracteristica3: form.caracteristica3,
-          }}
+          onSaved={() => setShowSaveLibModal(false)}
+          prefill={saveLibPrefill}
         />
       )}
     </div>

@@ -17,24 +17,25 @@ export type SavedProperty = {
   id: string;
   user_id: string;
   tipo_propiedad: string;
-  titulo: string;
   ubicacion: string;
-  barrio: string;
-  ciudad: string;
   metros_cuadrados: string;
   precio: string;
-  moneda: string;
-  ambientes: string;
   caracteristica1: string;
   caracteristica2: string;
   caracteristica3: string;
-  amenities: string[];
-  descripcion_libre: string;
-  foto_urls: string[];
   posts: Post[];
   recomendaciones: Recomendaciones | null;
   created_at: string;
   estado: PropertyEstado | null;
+  // Campos nuevos — opcionales para compatibilidad con propiedades antiguas
+  titulo?: string | null;
+  barrio?: string | null;
+  ciudad?: string | null;
+  moneda?: string | null;
+  ambientes?: string | null;
+  amenities?: string[] | null;
+  descripcion_libre?: string | null;
+  foto_urls?: string[] | null;
 };
 
 export type PropertyManualData = {

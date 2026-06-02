@@ -157,7 +157,7 @@ export default function PropertySelector({ onSelect }: Props) {
                           </p>
                           <p className="text-xs text-slate-500 truncate">{p.ubicacion}</p>
                           <p className="text-xs text-slate-400">
-                            {p.moneda ?? "USD"} {p.precio} · {p.metros_cuadrados} m²
+                            {p.moneda ?? "USD"} {p.precio ?? "—"} · {p.metros_cuadrados ?? "—"} m²
                           </p>
                         </div>
                         {/* Estado badge */}
