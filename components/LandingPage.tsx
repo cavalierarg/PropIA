@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, type ReactNode } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { trackEvent } from '@/lib/meta-pixel';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -100,6 +101,8 @@ const TESTIMONIALS = [
 
 // ─── Componente principal ────────────────────────────────────────────────────
 export default function LandingPage() {
+  const { isSignedIn } = useUser();
+  const ctaHref = isSignedIn ? "/dashboard" : "/sign-up";
   const lineRef = useRef<HTMLDivElement>(null);
   const stepsRef = useRef<HTMLDivElement>(null);
 
@@ -190,7 +193,7 @@ export default function LandingPage() {
               {/* Botones */}
               <div className="flex flex-col items-start sm:items-start gap-3 mt-10">
                 <Link
-                  href="/sign-in"
+                  href={ctaHref}
                   className="inline-flex items-center justify-center gap-2 bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-black px-8 py-4 rounded-2xl text-base transition-all duration-200 shadow-xl shadow-[#00c9c9]/25 hover:shadow-[#00c9c9]/40 hover:-translate-y-0.5 whitespace-nowrap"
                 >
                   Empezar gratis
@@ -563,7 +566,7 @@ export default function LandingPage() {
 
             <div className="mt-8 text-center">
               <Link
-                href="/sign-in"
+                href={ctaHref}
                 className="inline-flex items-center gap-2 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white font-bold px-8 py-4 rounded-2xl text-sm transition-colors shadow-lg"
               >
                 Generá tu primer post gratis
@@ -705,7 +708,7 @@ export default function LandingPage() {
                     ))}
                   </ul>
                   <Link
-                    href="/sign-in"
+                    href={ctaHref}
                     className="mt-auto block text-center border-2 border-[#0f3460] text-[#0f3460] font-semibold px-5 py-3 rounded-xl hover:bg-[#0f3460] hover:text-white transition-colors text-sm"
                   >
                     Empezar gratis
@@ -861,7 +864,7 @@ export default function LandingPage() {
               Sin tarjeta de crédito. Sin límite de tiempo en el plan gratuito.
             </p>
             <Link
-              href="/sign-in"
+              href={ctaHref}
               className="inline-flex items-center gap-3 bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-black px-10 py-5 rounded-2xl text-lg transition-all duration-200 shadow-2xl shadow-[#00c9c9]/30 hover:shadow-[#00c9c9]/50 hover:-translate-y-0.5 mt-10"
             >
               Crear mi cuenta gratis

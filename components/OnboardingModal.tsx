@@ -69,32 +69,37 @@ export default function OnboardingModal({ firstName, plan }: OnboardingModalProp
       return;
     }
 
-    const { driver } = await import("driver.js");
+    try {
+      const { driver } = await import("driver.js");
 
-    const steps = TOUR_STEPS.map((s) => ({
-      element: s.element,
-      popover: {
-        title: s.title,
-        description: s.element === "#sidebar-plan-badge" ? planDescription : s.description,
-        side: s.side,
-        align: "center" as const,
-      },
-    }));
+      const steps = TOUR_STEPS.map((s) => ({
+        element: s.element,
+        popover: {
+          title: s.title,
+          description: s.element === "#sidebar-plan-badge" ? planDescription : s.description,
+          side: s.side,
+          align: "center" as const,
+        },
+      }));
 
-    const driverObj = driver({
-      showProgress: true,
-      progressText: "Paso {{current}} de {{total}}",
-      nextBtnText: "Siguiente →",
-      prevBtnText: "← Anterior",
-      doneBtnText: "Entendido, empezar",
-      steps,
-      onDestroyed: () => {
-        completeOnboarding().then(() => router.refresh());
-      },
-    });
+      const driverObj = driver({
+        showProgress: true,
+        progressText: "Paso {{current}} de {{total}}",
+        nextBtnText: "Siguiente →",
+        prevBtnText: "← Anterior",
+        doneBtnText: "Entendido, empezar",
+        steps,
+        onDestroyed: () => {
+          completeOnboarding().then(() => router.refresh());
+        },
+      });
 
-    driverObj.drive();
-  }, [planDescription]);
+      driverObj.drive();
+    } catch {
+      await completeOnboarding();
+      router.refresh();
+    }
+  }, [planDescription, router]);
 
   if (!visible) return null;
 
