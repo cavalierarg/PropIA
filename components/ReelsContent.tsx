@@ -180,7 +180,11 @@ export default function ReelsContent() {
   };
 
   const handleGenerarGuion = async () => {
-    if (!formatoSeleccionado || formatos.length === 0 || !isFormValid) return;
+    if (!isFormValid) {
+      setError("Completá los datos de la propiedad antes de generar el guion.");
+      return;
+    }
+    if (!formatoSeleccionado || formatos.length === 0) return;
     setError("");
     setLoadingGuion(true);
 

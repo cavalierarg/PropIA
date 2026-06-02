@@ -34,16 +34,19 @@ const TONOS = [
     value: "profesional",
     label: "Profesional y formal",
     desc: "Lenguaje técnico, estructurado y de confianza",
+    example: "\"Propiedad en zona premium. 85 m², 3 dormitorios y cochera. Consulte disponibilidad.\"",
   },
   {
     value: "amigable",
     label: "Cercano y amigable",
     desc: "Tono cálido, directo y humano",
+    example: "\"¿Buscás tu próximo hogar? Este depto en Palermo tiene todo lo que necesitás.\"",
   },
   {
     value: "dinamico",
     label: "Moderno y dinámico",
     desc: "Energético, con llamadas a la acción y emojis",
+    example: "\"🔥 ¡Esta es la oportunidad! Casa amplia, barrio top. ¡Escribime ya antes de que se vaya!\"",
   },
 ];
 
@@ -393,6 +396,9 @@ export default function PerfilForm({
                 </div>
                 <p className="text-[11px] text-muted-foreground leading-snug">
                   {tono.desc}
+                </p>
+                <p className="text-[10px] text-slate-400 italic leading-snug border-t border-slate-100 pt-1.5 mt-0.5">
+                  {tono.example}
                 </p>
               </button>
             );

@@ -41,6 +41,7 @@ export default function CalendarioContent() {
   const [nicho, setNicho] = useState("");
   const [zona, setZona] = useState("");
   const [loading, setLoading] = useState(false);
+  const [retryDisabled, setRetryDisabled] = useState(false);
   const [error, setError] = useState("");
   const [dias, setDias] = useState<CalendarDay[]>([]);
   const [isPro, setIsPro] = useState(false);
@@ -74,6 +75,8 @@ export default function CalendarioContent() {
       } else {
         setError("Ocurrió un error al generar el calendario. Intentá de nuevo.");
       }
+      setRetryDisabled(true);
+      setTimeout(() => setRetryDisabled(false), 3000);
     } finally {
       setLoading(false);
     }
@@ -98,7 +101,7 @@ export default function CalendarioContent() {
           {isPro ? (
             <><SparklesIcon className="w-3.5 h-3.5" /> Plan PRO — calendario completo de {TOTAL_DAYS} días</>
           ) : (
-            <><CalendarIcon className="w-3.5 h-3.5" /> Plan Free — preview de {FREE_DAYS} días</>
+            <><CalendarIcon className="w-3.5 h-3.5" /> Plan Free — primeros {FREE_DAYS} días del calendario</>
           )}
         </div>
       )}
@@ -136,7 +139,7 @@ export default function CalendarioContent() {
 
         <Button
           onClick={handleGenerar}
-          disabled={loading || !nicho || !zona}
+          disabled={loading || !nicho || !zona || retryDisabled}
           className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
         >
           <SparklesIcon className="w-4 h-4" />
@@ -176,7 +179,7 @@ export default function CalendarioContent() {
             <p className="text-sm text-muted-foreground">
               {isPro
                 ? `${TOTAL_DAYS} días de contenido para ${nicho} en ${zona}`
-                : `Preview de ${FREE_DAYS} días · Actualizá a PRO para los ${TOTAL_DAYS} días completos`}
+                : `Primeros ${FREE_DAYS} días del calendario · Actualizá a PRO para ver los ${TOTAL_DAYS} días`}
             </p>
             <div className="h-1 w-16 bg-[#00d4d4] rounded-full" />
           </div>

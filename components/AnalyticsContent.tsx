@@ -62,7 +62,7 @@ export default function AnalyticsContent({ data }: Props) {
       : postsDelta > 0
       ? `+${postsDelta}% vs mes anterior`
       : postsDelta < 0
-      ? `${postsDelta}% vs mes anterior`
+      ? `Menos actividad que el mes pasado (${postsDelta}%)`
       : "Igual que el mes anterior";
 
   const maxFeatureCount = Math.max(...featureUsage.map((f) => f.count), 1);
