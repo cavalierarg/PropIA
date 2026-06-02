@@ -145,11 +145,11 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-[#00c9c9]/[0.05] blur-2xl" />
         <div className="pointer-events-none absolute top-1/2 left-1/3 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#1a4a7a]/20 blur-3xl" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:gap-16 gap-12">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div>
 
-            {/* ── Columna izquierda ── */}
-            <div className="lg:w-[46%]">
+            {/* ── Contenido hero ── */}
+            <div>
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-[#00c9c9]/[0.14] border border-[#00c9c9]/30 text-[#00c9c9] text-[11px] font-bold px-4 py-1.5 rounded-full mb-8 tracking-widest uppercase">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -241,99 +241,6 @@ export default function LandingPage() {
                 <div className="flex items-center gap-2 text-white/50 text-sm">
                   <Check className="w-4 h-4 text-[#00c9c9] shrink-0" />
                   Funciona con Claude AI de Anthropic
-                </div>
-              </div>
-            </div>
-
-            {/* ── Columna derecha: mockup — solo desktop ── */}
-            <div className="hidden lg:block lg:w-[54%]">
-              <div className="relative" style={{ transform: 'rotate(-1.5deg)' }}>
-                <div className="absolute -inset-10 bg-[#00c9c9]/10 blur-3xl rounded-full pointer-events-none" />
-                <div
-                  className="relative rounded-2xl overflow-hidden border border-white/[0.1]"
-                  style={{
-                    boxShadow:
-                      '0 48px 96px rgba(0,0,0,0.55), 0 16px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.06)',
-                  }}
-                >
-                  {/* Barra del navegador */}
-                  <div className="bg-[#1e2a3a] px-4 py-2.5 flex items-center gap-3">
-                    <div className="flex gap-1.5 shrink-0">
-                      <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
-                      <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
-                      <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-                    </div>
-                    <div className="flex-1 bg-[#131f2e] rounded-md h-6 flex items-center px-3 gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-emerald-400/60 shrink-0" />
-                      <span className="text-white/35 text-[11px] font-mono">
-                        propia.online
-                      </span>
-                    </div>
-                    <div className="flex gap-2 shrink-0">
-                      <div className="w-4 h-4 rounded bg-white/5" />
-                      <div className="w-4 h-4 rounded bg-white/5" />
-                    </div>
-                  </div>
-                  {/* UI mockup — Mis Propiedades con herramientas */}
-                  <div className="w-full flex" style={{ minHeight: 520, background: "#f1f5f9" }}>
-                    {/* Sidebar strip */}
-                    <div className="w-12 bg-white border-r border-slate-200 flex flex-col items-center gap-2.5 pt-4 shrink-0">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#0f3460] to-[#00c9c9] mb-1" />
-                      {[false, true, false, false, false].map((active, i) => (
-                        <div key={i} className={`w-7 h-7 rounded-lg flex items-center justify-center ${active ? "bg-[#00c9c9]/15" : ""}`}>
-                          <div className={`w-3.5 h-3.5 rounded-sm ${active ? "bg-[#00c9c9]" : "bg-slate-200"}`} />
-                        </div>
-                      ))}
-                    </div>
-                    {/* Content */}
-                    <div className="flex-1 p-5 flex flex-col gap-4 overflow-hidden">
-                      {/* Page header */}
-                      <div className="flex flex-col gap-1">
-                        <div className="h-4 w-36 bg-[#0f3460]/20 rounded-md" />
-                        <div className="h-2.5 w-56 bg-slate-200 rounded" />
-                      </div>
-                      {/* Tool cards grid */}
-                      <div className="grid grid-cols-4 gap-2">
-                        {[
-                          { bg: "bg-[#0f3460]/8", icon: "bg-[#0f3460]/20" },
-                          { bg: "bg-[#00c9c9]/8", icon: "bg-[#00c9c9]/20" },
-                          { bg: "bg-[#00c9c9]/8", icon: "bg-[#00c9c9]/20" },
-                          { bg: "bg-[#00c9c9]/8", icon: "bg-[#00c9c9]/20" },
-                          { bg: "bg-[#00c9c9]/8", icon: "bg-[#00c9c9]/20" },
-                          { bg: "bg-[#00c9c9]/8", icon: "bg-[#00c9c9]/20" },
-                          { bg: "bg-[#f59e0b]/8", icon: "bg-[#f59e0b]/20" },
-                        ].map((t, i) => (
-                          <div key={i} className={`${t.bg} rounded-xl p-2.5 flex flex-col gap-1.5`}>
-                            <div className={`w-6 h-6 rounded-lg ${t.icon}`} />
-                            <div className="h-2 w-full bg-current opacity-[0.12] rounded" />
-                            <div className="h-1.5 w-2/3 bg-current opacity-[0.07] rounded" />
-                          </div>
-                        ))}
-                      </div>
-                      {/* Divider */}
-                      <div className="h-px bg-slate-200" />
-                      {/* Property cards */}
-                      <div className="grid grid-cols-2 gap-3">
-                        {[
-                          { selected: true, name: "Depto · Palermo", price: "USD 185.000" },
-                          { selected: false, name: "Casa · Belgrano", price: "USD 320.000" },
-                        ].map((card, i) => (
-                          <div key={i} className={`rounded-xl overflow-hidden border-2 bg-white ${card.selected ? "border-[#00c9c9]" : "border-slate-100"}`}>
-                            <div className={`px-3 py-2 flex items-center gap-2 ${card.selected ? "bg-[#00c9c9]" : "bg-[#0f3460]"}`}>
-                              <div className="w-2.5 h-2.5 rounded-full bg-white/40 shrink-0" />
-                              <div className="h-2 flex-1 bg-white/40 rounded" />
-                              {card.selected && <div className="w-4 h-4 rounded-full bg-white/25 shrink-0" />}
-                            </div>
-                            <div className="p-2.5 flex flex-col gap-1.5">
-                              <div className="h-2 w-3/4 bg-slate-200 rounded" />
-                              <div className="h-1.5 w-1/2 bg-slate-100 rounded" />
-                              <div className="h-1.5 w-2/3 bg-slate-100 rounded" />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
