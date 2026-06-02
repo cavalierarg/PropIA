@@ -118,6 +118,13 @@ const FEATURES: Feature[] = [
   },
 ];
 
+function getNextRenewalDate(): string {
+  const next = new Date();
+  next.setDate(1);
+  next.setMonth(next.getMonth() + 1);
+  return next.toLocaleDateString("es-AR", { day: "numeric", month: "long" });
+}
+
 export default async function DashboardPage() {
   const { userId } = await auth();
 
@@ -127,6 +134,7 @@ export default async function DashboardPage() {
 
   const user = await currentUser();
   const firstName = user?.firstName ?? "Usuario";
+  const nextRenewal = getNextRenewalDate();
 
   const [usage, allProperties, onboarding, agentProfile] = await Promise.all([
     getUsage(),
@@ -242,6 +250,9 @@ export default async function DashboardPage() {
                 Tenés {usage.remaining} generacion{usage.remaining !== 1 ? "es" : ""} disponible{usage.remaining !== 1 ? "s" : ""}
               </p>
             )}
+            <p className="text-xs text-slate-300 mt-1">
+              Se renuevan el {nextRenewal}
+            </p>
           </div>
         )}
       </section>

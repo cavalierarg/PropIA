@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import {
   CheckIcon,
   CopyIcon,
+  DownloadIcon,
   LoaderIcon,
   LockIcon,
   SparklesIcon,
@@ -80,6 +81,25 @@ export default function CalendarioContent() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["Día", "Fecha", "Red social", "Tipo de contenido", "Copy"];
+    const rows = dias.map((d) => [
+      d.dia,
+      d.fecha,
+      d.red,
+      d.tipo_contenido,
+      `"${d.copy.replace(/"/g, '""')}"`,
+    ]);
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `calendario-${nicho}-${zona}.csv`.replace(/\s+/g, "-").toLowerCase();
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleCopy = async (text: string, index: number) => {
@@ -173,9 +193,20 @@ export default function CalendarioContent() {
         <div className="flex flex-col gap-5 sm:gap-6">
           {/* Header */}
           <div className="flex flex-col gap-2">
-            <h2 className="text-xl font-bold text-[#0f3460] sm:text-2xl">
-              Tu plan de contenido
-            </h2>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <h2 className="text-xl font-bold text-[#0f3460] sm:text-2xl">
+                Tu plan de contenido
+              </h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportCSV}
+                className="h-8 px-3 text-xs gap-1.5 shrink-0"
+              >
+                <DownloadIcon className="w-3.5 h-3.5" />
+                Exportar CSV
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground">
               {isPro
                 ? `${TOTAL_DAYS} días de contenido para ${nicho} en ${zona}`

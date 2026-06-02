@@ -598,6 +598,9 @@ function DescripcionCard({
         <p className="whitespace-pre-wrap text-sm leading-relaxed text-card-foreground break-words">
           {texto}
         </p>
+        <p className="text-xs text-slate-400 -mt-2 text-right">
+          {texto.length} caracteres
+        </p>
         <Button
           type="button"
           variant="outline"
