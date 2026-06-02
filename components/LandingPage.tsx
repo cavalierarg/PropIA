@@ -75,27 +75,33 @@ function FadeIn({
 const TESTIMONIALS = [
   {
     quote:
-      'Pasé de publicar 2 veces por semana a publicar todos los días. En 30 días conseguí 3 clientes nuevos.',
-    name: 'Marcela G.',
-    city: 'Buenos Aires',
-    metric: '+3 clientes en 30 días',
-    initials: 'MG',
-  },
-  {
-    quote:
-      'El calendario de contenido me cambió la vida. Antes improvisaba, ahora tengo 30 días planificados en 5 minutos y mis seguidores aumentaron un 60%.',
-    name: 'Lucas R.',
-    city: 'Córdoba',
-    metric: '+60% de seguidores',
-    initials: 'LR',
-  },
-  {
-    quote:
-      'Antes tardaba 2 horas redactando posts. Ahora en 60 segundos tengo todo listo. Cerré 2 ventas más este mes gracias a la constancia.',
-    name: 'Carolina M.',
-    city: 'Rosario',
-    metric: '2 ventas extra este mes',
+      'Antes me pasaba 2 horas escribiendo posts para cada propiedad. Ahora en 60 segundos tengo 5 opciones listas para Instagram y Facebook. Cerré 3 ventas este mes gracias al contenido que genera PropIA.',
+    name: 'Carlos Mendoza',
+    role: 'Agente inmobiliario',
+    city: 'Buenos Aires, Argentina',
+    metric: '3 ventas este mes',
     initials: 'CM',
+    avatarBg: 'linear-gradient(135deg, #0f3460, #1a4a7a)',
+  },
+  {
+    quote:
+      'Lo que más me sorprendió fue la calidad del contenido para LinkedIn. Los posts suenan profesionales y específicos para cada propiedad. Mi equipo de 4 agentes lo usa todos los días.',
+    name: 'Laura Jiménez',
+    role: 'Directora de agencia',
+    city: 'Madrid, España',
+    metric: 'Equipo de 4 agentes',
+    initials: 'LJ',
+    avatarBg: 'linear-gradient(135deg, #00c9c9, #00a0a0)',
+  },
+  {
+    quote:
+      'El generador de reels me cambió la vida. Antes no sabía qué grabar ni qué decir. Ahora tengo el guion completo escena por escena y mis videos tienen el doble de alcance.',
+    name: 'Roberto Silva',
+    role: 'Agente independiente',
+    city: 'Ciudad de México',
+    metric: '2× de alcance en videos',
+    initials: 'RS',
+    avatarBg: 'linear-gradient(135deg, #1a5c3a, #2d8a5e)',
   },
 ];
 
@@ -594,15 +600,13 @@ export default function LandingPage() {
                   <div className="flex items-center gap-3">
                     <div
                       className="w-11 h-11 rounded-full flex items-center justify-center text-white font-black text-sm shrink-0"
-                      style={{
-                        background: 'linear-gradient(135deg, #0f3460, #00c9c9)',
-                      }}
+                      style={{ background: t.avatarBg }}
                     >
                       {t.initials}
                     </div>
                     <div>
                       <p className="text-sm font-bold text-[#0f3460]">{t.name}</p>
-                      <p className="text-xs text-slate-400">{t.city}</p>
+                      <p className="text-xs text-slate-400">{t.role} · {t.city}</p>
                     </div>
                   </div>
                 </div>
