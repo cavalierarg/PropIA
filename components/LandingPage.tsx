@@ -180,19 +180,10 @@ export default function LandingPage() {
                 className="text-white/60 mt-7 leading-relaxed"
                 style={{ fontSize: 'clamp(16px, 1.8vw, 20px)' }}
               >
-                Cargá tu propiedad una vez →{' '}
-                <span
-                  className="text-white font-bold"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(transparent calc(100% - 3px), #00c9c9 3px)',
-                    backgroundRepeat: 'no-repeat',
-                    paddingBottom: '3px',
-                  }}
-                >
-                  elegí qué generar
+                PropIA genera posts, reels, ads y calendarios para tus propiedades en segundos.{' '}
+                <span className="text-white font-semibold">
+                  La IA escribe, vos cerrás ventas.
                 </span>
-                {' '}→ listo en 60 segundos. La IA escribe, vos cerrás ventas.
               </p>
 
               {/* Botones */}
