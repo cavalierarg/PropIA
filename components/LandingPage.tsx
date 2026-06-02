@@ -102,7 +102,7 @@ const TESTIMONIALS = [
 // ─── Componente principal ────────────────────────────────────────────────────
 export default function LandingPage() {
   const { isSignedIn } = useUser();
-  const ctaHref = isSignedIn ? "/dashboard" : "/sign-up";
+  const ctaHref = isSignedIn ? "/" : "/sign-up";
   const lineRef = useRef<HTMLDivElement>(null);
   const stepsRef = useRef<HTMLDivElement>(null);
 
