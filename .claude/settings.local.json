@@ -88,7 +88,8 @@
       "WebFetch(domain:propia.online)",
       "Bash(grep -E \"\\\\.tsx?$\")",
       "PowerShell(Select-String *)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\valen\\\\saas-template\\\\app\" -Recurse -Name | Where-Object { $_ -match \"sign\" })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\valen\\\\saas-template\\\\app\" -Recurse -Name | Where-Object { $_ -match \"sign\" })",
+      "mcp__plugin_vercel_vercel__get_deployment"
     ]
   }
 }

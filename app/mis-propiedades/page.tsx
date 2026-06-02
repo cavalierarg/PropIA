@@ -26,32 +26,12 @@ export default async function MisPropiedadesPage() {
               Tu biblioteca de propiedades. Cargalas una vez y reutilizalas en cualquier herramienta con un clic.
             </p>
           </div>
-          <Button
-            asChild
-            className="shrink-0 h-10 px-4 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white hidden sm:flex items-center gap-2"
-          >
-            <Link href="/posts">
-              <PlusIcon className="w-4 h-4" />
-              Nueva propiedad
-            </Link>
-          </Button>
         </div>
         <div className="h-1 w-16 bg-[#00c9c9] rounded-full sm:w-20" />
       </section>
 
       <MisPropiedadesList initialProperties={properties} />
 
-      {properties.length > 0 && (
-        <Button
-          asChild
-          className="sm:hidden w-full h-12 bg-[#0f3460] hover:bg-[#0f3460]/90 text-white"
-        >
-          <Link href="/posts" className="flex items-center justify-center gap-2">
-            <PlusIcon className="w-4 h-4" />
-            Nueva propiedad
-          </Link>
-        </Button>
-      )}
     </main>
   );
 }

@@ -5,19 +5,12 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { UserButton } from "@clerk/nextjs";
 import {
-  FileText,
-  CalendarDays,
-  Home,
-  Video,
-  TrendingUp,
-  Layers,
   LayoutDashboard,
   Building2,
   Sparkles,
   Tag,
   UserCircle2,
   BarChart2,
-  GalleryHorizontal,
 } from "lucide-react";
 import { trackEvent } from "@/lib/meta-pixel";
 import TutorialButton from "@/components/TutorialButton";
@@ -27,13 +20,6 @@ type Plan = "free" | "pro" | "pro_max";
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/mis-propiedades", label: "Mis Propiedades", icon: Building2 },
-  { href: "/posts", label: "Generar Posts", icon: FileText },
-  { href: "/calendario", label: "Calendario", icon: CalendarDays, requiredPlan: "pro" as Plan },
-  { href: "/descripcion", label: "Portal Inmobiliario", icon: Home, requiredPlan: "pro" as Plan },
-  { href: "/reels", label: "Guiones Reels", icon: Video, requiredPlan: "pro" as Plan },
-  { href: "/tendencias", label: "Tendencias", icon: TrendingUp, requiredPlan: "pro" as Plan },
-  { href: "/ads-generator", label: "Generador de Ads", icon: Layers, requiredPlan: "pro" as Plan },
-  { href: "/carousels", label: "Carruseles IG", icon: GalleryHorizontal, requiredPlan: "pro_max" as Plan },
   { href: "/pricing", label: "Precios y planes", icon: Tag },
   { href: "/analytics", label: "Estadísticas", icon: BarChart2 },
   { href: "/perfil", label: "Mi Perfil", icon: UserCircle2 },
@@ -96,17 +82,13 @@ export default function Sidebar({ plan, firstName, usageCount, usageLimit, isPro
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
           const Icon = item.icon;
-          const isLockedPro = item.requiredPlan === "pro" && plan === "free";
-          const isLockedProMax = item.requiredPlan === "pro_max" && plan !== "pro_max";
 
           return (
             <Link
               key={item.href}
               href={item.href}
               id={
-                item.href === "/posts"
-                  ? "nav-generar-posts"
-                  : item.href === "/mis-propiedades"
+                item.href === "/mis-propiedades"
                   ? "nav-mis-propiedades"
                   : item.href === "/perfil"
                   ? "nav-perfil"
@@ -124,16 +106,6 @@ export default function Sidebar({ plan, firstName, usageCount, usageLimit, isPro
                 }`}
               />
               <span className="flex-1 truncate">{item.label}</span>
-              {isLockedProMax && (
-                <span className="text-[10px] font-bold text-[#f59e0b] bg-[#f59e0b]/10 px-1.5 py-0.5 rounded shrink-0">
-                  MAX
-                </span>
-              )}
-              {isLockedPro && (
-                <span className="text-[10px] font-bold text-[#00c9c9] bg-[#00c9c9]/10 px-1.5 py-0.5 rounded shrink-0">
-                  PRO
-                </span>
-              )}
             </Link>
           );
         })}

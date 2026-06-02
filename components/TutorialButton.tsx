@@ -19,19 +19,9 @@ const TOUR_STEPS = [
   {
     element: "#nav-mis-propiedades",
     popover: {
-      title: "Empezá por tus propiedades 🏠",
+      title: "Todo arranca acá 🏠",
       description:
-        "Cargá tus propiedades una sola vez y usálas en todas las herramientas. Es el corazón de PropIA.",
-      side: "right" as const,
-      align: "center" as const,
-    },
-  },
-  {
-    element: "#nav-generar-posts",
-    popover: {
-      title: "Generá contenido en segundos ⚡",
-      description:
-        "Desde cada propiedad elegís qué generar: posts, reels, ads, carruseles, calendario y más. La IA escribe, vos cerrás ventas.",
+        "Cargá tus propiedades una sola vez y desde acá generás posts, reels, ads, carruseles, calendario y más — todo con un clic.",
       side: "right" as const,
       align: "center" as const,
     },

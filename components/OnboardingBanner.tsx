@@ -16,12 +16,12 @@ export default function OnboardingBanner() {
 
       <div className="flex-1 min-w-0">
         <p className="font-bold text-white text-sm sm:text-base leading-snug">
-          Generá tu primer post ahora — solo toma 60 segundos
+          ¡Generá tu primer contenido ahora!
         </p>
         <div className="flex items-center gap-1.5 mt-1">
           <ArrowDown className="w-3.5 h-3.5 text-[#00c9c9] animate-bounce" />
           <span className="text-xs text-white/70">
-            Completá el formulario de abajo para empezar
+            Seleccioná una propiedad desde Mis Propiedades para empezar
           </span>
         </div>
       </div>

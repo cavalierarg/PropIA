@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { X, ArrowRight, Sparkles, LayoutDashboard, Building2, Zap, Palette } from "lucide-react";
+import { X, ArrowRight, Sparkles, LayoutDashboard, Building2, Palette } from "lucide-react";
 import { completeOnboarding } from "@/lib/actions/onboarding.actions";
 import { trackEvent } from "@/lib/meta-pixel";
 import "driver.js/dist/driver.css";
@@ -22,16 +22,9 @@ const TOUR_STEPS = [
   },
   {
     element: "#nav-mis-propiedades",
-    title: "Empezá por tus propiedades 🏠",
+    title: "Todo arranca acá 🏠",
     description:
-      "Cargá tus propiedades una sola vez y usálas en todas las herramientas. Es el corazón de PropIA.",
-    side: "right" as const,
-  },
-  {
-    element: "#nav-generar-posts",
-    title: "Generá contenido en segundos ⚡",
-    description:
-      "Desde cada propiedad elegís qué generar: posts, reels, ads, carruseles, calendario y más. La IA escribe, vos cerrás ventas.",
+      "Cargá tus propiedades una sola vez y desde acá generás posts, reels, ads, carruseles, calendario y más — todo con un clic.",
     side: "right" as const,
   },
   {
@@ -45,8 +38,7 @@ const TOUR_STEPS = [
 
 const STEPS_PREVIEW = [
   { icon: LayoutDashboard, label: "Dashboard → punto de control" },
-  { icon: Building2, label: "Mis Propiedades → hub central" },
-  { icon: Zap, label: "Generar contenido desde cada prop." },
+  { icon: Building2, label: "Mis Propiedades → hub central de herramientas" },
   { icon: Palette, label: "Perfil de marca → personalizá la IA" },
 ];
 
