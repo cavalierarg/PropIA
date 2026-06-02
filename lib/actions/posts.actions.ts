@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
+import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import { buildAgentContext } from "@/lib/agent-context";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
@@ -65,24 +66,22 @@ export const generarPosts = async (data: PropertyData): Promise<ResultadoGenerac
   const { userId } = await auth();
   if (!userId) return { ok: false, error: "UNAUTHENTICATED" };
 
+  // checkAndIncrementUsage usa admin client (sin JWT) para evitar excepciones en el upsert
+  const usageResult = await checkAndIncrementUsage(userId);
+  if (!usageResult.allowed) return { ok: false, error: "LIMIT_REACHED" };
+
+  const { isPro } = usageResult;
+
   const supabase = createSupabaseClient();
-  const month = getCurrentMonth();
 
-  const [{ data: subData }, { data: usageData }, { data: profileRow }] = await Promise.all([
-    supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
-    supabase.from("usage").select("count").eq("user_id", userId).eq("month", month).maybeSingle(),
-    supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),
-  ]);
-
-  const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
-  const currentCount = usageData?.count ?? 0;
+  const { data: profileRow } = await supabase
+    .from("agent_profiles")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
 
   const profile: AgentProfile = profileRow ?? {};
   const { contextBlock, toneInstruction, profileEmpty } = buildAgentContext(profile);
-
-  if (!isPro && currentCount >= MONTHLY_LIMIT) {
-    return { ok: false, error: "LIMIT_REACHED" };
-  }
 
   if (!process.env.ANTHROPIC_API_KEY) {
     console.error("[posts.actions] ERROR: ANTHROPIC_API_KEY no está definida");
@@ -218,7 +217,7 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     return { ok: false, error: "ERROR_API" };
   }
 
-  const rawText = message.content[0].type === "text" ? message.content[0].text : "";
+  const rawText = message.content[0]?.type === "text" ? message.content[0].text : "";
 
   const jsonMatch = rawText.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
@@ -234,22 +233,13 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     return { ok: false, error: "ERROR_FORMATO" };
   }
 
-  const newCount = currentCount + 1;
-  const { error: upsertError } = await supabase
-    .from("usage")
-    .upsert({ user_id: userId, month, count: newCount }, { onConflict: "user_id,month" });
-
-  if (upsertError) {
-    console.error("[posts.actions] ERROR al actualizar usage en Supabase:", upsertError);
-  }
-
   void logFeatureUsage("posts");
 
   return {
     ok: true,
     posts: parsed.posts as PostResult[],
     recomendaciones: parsed.recomendaciones as RecomendacionesResult,
-    remaining: isPro ? -1 : Math.max(0, MONTHLY_LIMIT - newCount),
+    remaining: usageResult.remaining,
     isPro,
     profileEmpty,
   };
