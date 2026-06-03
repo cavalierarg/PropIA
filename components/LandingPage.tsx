@@ -151,11 +151,11 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-[#00c9c9]/[0.05] blur-2xl" />
         <div className="pointer-events-none absolute top-1/2 left-1/3 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#1a4a7a]/20 blur-3xl" />
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div>
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-10 lg:gap-16">
 
-            {/* ── Contenido hero ── */}
-            <div>
+            {/* ── Columna izquierda: texto ── */}
+            <div className="flex-1 lg:max-w-[560px]">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 bg-[#00c9c9]/[0.14] border border-[#00c9c9]/30 text-[#00c9c9] text-[11px] font-bold px-4 py-1.5 rounded-full mb-8 tracking-widest uppercase">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -238,6 +238,61 @@ export default function LandingPage() {
                 <div className="flex items-center gap-2 text-white/50 text-sm">
                   <Check className="w-4 h-4 text-[#00c9c9] shrink-0" />
                   Funciona con Claude AI de Anthropic
+                </div>
+              </div>
+
+              {/* Video mobile (debajo del CTA, solo en mobile) */}
+              <div className="mt-8 lg:hidden">
+                <div className="relative w-full max-w-xs mx-auto rounded-2xl overflow-hidden bg-black shadow-2xl"
+                  style={{ aspectRatio: '9/16' }}
+                >
+                  <iframe
+                    src="https://www.youtube.com/embed/DRi9i6uwdmQ?autoplay=1&mute=1&loop=1&controls=0&playsinline=1&rel=0&modestbranding=1&playlist=DRi9i6uwdmQ"
+                    title="Demo PropIA"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    className="absolute inset-0 w-full h-full border-0"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── Columna derecha: iPhone frame con video (solo desktop) ── */}
+            <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
+              {/* iPhone 14 Pro style */}
+              <div className="relative" style={{ width: 220 }}>
+                {/* Cuerpo del iPhone */}
+                <div
+                  className="relative bg-[#111] rounded-[44px] p-[3.5px]"
+                  style={{
+                    boxShadow: '0 0 0 1px #333, 0 0 0 2px #1a1a1a, 0 32px 80px rgba(0,0,0,0.75), 0 0 40px rgba(0,201,201,0.08)',
+                  }}
+                >
+                  {/* Botón silencio (izquierda arriba) */}
+                  <div className="absolute -left-[4px] top-[72px] w-[3px] h-[28px] bg-[#222] rounded-l-sm" />
+                  {/* Botones volumen (izquierda) */}
+                  <div className="absolute -left-[4px] top-[114px] w-[3px] h-[38px] bg-[#222] rounded-l-sm" />
+                  <div className="absolute -left-[4px] top-[162px] w-[3px] h-[38px] bg-[#222] rounded-l-sm" />
+                  {/* Botón encendido (derecha) */}
+                  <div className="absolute -right-[4px] top-[106px] w-[3px] h-[60px] bg-[#222] rounded-r-sm" />
+
+                  {/* Pantalla */}
+                  <div
+                    className="relative rounded-[41px] overflow-hidden bg-black"
+                    style={{ aspectRatio: '9/19.5' }}
+                  >
+                    {/* Dynamic Island */}
+                    <div
+                      className="absolute top-[13px] left-1/2 -translate-x-1/2 z-20 bg-black rounded-full"
+                      style={{ width: 78, height: 24 }}
+                    />
+                    {/* Video */}
+                    <iframe
+                      src="https://www.youtube.com/embed/DRi9i6uwdmQ?autoplay=1&mute=1&loop=1&controls=0&playsinline=1&rel=0&modestbranding=1&playlist=DRi9i6uwdmQ"
+                      title="Demo PropIA"
+                      allow="autoplay; encrypted-media; picture-in-picture"
+                      className="absolute inset-0 w-full h-full border-0"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
