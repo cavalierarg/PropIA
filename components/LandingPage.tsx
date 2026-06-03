@@ -243,7 +243,10 @@ export default function LandingPage() {
 
               {/* Video mobile (debajo del CTA, solo en mobile) */}
               <div className="mt-8 lg:hidden flex justify-center">
-                <div style={{ width: '85%', maxWidth: '320px', margin: '0 auto' }}>
+                <div style={{ width: '85%', maxWidth: '320px', margin: '0 auto' }} className="flex flex-col items-center gap-3">
+                  <p style={{ color: '#00c9c9', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                    ▶ Demo en vivo — 25 segundos
+                  </p>
                   {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                   <video
                     src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4"
@@ -260,27 +263,38 @@ export default function LandingPage() {
                       display: 'block',
                     }}
                   />
+                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, textAlign: 'center', maxWidth: 200, lineHeight: 1.5 }}>
+                    Mirá cómo un agente genera 5 posts profesionales en 60 segundos
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* ── Columna derecha: video (solo desktop) ── */}
             <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
-              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-              <video
-                src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                style={{
-                  width: '250px',
-                  height: 'auto',
-                  borderRadius: '16px',
-                  boxShadow: '0 0 40px rgba(0,201,201,0.12), 0 20px 60px rgba(0,0,0,0.5)',
-                  objectFit: 'cover',
-                }}
-              />
+              <div className="flex flex-col items-center gap-3">
+                <p style={{ color: '#00c9c9', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                  ▶ Demo en vivo — 25 segundos
+                </p>
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                <video
+                  src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  style={{
+                    width: '250px',
+                    height: 'auto',
+                    borderRadius: '16px',
+                    boxShadow: '0 0 40px rgba(0,201,201,0.12), 0 20px 60px rgba(0,0,0,0.5)',
+                    objectFit: 'cover',
+                  }}
+                />
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, textAlign: 'center', maxWidth: 200, lineHeight: 1.5 }}>
+                  Mirá cómo un agente genera 5 posts profesionales en 60 segundos
+                </p>
+              </div>
             </div>
 
           </div>
