@@ -274,7 +274,7 @@ export default function LandingPage() {
                 loop
                 playsInline
                 style={{
-                  width: '340px',
+                  width: '250px',
                   height: 'auto',
                   borderRadius: '16px',
                   boxShadow: '0 0 40px rgba(0,201,201,0.12), 0 20px 60px rgba(0,0,0,0.5)',
