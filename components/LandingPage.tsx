@@ -243,16 +243,19 @@ export default function LandingPage() {
 
               {/* Video mobile (debajo del CTA, solo en mobile) */}
               <div className="mt-8 lg:hidden">
-                <div className="relative w-full max-w-xs mx-auto rounded-2xl overflow-hidden bg-black shadow-2xl"
-                  style={{ aspectRatio: '9/16' }}
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full max-w-xs mx-auto block rounded-xl shadow-2xl"
+                  style={{ aspectRatio: '9/16', objectFit: 'cover' }}
                 >
-                  <iframe
-                    src="https://www.youtube.com/embed/DRi9i6uwdmQ?autoplay=1&mute=1&loop=1&controls=0&playsinline=1&rel=0&modestbranding=1&playlist=DRi9i6uwdmQ"
-                    title="Demo PropIA"
-                    allow="autoplay; encrypted-media; picture-in-picture"
-                    className="absolute inset-0 w-full h-full border-0"
+                  <source
+                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/landing/demo.mp4`}
+                    type="video/mp4"
                   />
-                </div>
+                </video>
               </div>
             </div>
 
@@ -286,12 +289,19 @@ export default function LandingPage() {
                       style={{ width: 78, height: 24 }}
                     />
                     {/* Video */}
-                    <iframe
-                      src="https://www.youtube.com/embed/DRi9i6uwdmQ?autoplay=1&mute=1&loop=1&controls=0&playsinline=1&rel=0&modestbranding=1&playlist=DRi9i6uwdmQ"
-                      title="Demo PropIA"
-                      allow="autoplay; encrypted-media; picture-in-picture"
-                      className="absolute inset-0 w-full h-full border-0"
-                    />
+                    <video
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="absolute inset-0 w-full h-full"
+                      style={{ objectFit: 'cover' }}
+                    >
+                      <source
+                        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/landing/demo.mp4`}
+                        type="video/mp4"
+                      />
+                    </video>
                   </div>
                 </div>
               </div>
