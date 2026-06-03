@@ -242,20 +242,24 @@ export default function LandingPage() {
               </div>
 
               {/* Video mobile (debajo del CTA, solo en mobile) */}
-              <div className="mt-8 lg:hidden">
-                <video
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="w-full max-w-xs mx-auto block rounded-xl shadow-2xl"
-                  style={{ aspectRatio: '9/16', objectFit: 'cover' }}
+              <div className="mt-8 lg:hidden flex justify-center">
+                <div
+                  className="relative w-full max-w-[260px] rounded-xl overflow-hidden bg-black shadow-2xl"
+                  style={{ aspectRatio: '9/16' }}
                 >
-                  <source
-                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/landing/demo.mp4`}
-                    type="video/mp4"
-                  />
-                </video>
+                  <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                  >
+                    <source
+                      src={`${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '')}/storage/v1/object/public/landing/demo.mp4`}
+                      type="video/mp4"
+                    />
+                  </video>
+                </div>
               </div>
             </div>
 
@@ -294,11 +298,10 @@ export default function LandingPage() {
                       muted
                       loop
                       playsInline
-                      className="absolute inset-0 w-full h-full"
-                      style={{ objectFit: 'cover' }}
+                      className="absolute inset-0 w-full h-full object-cover"
                     >
                       <source
-                        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/landing/demo.mp4`}
+                        src={`${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '')}/storage/v1/object/public/landing/demo.mp4`}
                         type="video/mp4"
                       />
                     </video>
