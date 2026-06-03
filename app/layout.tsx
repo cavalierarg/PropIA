@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { esES } from "@clerk/localizations";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { Inter } from "next/font/google";
 import { headers } from "next/headers";
@@ -79,7 +80,7 @@ export default async function RootLayout({
   }
 
   return (
-    <ClerkProvider afterSignOutUrl="/">
+    <ClerkProvider afterSignOutUrl="/" localization={esES as Parameters<typeof ClerkProvider>[0]['localization']}>
       <html lang="es">
         <body className={`${inter.variable} antialiased`}>
           {userId && sidebarProps ? (
