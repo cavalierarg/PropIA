@@ -10,26 +10,8 @@ interface UsageBarProps {
   className?: string;
 }
 
-function UsageSkeleton({ className = "" }: { className?: string }) {
-  return (
-    <div className={`flex flex-col gap-2 ${className}`}>
-      <div className="flex items-center justify-between gap-2">
-        <div className="h-3 w-48 bg-slate-100 rounded-full animate-pulse" />
-        <div className="h-3 w-8 bg-slate-100 rounded-full animate-pulse" />
-      </div>
-      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-        <div className="h-1.5 w-1/4 rounded-full bg-slate-200 animate-pulse" />
-      </div>
-    </div>
-  );
-}
-
 export default function UsageBar({ checkoutUrl, renewalDate, className = "" }: UsageBarProps) {
-  const { count, remaining, limit, isPro, loading } = useUsage();
-
-  if (loading) {
-    return <UsageSkeleton className={className} />;
-  }
+  const { count, remaining, limit, isPro } = useUsage();
 
   if (isPro) {
     return (

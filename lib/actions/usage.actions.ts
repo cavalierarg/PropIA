@@ -19,28 +19,22 @@ export async function getUsage(): Promise<{
   const { userId } = await auth();
   if (!userId) return { count: 0, remaining: MONTHLY_LIMIT, limit: MONTHLY_LIMIT, isPro: false };
 
-  const supabase = createSupabaseClient();
+  // Use admin client to bypass RLS — reads are filtered by userId in the query itself
+  const supabase = createSupabaseAdminClient();
 
-  const { data: subData } = await supabase
-    .from("subscriptions")
-    .select("plan, status")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const [{ data: subData }, { data: usageData }] = await Promise.all([
+    supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
+    supabase.from("usage").select("count").eq("user_id", userId).eq("month", getCurrentMonth()).maybeSingle(),
+  ]);
 
-  const isPro = (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
+  const isPro =
+    (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
 
   if (isPro) {
     return { count: 0, remaining: -1, limit: -1, isPro: true };
   }
 
-  const { data } = await supabase
-    .from("usage")
-    .select("count")
-    .eq("user_id", userId)
-    .eq("month", getCurrentMonth())
-    .maybeSingle();
-
-  const count = data?.count ?? 0;
+  const count = usageData?.count ?? 0;
   return { count, remaining: Math.max(0, MONTHLY_LIMIT - count), limit: MONTHLY_LIMIT, isPro: false };
 }
 
