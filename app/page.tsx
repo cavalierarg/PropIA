@@ -23,7 +23,7 @@ import { Greeting } from "@/components/Greeting";
 import OnboardingChecklist, { type ChecklistItem } from "@/components/OnboardingChecklist";
 import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
-import { UpgradeButton } from "@/components/UpgradeLink";
+import UsageBar from "@/components/UsageBar";
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -215,45 +215,13 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Usage bar for free users */}
+        {/* Usage bar */}
         {!usage.isPro && (
-          <div className="mt-4 bg-white rounded-2xl border border-[#e2e8f0] shadow-sm p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-[#0f3460]">Uso del plan Free</span>
-              <span className="text-xs font-medium text-slate-500">
-                {usage.count}/{usage.limit}
-              </span>
-            </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-3">
-              <div
-                className="h-2 rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.min(100, Math.round((usage.count / usage.limit) * 100))}%`,
-                  background:
-                    usage.count >= usage.limit
-                      ? "#ef4444"
-                      : "linear-gradient(90deg, #0f3460, #00c9c9)",
-                }}
-              />
-            </div>
-            {usage.remaining === 0 ? (
-              <UpgradeButton href={checkoutUrl} />
-            ) : usage.remaining <= 2 ? (
-              <div className="flex flex-col gap-1.5">
-                <p className="text-xs text-amber-600 font-medium">
-                  Te {usage.remaining === 1 ? "queda" : "quedan"} {usage.remaining} generaci{usage.remaining !== 1 ? "ones" : "ón"} este mes
-                </p>
-                <UpgradeButton href={checkoutUrl} />
-              </div>
-            ) : (
-              <p className="text-xs text-slate-400">
-                Tenés {usage.remaining} generacion{usage.remaining !== 1 ? "es" : ""} disponible{usage.remaining !== 1 ? "s" : ""}
-              </p>
-            )}
-            <p className="text-xs text-slate-300 mt-1">
-              Se renuevan el {nextRenewal}
-            </p>
-          </div>
+          <UsageBar
+            checkoutUrl={checkoutUrl}
+            renewalDate={nextRenewal}
+            className="mt-4 bg-white rounded-2xl border border-[#e2e8f0] shadow-sm p-4"
+          />
         )}
       </section>
 

@@ -7,6 +7,7 @@ import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/p
 import type { ErrorGeneracion } from "@/lib/actions/posts.actions";
 import { saveProperty } from "@/lib/actions/properties.actions";
 import { useUsage } from "@/lib/context/usage-context";
+import UsageBar from "@/components/UsageBar";
 import { getUserProfile } from "@/lib/actions/user-profile.actions";
 import PostsView from "@/components/PostsView";
 import PostsSkeleton from "@/components/PostsSkeleton";
@@ -133,8 +134,6 @@ export default function PropertyForm() {
   };
 
   const isLimitReached = !isPro && remaining === 0;
-  const isWarning = !isPro && remaining !== null && remaining > 0 && remaining <= 3;
-  const used = remaining !== null ? usageLimit - remaining : 0;
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
@@ -144,53 +143,7 @@ export default function PropertyForm() {
       )}
 
       {/* Indicador de uso */}
-      {(remaining !== null || isPro) && (
-        <div className="flex flex-col gap-2 p-4 border rounded-xl bg-card">
-          {isPro ? (
-            <div className="flex items-center gap-2">
-              <SparklesIcon className="w-4 h-4 text-[#00d4d4] shrink-0" />
-              <span className="font-semibold text-sm text-[#0f3460]">
-                Plan PRO activo — generaciones ilimitadas
-              </span>
-              <span className="ml-auto text-xs bg-[#00d4d4]/10 text-[#0f3460] border border-[#00d4d4]/30 rounded-full px-2 py-0.5 font-semibold">
-                PRO
-              </span>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <div className="flex items-center gap-2 min-w-0">
-                  <ZapIcon
-                    className={`w-4 h-4 shrink-0 ${
-                      isLimitReached ? "text-red-500" : isWarning ? "text-amber-500" : "text-[#00d4d4]"
-                    }`}
-                  />
-                  <span
-                    className={`font-medium text-sm leading-tight ${
-                      isLimitReached ? "text-red-600" : isWarning ? "text-amber-600" : "text-[#0f3460]"
-                    }`}
-                  >
-                    {isLimitReached
-                      ? "Sin generaciones disponibles este mes"
-                      : `${remaining} generación${remaining !== 1 ? "es" : ""} disponible${remaining !== 1 ? "s" : ""} este mes`}
-                  </span>
-                </div>
-                <span className="text-muted-foreground tabular-nums shrink-0 text-xs sm:text-sm">
-                  {used}/{usageLimit}
-                </span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    isLimitReached ? "bg-red-400" : isWarning ? "bg-amber-400" : "bg-[#00d4d4]"
-                  }`}
-                  style={{ width: `${usageLimit > 0 ? (used / usageLimit) * 100 : 0}%` }}
-                />
-              </div>
-            </>
-          )}
-        </div>
-      )}
+      <UsageBar checkoutUrl={checkoutUrl} className="p-4 border rounded-xl bg-card" />
 
       {/* Límite alcanzado */}
       {isLimitReached && (

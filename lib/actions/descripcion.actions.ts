@@ -32,6 +32,7 @@ export type DescripcionResult = {
   version_corta: string;
   version_larga: string | null;
   isPro: boolean;
+  remaining: number;
 };
 
 export async function generarDescripcion(data: PropertyInput): Promise<DescripcionResult> {
@@ -172,5 +173,6 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     version_corta: parsed.version_corta,
     version_larga: isPro ? (parsed.version_larga ?? null) : null,
     isPro,
+    remaining: usage.remaining,
   };
 }

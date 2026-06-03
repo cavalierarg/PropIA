@@ -208,7 +208,7 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
 export async function generarGuion(
   data: PropertyInput,
   formato: TrendingFormat
-): Promise<GuionResult> {
+): Promise<GuionResult & { remaining: number }> {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
@@ -312,5 +312,5 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
   }
 
   void logFeatureUsage("reels");
-  return result;
+  return { ...result, remaining: usage.remaining };
 }

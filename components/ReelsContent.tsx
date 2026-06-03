@@ -13,6 +13,7 @@ import {
 } from "@/lib/actions/reels.actions";
 import { getUserPlan } from "@/lib/actions/subscription.actions";
 import { getUserProfile } from "@/lib/actions/user-profile.actions";
+import { useUsage } from "@/lib/context/usage-context";
 import { Button } from "@/components/ui/button";
 import {
   Building2,
@@ -54,6 +55,7 @@ const FORM_EMPTY = {
 export default function ReelsContent() {
   const { user } = useUser();
   const router = useRouter();
+  const { limit, setUsage } = useUsage();
   const [form, setForm] = useState(FORM_EMPTY);
   const [step, setStep] = useState<Step>("form");
   const [formatos, setFormatos] = useState<TrendingFormat[]>([]);
@@ -143,6 +145,9 @@ export default function ReelsContent() {
       const result = await generarGuion({ ...form, amenities: [] }, formatoSeleccionado);
       setGuion(result);
       setStep("guion");
+      if (!isPro) {
+        setUsage({ remaining: result.remaining, count: limit - result.remaining });
+      }
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHENTICATED") {
         setError("Necesitás iniciar sesión para usar esta feature.");

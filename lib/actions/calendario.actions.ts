@@ -139,7 +139,7 @@ async function generarBatch(
 export async function generarCalendario(data: {
   nicho: string;
   zona: string;
-}): Promise<{ dias: CalendarDay[]; isPro: boolean }> {
+}): Promise<{ dias: CalendarDay[]; isPro: boolean; remaining: number }> {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
@@ -177,5 +177,5 @@ export async function generarCalendario(data: {
   }
 
   void logFeatureUsage("calendario");
-  return { dias, isPro };
+  return { dias, isPro, remaining: usage.remaining };
 }

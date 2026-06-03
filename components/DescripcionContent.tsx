@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { generarDescripcion, DescripcionResult } from "@/lib/actions/descripcion.actions";
 import { getUserProfile } from "@/lib/actions/user-profile.actions";
+import { useUsage } from "@/lib/context/usage-context";
 import { getUserPlan } from "@/lib/actions/subscription.actions";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon, LockIcon, SparklesIcon, Building2 } from "lucide-react";
@@ -16,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function DescripcionContent() {
   const { user } = useUser();
   const router = useRouter();
+  const { limit, setUsage } = useUsage();
 
   const [form, setForm] = useState({
     tipoPropiedad: "",
@@ -89,6 +91,9 @@ export default function DescripcionContent() {
       const res = await generarDescripcion({ ...form, amenities: [] });
       setResult(res);
       setIsPro(res.isPro);
+      if (!res.isPro) {
+        setUsage({ remaining: res.remaining, count: limit - res.remaining });
+      }
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHENTICATED") {
         setError("Necesitás iniciar sesión para generar descripciones.");

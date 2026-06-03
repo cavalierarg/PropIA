@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { generarCalendario, CalendarDay } from "@/lib/actions/calendario.actions";
+import { useUsage } from "@/lib/context/usage-context";
 import { getUserPlan } from "@/lib/actions/subscription.actions";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const TOTAL_DAYS = 30;
 export default function CalendarioContent() {
   const { user } = useUser();
   const router = useRouter();
+  const { limit, setUsage } = useUsage();
   const [nicho, setNicho] = useState("");
   const [zona, setZona] = useState("");
   const [loading, setLoading] = useState(false);
@@ -82,6 +84,9 @@ export default function CalendarioContent() {
       const result = await generarCalendario({ nicho, zona });
       setDias(result.dias);
       setIsPro(result.isPro);
+      if (!result.isPro) {
+        setUsage({ remaining: result.remaining, count: limit - result.remaining });
+      }
     } catch (err: unknown) {
       if (err instanceof Error && err.message === "UNAUTHENTICATED") {
         setError("Necesitás iniciar sesión para usar esta feature.");
