@@ -16,7 +16,7 @@ import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import OnboardingModal from "@/components/OnboardingModal";
 import { UsageProvider } from "@/lib/context/usage-context";
 import MetaPixelScript from "@/components/MetaPixelScript";
-import WhatsAppButton from "@/components/WhatsAppButton";
+
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -110,7 +110,6 @@ export default async function RootLayout({
           {process.env.NEXT_PUBLIC_META_PIXEL_ID && (
             <MetaPixelScript pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID} />
           )}
-          <WhatsAppButton />
           <Toaster richColors position="bottom-right" />
           <Analytics />
           <SpeedInsights />
