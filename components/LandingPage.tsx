@@ -243,71 +243,31 @@ export default function LandingPage() {
 
               {/* Video mobile (debajo del CTA, solo en mobile) */}
               <div className="mt-8 lg:hidden flex justify-center">
-                <div
-                  className="relative w-full max-w-[260px] rounded-xl overflow-hidden bg-black shadow-2xl"
-                  style={{ aspectRatio: '9/16' }}
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-[80%] object-cover"
+                  style={{ borderRadius: 12, boxShadow: '0 20px 60px rgba(0,0,0,0.3)', aspectRatio: '9/16' }}
                 >
-                  <video
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
-                  >
-                    <source
-                      src={`${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '')}/storage/v1/object/public/landing/demo.mp4`}
-                      type="video/mp4"
-                    />
-                  </video>
-                </div>
+                  <source src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4" type="video/mp4" />
+                </video>
               </div>
             </div>
 
-            {/* ── Columna derecha: iPhone frame con video (solo desktop) ── */}
+            {/* ── Columna derecha: video sin frame (solo desktop) ── */}
             <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
-              {/* iPhone 14 Pro style */}
-              <div className="relative" style={{ width: 220 }}>
-                {/* Cuerpo del iPhone */}
-                <div
-                  className="relative bg-[#111] rounded-[44px] p-[3.5px]"
-                  style={{
-                    boxShadow: '0 0 0 1px #333, 0 0 0 2px #1a1a1a, 0 32px 80px rgba(0,0,0,0.75), 0 0 40px rgba(0,201,201,0.08)',
-                  }}
-                >
-                  {/* Botón silencio (izquierda arriba) */}
-                  <div className="absolute -left-[4px] top-[72px] w-[3px] h-[28px] bg-[#222] rounded-l-sm" />
-                  {/* Botones volumen (izquierda) */}
-                  <div className="absolute -left-[4px] top-[114px] w-[3px] h-[38px] bg-[#222] rounded-l-sm" />
-                  <div className="absolute -left-[4px] top-[162px] w-[3px] h-[38px] bg-[#222] rounded-l-sm" />
-                  {/* Botón encendido (derecha) */}
-                  <div className="absolute -right-[4px] top-[106px] w-[3px] h-[60px] bg-[#222] rounded-r-sm" />
-
-                  {/* Pantalla */}
-                  <div
-                    className="relative rounded-[41px] overflow-hidden bg-black"
-                    style={{ aspectRatio: '9/19.5' }}
-                  >
-                    {/* Dynamic Island */}
-                    <div
-                      className="absolute top-[13px] left-1/2 -translate-x-1/2 z-20 bg-black rounded-full"
-                      style={{ width: 78, height: 24 }}
-                    />
-                    {/* Video */}
-                    <video
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="absolute inset-0 w-full h-full object-cover"
-                    >
-                      <source
-                        src={`${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '')}/storage/v1/object/public/landing/demo.mp4`}
-                        type="video/mp4"
-                      />
-                    </video>
-                  </div>
-                </div>
-              </div>
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="object-cover"
+                style={{ width: 320, height: 568, borderRadius: 16, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
+              >
+                <source src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4" type="video/mp4" />
+              </video>
             </div>
 
           </div>
