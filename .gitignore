@@ -42,3 +42,9 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# local development artifacts
+*.png
+response.json
+take-screenshot.js
+.claude/settings.local.json
