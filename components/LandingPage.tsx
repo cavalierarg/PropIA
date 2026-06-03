@@ -243,31 +243,42 @@ export default function LandingPage() {
 
               {/* Video mobile (debajo del CTA, solo en mobile) */}
               <div className="mt-8 lg:hidden flex justify-center">
+                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                 <video
+                  src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4"
                   autoPlay
                   muted
                   loop
                   playsInline
-                  className="w-[80%] object-cover"
-                  style={{ borderRadius: 12, boxShadow: '0 20px 60px rgba(0,0,0,0.3)', aspectRatio: '9/16' }}
-                >
-                  <source src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4" type="video/mp4" />
-                </video>
+                  style={{
+                    width: '85%',
+                    height: 'auto',
+                    borderRadius: '12px',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
               </div>
             </div>
 
-            {/* ── Columna derecha: video sin frame (solo desktop) ── */}
+            {/* ── Columna derecha: video (solo desktop) ── */}
             <div className="hidden lg:flex flex-shrink-0 items-center justify-center">
+              {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
               <video
+                src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4"
                 autoPlay
                 muted
                 loop
                 playsInline
-                className="object-cover"
-                style={{ width: 320, height: 568, borderRadius: 16, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
-              >
-                <source src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4" type="video/mp4" />
-              </video>
+                style={{
+                  width: '300px',
+                  height: 'auto',
+                  borderRadius: '16px',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+                  objectFit: 'cover',
+                }}
+              />
             </div>
 
           </div>
