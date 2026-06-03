@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { getUsage } from "@/lib/actions/usage.actions";
 
 interface UsageState {
   count: number;
@@ -33,13 +34,10 @@ export function UsageProvider({
   const [usage, setUsageState] = useState<UsageState>(initial);
   const [loading, setLoading] = useState(true);
 
-  // Fetch real usage from DB on mount — the layout's initial prop may be stale
-  // on client-side navigation since the layout Server Component doesn't re-run.
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/usage")
-      .then((r) => r.json())
-      .then((data: UsageState) => {
+    getUsage()
+      .then((data) => {
         if (!cancelled) {
           setUsageState(data);
           setLoading(false);
@@ -47,12 +45,13 @@ export function UsageProvider({
       })
       .catch(() => {
         if (!cancelled) {
-          // Fallback to initial data from layout if fetch fails
           setUsageState(initial);
           setLoading(false);
         }
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
