@@ -264,7 +264,11 @@ export default function AdsGeneratorContent({
               agentLogoUrl: agentLogoUrl ?? undefined,
             }),
           });
-          if (!res.ok) throw new Error(`API error ${res.status}`);
+          if (!res.ok) {
+            const errBody = await res.text().catch(() => "");
+            console.error(`[ads] API error ${res.status}:`, errBody);
+            throw new Error(`API error ${res.status}: ${errBody}`);
+          }
           const blob = await res.blob();
           return { photoIndex, type, url: URL.createObjectURL(blob) } as GeneratedAd;
         })

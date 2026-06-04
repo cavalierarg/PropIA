@@ -137,7 +137,10 @@ export async function POST(req: NextRequest) {
 
   let imageData: string;
   try { imageData = await fetchImageAsDataUrl(imageUrl); }
-  catch (e) { return NextResponse.json({ error: String(e) }, { status: 400 }); }
+  catch (e) {
+    console.error("[generate-ad] image fetch failed:", String(e), "url:", imageUrl?.slice(0, 80));
+    return NextResponse.json({ error: String(e) }, { status: 400 });
+  }
 
   const agentLogoData: string | null = agentLogoUrl
     ? await processLogoWithTransparency(agentLogoUrl)
