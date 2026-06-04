@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { generarDescripcion, DescripcionResult } from "@/lib/actions/descripcion.actions";
 import { getUserProfile } from "@/lib/actions/user-profile.actions";
 import { useUsage } from "@/lib/context/usage-context";
-import { getUserPlan } from "@/lib/actions/subscription.actions";
+
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon, LockIcon, SparklesIcon, Building2 } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +14,7 @@ import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function DescripcionContent() {
+export default function DescripcionContent({ initialIsPro }: { initialIsPro: boolean }) {
   const { user } = useUser();
   const router = useRouter();
   const { limit, setUsage } = useUsage();
@@ -41,7 +41,7 @@ export default function DescripcionContent() {
   const [error, setError] = useState("");
   const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const [result, setResult] = useState<DescripcionResult | null>(null);
-  const [isPro, setIsPro] = useState(false);
+  const [isPro, setIsPro] = useState(initialIsPro);
   const [copiedShort, setCopiedShort] = useState(false);
   const [copiedLong, setCopiedLong] = useState(false);
 
@@ -71,7 +71,6 @@ export default function DescripcionContent() {
       }
     } catch {}
 
-    getUserPlan().then((plan) => setIsPro(plan === "pro" || plan === "pro_max"));
     getUserProfile().then((profile) => {
       setForm((prev) => ({
         ...prev,

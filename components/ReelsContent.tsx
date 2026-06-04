@@ -11,7 +11,7 @@ import {
   type Slide,
   type GuionResult,
 } from "@/lib/actions/reels.actions";
-import { getUserPlan } from "@/lib/actions/subscription.actions";
+
 import { getUserProfile } from "@/lib/actions/user-profile.actions";
 import { useUsage } from "@/lib/context/usage-context";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,7 @@ const FORM_EMPTY = {
   agenteSitioWeb: "",
 };
 
-export default function ReelsContent() {
+export default function ReelsContent({ initialIsPro }: { initialIsPro: boolean }) {
   const { user } = useUser();
   const router = useRouter();
   const { limit, setUsage } = useUsage();
@@ -65,8 +65,8 @@ export default function ReelsContent() {
   const [loadingGuion, setLoadingGuion] = useState(false);
   const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const [error, setError] = useState("");
-  const [isPro, setIsPro] = useState(false);
-  const [planChecked, setPlanChecked] = useState(false);
+  const [isPro, setIsPro] = useState(initialIsPro);
+  const [planChecked] = useState(true);
   const [copiedEscena, setCopiedEscena] = useState<number | null>(null);
   const [copiedSlide, setCopiedSlide] = useState<number | null>(null);
 
@@ -96,10 +96,6 @@ export default function ReelsContent() {
       }
     } catch {}
 
-    getUserPlan().then((plan) => {
-      setIsPro(plan === "pro" || plan === "pro_max");
-      setPlanChecked(true);
-    });
     getUserProfile().then((profile) => {
       setForm((prev) => ({
         ...prev,

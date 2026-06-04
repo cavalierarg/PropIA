@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { generarCalendario, CalendarDay } from "@/lib/actions/calendario.actions";
 import { useUsage } from "@/lib/context/usage-context";
-import { getUserPlan } from "@/lib/actions/subscription.actions";
+
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -40,7 +40,7 @@ const COLORES_RED: Record<string, string> = {
 const FREE_DAYS = 3;
 const TOTAL_DAYS = 30;
 
-export default function CalendarioContent() {
+export default function CalendarioContent({ initialIsPro }: { initialIsPro: boolean }) {
   const { user } = useUser();
   const router = useRouter();
   const { limit, setUsage } = useUsage();
@@ -51,8 +51,8 @@ export default function CalendarioContent() {
   const [error, setError] = useState("");
   const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string } | null>(null);
   const [dias, setDias] = useState<CalendarDay[]>([]);
-  const [isPro, setIsPro] = useState(false);
-  const [planChecked, setPlanChecked] = useState(false);
+  const [isPro, setIsPro] = useState(initialIsPro);
+  const [planChecked] = useState(true);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const checkoutUrl = user
@@ -60,10 +60,6 @@ export default function CalendarioContent() {
     : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
 
   useEffect(() => {
-    getUserPlan().then((plan) => {
-      setIsPro(plan === "pro" || plan === "pro_max");
-      setPlanChecked(true);
-    });
     try {
       const raw = localStorage.getItem("propia_property_prefill");
       if (raw) {

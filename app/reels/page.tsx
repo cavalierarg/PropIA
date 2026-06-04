@@ -108,7 +108,7 @@ export default async function ReelsPage() {
         <div className="h-1 w-16 bg-[#00d4d4] rounded-full sm:w-20" />
       </section>
 
-      <ReelsContent />
+      <ReelsContent initialIsPro={true} />
     </main>
   );
 }

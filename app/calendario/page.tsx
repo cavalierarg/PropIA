@@ -19,8 +19,6 @@ export default async function CalendarioPage() {
 
   await updateOnboardingStep("calendario_visitado");
   const plan = await getUserPlan();
-  console.log("[CalendarioPage] userId:", userId, "plan:", plan);
-
   if (plan === "free") {
     const checkoutUrl = `${PRO_CHECKOUT}?checkout[custom][plan]=pro&checkout[custom][user_id]=${userId}`;
 
@@ -106,7 +104,7 @@ export default async function CalendarioPage() {
         <div className="h-1 w-16 bg-[#00d4d4] rounded-full sm:w-20" />
       </section>
 
-      <CalendarioContent />
+      <CalendarioContent initialIsPro={true} />
     </main>
   );
 }
