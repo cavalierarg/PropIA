@@ -17,6 +17,7 @@ const PRO_CHECKOUT =
 const PRO_MAX_CHECKOUT =
   "https://propia.lemonsqueezy.com/checkout/buy/999a3318-b1c8-40d1-a379-2039fe777b1d";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Generador de Ads — PropIA" };
 
 export default async function AdsGeneratorPage() {

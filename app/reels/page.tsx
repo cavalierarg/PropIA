@@ -9,6 +9,7 @@ import { SparklesIcon, CheckIcon } from "lucide-react";
 const PRO_CHECKOUT =
   "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Guion para Reels — PropIA" };
 
 export default async function ReelsPage() {
