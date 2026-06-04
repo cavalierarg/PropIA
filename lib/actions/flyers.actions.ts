@@ -25,9 +25,16 @@ export async function uploadPropertyImage(formData: FormData): Promise<string> {
 
   if (error) throw new Error(`Upload failed: ${error.message}`);
 
-  const { data } = supabase.storage
+  // Signed URL válida por 1 hora — funciona con bucket público o privado
+  const { data: signed, error: signedErr } = await supabase.storage
     .from("property-images")
-    .getPublicUrl(fileName);
+    .createSignedUrl(fileName, 3600);
 
-  return data.publicUrl;
+  if (signedErr || !signed?.signedUrl) {
+    // Fallback a URL pública si el bucket lo permite
+    const { data } = supabase.storage.from("property-images").getPublicUrl(fileName);
+    return data.publicUrl;
+  }
+
+  return signed.signedUrl;
 }
