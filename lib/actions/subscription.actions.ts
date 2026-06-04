@@ -1,9 +1,11 @@
 "use server";
 
+import { unstable_noStore as noStore } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export async function getUserPlan(): Promise<"free" | "pro" | "pro_max"> {
+  noStore();
   const { userId } = await auth();
   if (!userId) return "free";
 
