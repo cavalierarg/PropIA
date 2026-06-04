@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getUserProperties } from "@/lib/actions/properties.actions";
+import { getUserPlan } from "@/lib/actions/subscription.actions";
 import MisPropiedadesList from "@/components/MisPropiedadesList";
 import Link from "next/link";
 import { PlusIcon } from "lucide-react";
@@ -12,7 +13,7 @@ export default async function MisPropiedadesPage() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const properties = await getUserProperties();
+  const [properties, plan] = await Promise.all([getUserProperties(), getUserPlan()]);
 
   return (
     <main className="flex flex-col gap-6 py-6 sm:gap-8 sm:py-8">
@@ -30,7 +31,7 @@ export default async function MisPropiedadesPage() {
         <div className="h-1 w-16 bg-[#00c9c9] rounded-full sm:w-20" />
       </section>
 
-      <MisPropiedadesList initialProperties={properties} />
+      <MisPropiedadesList initialProperties={properties} userPlan={plan} />
 
     </main>
   );

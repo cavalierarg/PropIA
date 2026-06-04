@@ -142,8 +142,10 @@ function formatDate(dateStr: string) {
 
 export default function MisPropiedadesList({
   initialProperties,
+  userPlan = "free",
 }: {
   initialProperties: SavedProperty[];
+  userPlan?: "free" | "pro" | "pro_max";
 }) {
   const [properties, setProperties] = useState(initialProperties);
   const [search, setSearch] = useState("");
@@ -537,6 +539,7 @@ export default function MisPropiedadesList({
           property={generarProperty}
           open={!!generarProperty}
           onClose={() => setGenerarProperty(null)}
+          userPlan={userPlan}
         />
       )}
 
