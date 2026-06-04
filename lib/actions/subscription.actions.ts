@@ -1,13 +1,13 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export async function getUserPlan(): Promise<"free" | "pro" | "pro_max"> {
   const { userId } = await auth();
   if (!userId) return "free";
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const { data } = await supabase
     .from("subscriptions")
     .select("plan, status")
