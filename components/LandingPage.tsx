@@ -244,12 +244,12 @@ export default function LandingPage() {
               {/* Video mobile (debajo del CTA, solo en mobile) */}
               <div className="mt-8 lg:hidden flex justify-center">
                 <div style={{ width: '85%', maxWidth: '320px', margin: '0 auto' }} className="flex flex-col items-center gap-3">
-                  <p style={{ color: '#00c9c9', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                    ▶ Demo en vivo — 25 segundos
+                  <p style={{ color: '#ffffff', fontSize: 15, fontWeight: 600, borderLeft: '3px solid #00c9c9', paddingLeft: 10, lineHeight: 1.4, alignSelf: 'flex-start' }}>
+                    En vivo — así trabaja un agente con PropIA
                   </p>
                   {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                   <video
-                    src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4"
+                    src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-04%20at%207.26.56%20PM.mp4"
                     autoPlay
                     muted
                     loop
@@ -263,8 +263,8 @@ export default function LandingPage() {
                       display: 'block',
                     }}
                   />
-                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, textAlign: 'center', maxWidth: 200, lineHeight: 1.5 }}>
-                    Mirá cómo un agente genera 5 posts profesionales en 60 segundos
+                  <p style={{ color: '#ffffff', fontSize: 14, fontWeight: 500, textAlign: 'center', lineHeight: 1.5 }}>
+                    60 segundos. Una propiedad real.<br />Cinco posts listos para publicar.
                   </p>
                 </div>
               </div>
@@ -273,15 +273,15 @@ export default function LandingPage() {
             {/* ── Columna derecha: video (solo desktop) ── */}
             <div
               className="hidden lg:flex flex-shrink-0"
-              style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}
+              style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', gap: 12 }}
             >
-              <p style={{ color: '#00c9c9', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', textAlign: 'center' }}>
-                ▶ Demo en vivo — 25 segundos
+              <p style={{ color: '#ffffff', fontSize: 15, fontWeight: 600, borderLeft: '3px solid #00c9c9', paddingLeft: 10, lineHeight: 1.4 }}>
+                En vivo — así trabaja un agente con PropIA
               </p>
               <div style={{ width: 360, borderRadius: 16, overflow: 'hidden', boxShadow: '0 0 40px rgba(0,201,201,0.12), 0 20px 60px rgba(0,0,0,0.5)' }}>
                 {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                 <video
-                  src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-02%20at%208.53.09%20PM.mp4"
+                  src="https://okllyjgtphcddybofcid.supabase.co/storage/v1/object/public/landing/WhatsApp%20Video%202026-06-04%20at%207.26.56%20PM.mp4"
                   autoPlay
                   muted
                   loop
@@ -289,8 +289,8 @@ export default function LandingPage() {
                   style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'cover' }}
                 />
               </div>
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, textAlign: 'center', maxWidth: 200, lineHeight: 1.5 }}>
-                Mirá cómo un agente genera 5 posts profesionales en 60 segundos
+              <p style={{ color: '#ffffff', fontSize: 14, fontWeight: 500, lineHeight: 1.5, textAlign: 'left' }}>
+                60 segundos. Una propiedad real.<br />Cinco posts listos para publicar.
               </p>
             </div>
 
