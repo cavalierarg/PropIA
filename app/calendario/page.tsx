@@ -19,6 +19,7 @@ export default async function CalendarioPage() {
 
   await updateOnboardingStep("calendario_visitado");
   const plan = await getUserPlan();
+  console.log("[CalendarioPage] userId:", userId, "plan:", plan);
 
   if (plan === "free") {
     const checkoutUrl = `${PRO_CHECKOUT}?checkout[custom][plan]=pro&checkout[custom][user_id]=${userId}`;
