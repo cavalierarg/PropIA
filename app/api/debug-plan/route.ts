@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseAdminClient } from "@/lib/supabase";
+import { getUserPlan } from "@/lib/actions/subscription.actions";
 
 export async function GET() {
   const { userId } = await auth();
@@ -13,5 +14,13 @@ export async function GET() {
     .eq("user_id", userId)
     .maybeSingle();
 
-  return NextResponse.json({ userId, data, error, serviceRoleKeySet: !!process.env.SUPABASE_SERVICE_ROLE_KEY });
+  const planFromFunction = await getUserPlan();
+
+  return NextResponse.json({
+    userId,
+    data,
+    error,
+    planFromFunction,
+    serviceRoleKeySet: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+  });
 }
