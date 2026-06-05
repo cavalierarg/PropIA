@@ -83,6 +83,14 @@ function formatPrecio(precio: string): string {
   );
 }
 
+function calcPrecioM2(precio: string, metros: string): string | null {
+  const priceNum = parseInt(precio.replace(/[^0-9]/g, ""), 10);
+  const metrosNum = parseInt(metros.replace(/[^0-9]/g, ""), 10);
+  if (!priceNum || !metrosNum || metrosNum === 0) return null;
+  const pm2 = Math.round(priceNum / metrosNum);
+  return pm2.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
 async function toDataUrl(url: string): Promise<string> {
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
@@ -271,11 +279,13 @@ export async function POST(req: NextRequest) {
         try { imgData = await toDataUrl(imageUrl); } catch { imgData = null; }
       }
 
+      const pm2 = calcPrecioM2(precio, metros);
       const stats = [
         { value: metros, label: "m²", cat: "SUPERFICIE" },
         dormitorios ? { value: dormitorios, label: "dormitorios", cat: "DORMITORIOS" } : null,
         banios ? { value: banios, label: "baños", cat: "BAÑOS" } : null,
-        cocheras ? { value: cocheras, label: "cocheras", cat: "COCHERAS" } : null,
+        pm2 ? { value: pm2, label: "USD por m²", cat: "PRECIO / m²" }
+            : cocheras ? { value: cocheras, label: "cocheras", cat: "COCHERAS" } : null,
       ].filter((s): s is { value: string; label: string; cat: string } => s !== null);
 
       const rows = Math.ceil(stats.length / 2);
@@ -344,9 +354,9 @@ export async function POST(req: NextRequest) {
               {items.map((c, idx) => (
                 <div
                   key={idx}
-                  style={{ display: "flex", alignItems: "center", backgroundColor: t.dark ? "rgba(255,255,255,0.09)" : hexRgba(t.accent, 0.08), border: `1.5px solid ${hexRgba(t.accent, 0.55)}`, borderRadius: 50, padding: "18px 32px" }}
+                  style={{ display: "flex", alignItems: "center", backgroundColor: hexRgba(t.accent, 0.15), border: `1px solid ${t.accent}`, borderRadius: 50, padding: "18px 32px" }}
                 >
-                  <span style={{ color: t.dark ? "#ffffff" : t.accent, fontSize: 34, fontWeight: 600 }}>{c}</span>
+                  <span style={{ color: t.accent, fontSize: 34, fontWeight: 600 }}>{c}</span>
                 </div>
               ))}
             </div>
@@ -381,9 +391,9 @@ export async function POST(req: NextRequest) {
             <div style={{ display: "flex", width: 120, height: 3, backgroundColor: hexRgba(t.accent, 0.35), borderRadius: 2 }} />
             {/* Precio en acento */}
             <span style={{ fontSize: priceFontSize, fontWeight: 900, color: t.accent, letterSpacing: "-0.02em" }}>{precioFmt}</span>
-            {/* Badge operación */}
-            <div style={{ display: "flex", backgroundColor: badgeBg, padding: "16px 52px", borderRadius: 48 }}>
-              <span style={{ color: "#fff", fontSize: 32, fontWeight: 700 }}>{operacion}</span>
+            {/* Badge operación — usa acento del tema */}
+            <div style={{ display: "flex", backgroundColor: t.accent, padding: "16px 52px", borderRadius: 48 }}>
+              <span style={{ color: t.btnText, fontSize: 32, fontWeight: 700 }}>{operacion}</span>
             </div>
           </div>
 
@@ -449,8 +459,8 @@ export async function POST(req: NextRequest) {
             ) : null}
           </div>
 
-          {/* Botón CTA — 70% de ancho */}
-          <div style={{ display: "flex", backgroundColor: t.accent, padding: "22px 0", borderRadius: 18, width: 660, alignItems: "center", justifyContent: "center" }}>
+          {/* Botón CTA — 70% del slide = 756px */}
+          <div style={{ display: "flex", backgroundColor: t.accent, padding: "22px 0", borderRadius: 18, width: 756, alignItems: "center", justifyContent: "center" }}>
             <span style={{ color: t.btnText, fontSize: 42, fontWeight: 800 }}>Consultá ahora</span>
           </div>
 
