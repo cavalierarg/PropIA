@@ -39,8 +39,8 @@ export function buildTheme(theme: Theme, agentAccent = "#00c9c9"): TC {
       bg: "#FFFFFF", bgGrad: "#F0F4F8",
       text: "#1a1a2e", textSub: "#666666",
       overlay: "rgba(255,255,255,0.88)",
-      cellBg: hexRgba(agentAccent, 0.07),
-      cellBorder: hexRgba(agentAccent, 0.22),
+      cellBg: hexRgba(agentAccent, 0.14),
+      cellBorder: hexRgba(agentAccent, 0.42),
       fborder: "#e2e8f0", ftext: "#94a3b8",
       dark: false, isLight: true, accent: agentAccent, btnText: "#1a1a2e",
     };
@@ -59,8 +59,8 @@ export function buildTheme(theme: Theme, agentAccent = "#00c9c9"): TC {
       bg: "#FF6B35", bgGrad: "#F7C59F",
       text: "#2D2D2D", textSub: "rgba(45,45,45,0.65)",
       overlay: "rgba(255,107,53,0.88)",
-      cellBg: "rgba(45,45,45,0.10)",
-      cellBorder: hexRgba("#FF6B35", 0.50),
+      cellBg: "rgba(255,255,255,0.85)",
+      cellBorder: "rgba(45,45,45,0.15)",
       fborder: "rgba(45,45,45,0.18)", ftext: "rgba(45,45,45,0.55)",
       dark: false, isLight: true, accent: "#FF6B35", btnText: "#2D2D2D",
     };
@@ -69,8 +69,8 @@ export function buildTheme(theme: Theme, agentAccent = "#00c9c9"): TC {
       bg: "#0077B6", bgGrad: "#00B4D8",
       text: "#1a1a2e", textSub: "rgba(26,26,46,0.65)",
       overlay: "rgba(0,119,182,0.82)",
-      cellBg: "rgba(255,255,255,0.15)",
-      cellBorder: "rgba(26,26,46,0.25)",
+      cellBg: "rgba(255,255,255,0.85)",
+      cellBorder: "rgba(26,26,46,0.18)",
       fborder: "rgba(26,26,46,0.18)", ftext: "rgba(26,26,46,0.55)",
       dark: false, isLight: true, accent: "#00B4D8", btnText: "#0077B6",
     };
