@@ -90,7 +90,12 @@
       "PowerShell(Select-String *)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\valen\\\\saas-template\\\\app\" -Recurse -Name | Where-Object { $_ -match \"sign\" })",
       "mcp__plugin_vercel_vercel__get_deployment",
-      "Skill(commit)"
+      "Skill(commit)",
+      "Bash(npm root *)",
+      "Bash(where playwright *)",
+      "Bash(npx --yes playwright install chromium)",
+      "Bash(npm view *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('dependencies',{}\\).get\\('heic-convert','not found'\\)\\)\")"
     ]
   }
 }
