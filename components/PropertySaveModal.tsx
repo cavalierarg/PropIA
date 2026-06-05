@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { XIcon, UploadCloudIcon, Loader2Icon, CheckIcon } from "lucide-react";
+import { XIcon, UploadCloudIcon, Loader2Icon, CheckIcon, SparklesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import {
   type PropertyEstado,
 } from "@/lib/actions/properties.actions";
 import { uploadPropertyImage } from "@/lib/actions/flyers.actions";
+import { analizarFotoPropiedad } from "@/lib/actions/analyze-photo.actions";
 import { toast } from "sonner";
 
 const TIPOS = ["Casa", "Departamento", "PH", "Terreno", "Oficina", "Local comercial", "Cochera"];
@@ -67,6 +68,9 @@ export default function PropertySaveModal({
   const [fotoPreviews, setFotoPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiAnalyzed, setAiAnalyzed] = useState(false);
+  const [aiError, setAiError] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -94,6 +98,8 @@ export default function PropertySaveModal({
       setForm({ ...EMPTY_FORM, ...prefill });
       setFotoPreviews([]);
     }
+    setAiAnalyzed(false);
+    setAiError("");
   }, [open, editProperty, prefill]);
 
   if (!open) return null;
@@ -141,6 +147,36 @@ export default function PropertySaveModal({
     const newUrls = (form.foto_urls ?? []).filter((_, i) => i !== idx);
     set("foto_urls", newUrls);
     setFotoPreviews(newUrls);
+  };
+
+  const handleAnalyze = async () => {
+    const firstPhoto = fotoPreviews[0];
+    if (!firstPhoto) return;
+    setAnalyzing(true);
+    setAiError("");
+    try {
+      const result = await analizarFotoPropiedad(firstPhoto);
+      setForm((prev) => ({
+        ...prev,
+        tipo_propiedad: result.tipo_propiedad ?? prev.tipo_propiedad,
+        caracteristica1: result.caracteristicas[0] ?? prev.caracteristica1,
+        caracteristica2: result.caracteristicas[1] ?? prev.caracteristica2,
+        caracteristica3: result.caracteristicas[2] ?? prev.caracteristica3,
+        amenities: result.amenities.length > 0
+          ? [...new Set([...(prev.amenities ?? []), ...result.amenities])]
+          : prev.amenities,
+        descripcion_libre: result.descripcion_libre || prev.descripcion_libre,
+      }));
+      setAiAnalyzed(true);
+    } catch (err) {
+      if (err instanceof Error && err.message === "NO_PROPERTY") {
+        setAiError("No pudimos identificar una propiedad en esta foto. Completá los datos manualmente.");
+      } else {
+        setAiError("No se pudo analizar la foto. Intentá de nuevo.");
+      }
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -213,6 +249,44 @@ export default function PropertySaveModal({
               )}
             </div>
           </div>
+
+          {/* Análisis con IA */}
+          {fotoPreviews.length > 0 && !editProperty && (
+            <div className="flex flex-col gap-2">
+              {aiAnalyzed ? (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                  <CheckIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <p className="text-sm text-emerald-700 leading-snug">
+                    Completamos lo que pudimos ver en la foto. Revisá y completá el resto.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleAnalyze}
+                  disabled={analyzing || uploading || saving}
+                  className="flex items-center justify-center gap-2 h-10 px-4 rounded-xl border-2 border-dashed border-[#00c9c9]/50 text-sm font-semibold text-[#0f3460] hover:border-[#00c9c9] hover:bg-[#00c9c9]/5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {analyzing ? (
+                    <>
+                      <Loader2Icon className="w-4 h-4 animate-spin text-[#00c9c9]" />
+                      Analizando la propiedad...
+                    </>
+                  ) : (
+                    <>
+                      <SparklesIcon className="w-4 h-4 text-[#00c9c9]" />
+                      Analizar foto con IA
+                    </>
+                  )}
+                </button>
+              )}
+              {aiError && (
+                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  {aiError}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Tipo + Título */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
