@@ -233,8 +233,8 @@ export async function POST(req: NextRequest) {
               <span style={{ fontSize:46, fontWeight:800, color:C.strong, lineHeight:1 }}>QUÉ INCLUYE</span>
               <div style={{ display:"flex", width:80, height:6, backgroundColor:C.emBg, borderRadius:3 }} />
             </div>
-            {/* Pills — centrados verticalmente con wrapper */}
-            <div style={{ display:"flex", flex:1, alignItems:"center" }}>
+            {/* Pills — centrados verticalmente con column+justifyContent */}
+            <div style={{ display:"flex", flexDirection:"column", flex:1, justifyContent:"center" }}>
               <div style={{ display:"flex", flexWrap:"wrap", gap:18, width:"100%" }}>
                 {safeItems.map((c, idx) => (
                   <div key={idx} style={{ display:"flex", alignItems:"center", backgroundColor:C.pillBg, border:`1.5px solid ${C.pillBorder}`, borderRadius:50, padding:"18px 32px" }}>

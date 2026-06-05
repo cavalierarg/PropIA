@@ -72,6 +72,7 @@ export default function CarouselGeneratorContent({ profile }: Props) {
         if (p.ubicacion) setZona(p.ubicacion);
         if (p.precio) setPrecio(p.precio);
         if (p.metrosCuadrados) setMetros(p.metrosCuadrados);
+        if (p.ambientes) setDormitorios(p.ambientes); // ambientes como proxy de dormitorios
         if (p.tipoPropiedad && p.ubicacion) {
           setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
         }

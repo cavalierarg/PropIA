@@ -87,6 +87,7 @@ function savePrefill(property: SavedProperty) {
         ubicacion: property.ubicacion,
         precio: property.precio,
         metrosCuadrados: property.metros_cuadrados,
+        ambientes: property.ambientes ?? "",
         caracteristica1: property.caracteristica1 ?? "",
         caracteristica2: property.caracteristica2 ?? "",
         caracteristica3: property.caracteristica3 ?? "",
