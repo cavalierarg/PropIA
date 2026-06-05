@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
+import sharp from "sharp";
 
 export const runtime = "nodejs";
 
@@ -78,16 +79,22 @@ export async function POST(req: NextRequest) {
   const dims = { feed: [1080,1080], story: [1080,1920], banner: [1200,628] };
   const [width, height] = dims[type] ?? dims.feed;
 
-  // Verify image URL is accessible before passing to Satori
-  console.log("[ads] imageUrl recibida:", imageUrl);
+  // Fetch + resize image server-side → base64 JPEG (avoids Satori remote fetch issues)
+  let imageData: string;
   try {
-    const probe = await fetch(imageUrl, { method: "HEAD", cache: "no-store" });
-    console.log("[ads] HEAD probe →", probe.status, probe.headers.get("content-type"));
+    const res = await fetch(imageUrl, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Image fetch ${res.status}: ${imageUrl.slice(0, 80)}`);
+    const raw = Buffer.from(await res.arrayBuffer());
+    const resized = await sharp(raw)
+      .resize(1200, 1200, { fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+    imageData = `data:image/jpeg;base64,${resized.toString("base64")}`;
   } catch (e) {
-    console.error("[ads] HEAD probe failed:", String(e));
+    console.error("[generate-ad] image fetch/resize failed:", String(e));
+    return NextResponse.json({ error: String(e) }, { status: 400 });
   }
 
-  const imageData = imageUrl;
   const agentLogoData: string | null = agentLogoUrl ?? null;
 
   // Logo dimensions per format (max 20% of ad width, proportional height)
