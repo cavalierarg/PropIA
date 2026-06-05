@@ -600,7 +600,7 @@ export default function AdsGeneratorContent({
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-[#0f3460]">Tema visual <span className="text-xs font-normal text-slate-400 ml-1">(opcional · sobreescribe colores)</span></span>
             {selectedAdTheme && (
-              <button onClick={() => setSelectedAdTheme(null)} className="text-xs text-slate-400 hover:text-red-400 transition-colors">Quitar tema</button>
+              <button onClick={() => { setSelectedAdTheme(null); setColorAcento("#00c9c9"); }} className="text-xs text-slate-400 hover:text-red-400 transition-colors">Quitar tema</button>
             )}
           </div>
           <div className="grid grid-cols-4 gap-2">
@@ -608,7 +608,12 @@ export default function AdsGeneratorContent({
               <button
                 key={theme.id}
                 type="button"
-                onClick={() => setSelectedAdTheme(selectedAdTheme === theme.id ? null : theme.id)}
+                onClick={() => {
+                  const next = selectedAdTheme === theme.id ? null : theme.id;
+                  setSelectedAdTheme(next);
+                  // Al elegir un tema, actualizar colorAcento al default del tema
+                  if (next) setColorAcento(theme.accent);
+                }}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all ${
                   selectedAdTheme === theme.id
                     ? "border-[#00c9c9] bg-[#00c9c9]/5"

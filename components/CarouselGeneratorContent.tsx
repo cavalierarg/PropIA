@@ -56,8 +56,9 @@ export default function CarouselGeneratorContent({ profile }: Props) {
   const [cocheras, setCocheras] = useState("");
   const [caracteristicas, setCaracteristicas] = useState<string[]>(["", "", ""]);
 
-  // Tema visual seleccionado
+  // Tema visual + color de acento (el acento puede sobreescribirse independientemente)
   const [selectedTheme, setSelectedTheme] = useState<ThemeId>("dark");
+  const [colorAcento, setColorAcento] = useState(THEME_PRESETS[0].accent); // default = acento del tema "dark"
   // Fotos autocargadas desde la propiedad
   const [autoPhotosLoaded, setAutoPhotosLoaded] = useState(false);
 
@@ -162,7 +163,7 @@ export default function CarouselGeneratorContent({ profile }: Props) {
       cocheras: cocheras.trim(),
       caracteristicas: caracteristicas.filter((c) => c.trim()),
       theme: selectedTheme,
-      accentColor: "#00c9c9",
+      accentColor: colorAcento,
       nombreAgente,
       nombreAgencia,
       whatsapp,
@@ -419,7 +420,10 @@ export default function CarouselGeneratorContent({ profile }: Props) {
               <button
                 key={theme.id}
                 type="button"
-                onClick={() => setSelectedTheme(theme.id)}
+                onClick={() => {
+                  setSelectedTheme(theme.id);
+                  setColorAcento(theme.accent); // reset acento al default del nuevo tema
+                }}
                 className={`flex flex-col items-center gap-2 p-2 rounded-xl border-2 transition-all ${
                   selectedTheme === theme.id
                     ? "border-[#00c9c9] bg-[#00c9c9]/5"
@@ -452,6 +456,26 @@ export default function CarouselGeneratorContent({ profile }: Props) {
                 <span className="text-[10px] font-medium text-slate-600 text-center leading-tight">{theme.label}</span>
               </button>
             ))}
+          </div>
+          {/* Color de acento — sobreescribe el default del tema */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#e2e8f0]">
+            <div>
+              <span className="text-xs font-medium text-slate-600">Color de acento</span>
+              <p className="text-[10px] text-slate-400">Precio, bordes, botones</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full border border-slate-200 flex-shrink-0" style={{ backgroundColor: colorAcento }} />
+              <input type="color" value={colorAcento} onChange={(e) => setColorAcento(e.target.value)} className="w-0 h-0 opacity-0 absolute" id="carousel-acento" />
+              <label htmlFor="carousel-acento" className="text-xs font-mono text-slate-400 cursor-pointer">{colorAcento.toUpperCase()}</label>
+              <label htmlFor="carousel-acento" className="text-xs text-[#00c9c9] font-medium cursor-pointer hover:underline">Cambiar</label>
+              <button
+                type="button"
+                onClick={() => { const preset = THEME_PRESETS.find(t => t.id === selectedTheme); if (preset) setColorAcento(preset.accent); }}
+                className="text-[10px] text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                Resetear
+              </button>
+            </div>
           </div>
         </div>
 
