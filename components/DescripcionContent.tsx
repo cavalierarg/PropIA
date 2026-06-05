@@ -5,7 +5,11 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { generarDescripcion, DescripcionResult } from "@/lib/actions/descripcion.actions";
 import { getUserProfile } from "@/lib/actions/user-profile.actions";
+import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
+import { detectVariante } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
 import { useUsage } from "@/lib/context/usage-context";
+import VarianteEspanolSelector from "@/components/VarianteEspanolSelector";
 
 import { Button } from "@/components/ui/button";
 import { CheckIcon, CopyIcon, LockIcon, SparklesIcon, Building2 } from "lucide-react";
@@ -44,6 +48,7 @@ export default function DescripcionContent({ initialIsPro }: { initialIsPro: boo
   const [isPro, setIsPro] = useState(initialIsPro);
   const [copiedShort, setCopiedShort] = useState(false);
   const [copiedLong, setCopiedLong] = useState(false);
+  const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>("neutro");
 
   const checkoutUrl = user
     ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][plan]=pro&checkout[custom][user_id]=${user.id}`
@@ -71,13 +76,16 @@ export default function DescripcionContent({ initialIsPro }: { initialIsPro: boo
       }
     } catch {}
 
-    getUserProfile().then((profile) => {
+    Promise.all([getUserProfile(), getAgentProfile()]).then(([userProf, agentProf]) => {
       setForm((prev) => ({
         ...prev,
-        agenteWhatsapp: profile.whatsapp ?? "",
-        agenteInstagram: profile.instagram ?? "",
-        agenteSitioWeb: profile.sitio_web ?? "",
+        agenteWhatsapp: userProf.whatsapp ?? "",
+        agenteInstagram: userProf.instagram ?? "",
+        agenteSitioWeb: userProf.sitio_web ?? "",
       }));
+      setVarianteEspanol(
+        agentProf.variante_espanol ?? detectVariante(agentProf.zona) ?? "neutro"
+      );
     });
   }, []);
 
@@ -87,7 +95,7 @@ export default function DescripcionContent({ initialIsPro }: { initialIsPro: boo
     setResult(null);
     setLoading(true);
     try {
-      const res = await generarDescripcion({ ...form, amenities: [] });
+      const res = await generarDescripcion({ ...form, amenities: [], variante_espanol: varianteEspanol });
       setResult(res);
       setIsPro(res.isPro);
       if (!res.isPro) {
@@ -153,6 +161,14 @@ export default function DescripcionContent({ initialIsPro }: { initialIsPro: boo
           )}
 
           {error && <p className="text-destructive text-sm">{error}</p>}
+
+          {loadedProperty && (
+            <VarianteEspanolSelector
+              value={varianteEspanol}
+              onChange={setVarianteEspanol}
+              disabled={loading}
+            />
+          )}
 
           {loadedProperty && (
             <Button

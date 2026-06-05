@@ -5,7 +5,8 @@ import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
-import { buildAgentContext } from "@/lib/agent-context";
+import { buildAgentContext, detectVariante, getVariantInstruction } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 export type PropertyInput = {
@@ -26,6 +27,7 @@ export type PropertyInput = {
   agenteWhatsapp?: string;
   agenteInstagram?: string;
   agenteSitioWeb?: string;
+  variante_espanol?: VarianteEspanol;
 };
 
 export type DescripcionResult = {
@@ -52,6 +54,12 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
 
   const profile: AgentProfile = profileRow ?? {};
   const { contextBlock, toneInstruction } = buildAgentContext(profile);
+
+  const variante: VarianteEspanol =
+    data.variante_espanol ??
+    profile.variante_espanol ??
+    detectVariante(data.ubicacion || profile.zona);
+  const variantInstruction = getVariantInstruction(variante);
 
   const contactoWhatsapp = data.agenteWhatsapp || profile.whatsapp || "";
   const contactoInstagram = data.agenteInstagram || profile.instagram || "";
@@ -87,7 +95,9 @@ export async function generarDescripcion(data: PropertyInput): Promise<Descripci
     caracteristicas ? `- Destacados: ${caracteristicas}` : "",
   ].filter(Boolean).join("\n");
 
-  const agentContextLine = contextBlock ? `\n${contextBlock}\n\nTONO DE VOZ: ${toneInstruction}\n` : `\nTONO DE VOZ: ${toneInstruction}\n`;
+  const agentContextLine = contextBlock
+    ? `\n${contextBlock}\n\nTONO DE VOZ: ${toneInstruction}\nVARIANTE DE ESPAÑOL: ${variantInstruction}\n`
+    : `\nTONO DE VOZ: ${toneInstruction}\nVARIANTE DE ESPAÑOL: ${variantInstruction}\n`;
 
   const prompt = isPro
     ? `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
