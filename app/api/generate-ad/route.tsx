@@ -3,7 +3,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
-import sharp from "sharp";
 
 export const runtime = "nodejs";
 
@@ -18,62 +17,6 @@ const FONT_STACK: Record<AdStyle, string> = {
   profesional: "'Trebuchet MS', 'Helvetica Neue', Arial, sans-serif",
 };
 
-async function fetchImageAsDataUrl(url: string): Promise<string> {
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`Image fetch failed: ${res.status}`);
-  const buffer = Buffer.from(await res.arrayBuffer());
-  const mime = res.headers.get("content-type") || "image/jpeg";
-  return `data:${mime};base64,${buffer.toString("base64")}`;
-}
-
-async function processLogoWithTransparency(url: string): Promise<string | null> {
-  try {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) return null;
-    const inputBuf = Buffer.from(await res.arrayBuffer());
-
-    const { data, info } = await sharp(inputBuf)
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-
-    const pixels = new Uint8ClampedArray(data.buffer);
-    const { width, height } = info;
-
-    const corners = [
-      [0, 0], [width - 1, 0],
-      [0, height - 1], [width - 1, height - 1],
-    ] as const;
-
-    let sumR = 0, sumG = 0, sumB = 0;
-    for (const [x, y] of corners) {
-      const i = (y * width + x) * 4;
-      sumR += pixels[i]; sumG += pixels[i + 1]; sumB += pixels[i + 2];
-    }
-    const bgR = Math.round(sumR / 4);
-    const bgG = Math.round(sumG / 4);
-    const bgB = Math.round(sumB / 4);
-
-    const threshold = 30;
-    for (let i = 0; i < pixels.length; i += 4) {
-      if (
-        Math.abs(pixels[i] - bgR) < threshold &&
-        Math.abs(pixels[i + 1] - bgG) < threshold &&
-        Math.abs(pixels[i + 2] - bgB) < threshold
-      ) {
-        pixels[i + 3] = 0;
-      }
-    }
-
-    const pngBuf = await sharp(Buffer.from(pixels.buffer), {
-      raw: { width, height, channels: 4 },
-    }).png().toBuffer();
-
-    return `data:image/png;base64,${pngBuf.toString("base64")}`;
-  } catch {
-    return null;
-  }
-}
 
 function formatPrice(precio: string, moneda: string): string {
   const t = precio.trim();
@@ -135,16 +78,10 @@ export async function POST(req: NextRequest) {
   const dims = { feed: [1080,1080], story: [1080,1920], banner: [1200,628] };
   const [width, height] = dims[type] ?? dims.feed;
 
-  let imageData: string;
-  try { imageData = await fetchImageAsDataUrl(imageUrl); }
-  catch (e) {
-    console.error("[generate-ad] image fetch failed:", String(e), "url:", imageUrl?.slice(0, 80));
-    return NextResponse.json({ error: String(e) }, { status: 400 });
-  }
-
-  const agentLogoData: string | null = agentLogoUrl
-    ? await processLogoWithTransparency(agentLogoUrl)
-    : null;
+  // Pass URLs directly — ImageResponse/Satori fetches them internally
+  // (avoids base64 conversion that causes memory issues in Vercel)
+  const imageData = imageUrl;
+  const agentLogoData: string | null = agentLogoUrl ?? null;
 
   // Logo dimensions per format (max 20% of ad width, proportional height)
   const logoFeed   = { w: 200, h: 70, top: 24, left: 24 } as const;
