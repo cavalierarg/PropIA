@@ -13,6 +13,10 @@ import {
 } from "@/lib/actions/reels.actions";
 
 import { getUserProfile } from "@/lib/actions/user-profile.actions";
+import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
+import { detectVariante } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
+import VarianteEspanolSelector from "@/components/VarianteEspanolSelector";
 import { useUsage } from "@/lib/context/usage-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,6 +73,7 @@ export default function ReelsContent({ initialIsPro }: { initialIsPro: boolean }
   const [planChecked] = useState(true);
   const [copiedEscena, setCopiedEscena] = useState<number | null>(null);
   const [copiedSlide, setCopiedSlide] = useState<number | null>(null);
+  const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>("neutro");
 
   const checkoutUrl = user
     ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][plan]=pro&checkout[custom][user_id]=${user.id}`
@@ -96,13 +101,16 @@ export default function ReelsContent({ initialIsPro }: { initialIsPro: boolean }
       }
     } catch {}
 
-    getUserProfile().then((profile) => {
+    Promise.all([getUserProfile(), getAgentProfile()]).then(([userProf, agentProf]) => {
       setForm((prev) => ({
         ...prev,
-        agenteWhatsapp: profile.whatsapp ?? "",
-        agenteInstagram: profile.instagram ?? "",
-        agenteSitioWeb: profile.sitio_web ?? "",
+        agenteWhatsapp: userProf.whatsapp ?? "",
+        agenteInstagram: userProf.instagram ?? "",
+        agenteSitioWeb: userProf.sitio_web ?? "",
       }));
+      setVarianteEspanol(
+        agentProf.variante_espanol ?? detectVariante(agentProf.zona) ?? "neutro"
+      );
     });
   }, []);
 
@@ -116,7 +124,7 @@ export default function ReelsContent({ initialIsPro }: { initialIsPro: boolean }
     setStep("form");
 
     try {
-      const result = await buscarFormatosTrending({ ...form, amenities: [] });
+      const result = await buscarFormatosTrending({ ...form, amenities: [], variante_espanol: varianteEspanol });
       setFormatos(result.formatos);
       setStep("formatos");
     } catch (err: unknown) {
@@ -138,7 +146,7 @@ export default function ReelsContent({ initialIsPro }: { initialIsPro: boolean }
     setLoadingGuion(true);
 
     try {
-      const result = await generarGuion({ ...form, amenities: [] }, formatoSeleccionado);
+      const result = await generarGuion({ ...form, amenities: [], variante_espanol: varianteEspanol }, formatoSeleccionado);
       setGuion(result);
       setStep("guion");
       if (!isPro) {
@@ -243,14 +251,21 @@ export default function ReelsContent({ initialIsPro }: { initialIsPro: boolean }
           ) : !isPro ? (
             <LockedProGate checkoutUrl={checkoutUrl} />
           ) : (
-            <Button
-              onClick={handleInvestigar}
-              disabled={loadingFormatos || !loadedProperty}
-              className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
-            >
-              <TrendingUpIcon className="w-4 h-4" />
-              {loadingFormatos ? "Investigando tendencias..." : "Investigar formatos trending"}
-            </Button>
+            <>
+              <VarianteEspanolSelector
+                value={varianteEspanol}
+                onChange={setVarianteEspanol}
+                disabled={loadingFormatos || loadingGuion}
+              />
+              <Button
+                onClick={handleInvestigar}
+                disabled={loadingFormatos || !loadedProperty}
+                className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm"
+              >
+                <TrendingUpIcon className="w-4 h-4" />
+                {loadingFormatos ? "Investigando tendencias..." : "Investigar formatos trending"}
+              </Button>
+            </>
           )}
 
         </fieldset>

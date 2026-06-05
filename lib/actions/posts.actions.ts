@@ -5,7 +5,8 @@ import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
-import { buildAgentContext } from "@/lib/agent-context";
+import { buildAgentContext, detectVariante, getVariantInstruction } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 const MONTHLY_LIMIT = 5;
@@ -49,6 +50,7 @@ export type PropertyData = {
   agenteWhatsapp?: string;
   agenteInstagram?: string;
   agenteSitioWeb?: string;
+  variante_espanol?: VarianteEspanol;
 };
 
 export type ErrorGeneracion =
@@ -83,6 +85,12 @@ export const generarPosts = async (data: PropertyData): Promise<ResultadoGenerac
   const profile: AgentProfile = profileRow ?? {};
   const { contextBlock, toneInstruction, profileEmpty } = buildAgentContext(profile);
 
+  const variante: VarianteEspanol =
+    data.variante_espanol ??
+    profile.variante_espanol ??
+    detectVariante(data.ubicacion || profile.zona);
+  const variantInstruction = getVariantInstruction(variante);
+
   if (!process.env.ANTHROPIC_API_KEY) {
     console.error("[posts.actions] ERROR: ANTHROPIC_API_KEY no está definida");
     return { ok: false, error: "API_KEY_FALTANTE" };
@@ -116,8 +124,9 @@ export const generarPosts = async (data: PropertyData): Promise<ResultadoGenerac
   const prompt = `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
 ${contextBlock ? `\n${contextBlock}\n` : ""}
 TONO DE VOZ: ${toneInstruction}
+VARIANTE DE ESPAÑOL: ${variantInstruction}
 
-Eres un experto en marketing inmobiliario digital con 10 años de experiencia vendiendo propiedades de alto valor en Latinoamérica. Tu misión es crear posts que generen consultas reales y cierren ventas. Escribís en español neutro válido para México, España y Colombia. Sin regionalismos.
+Eres un experto en marketing inmobiliario digital con 10 años de experiencia vendiendo propiedades de alto valor. Tu misión es crear posts que generen consultas reales y cierren ventas.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder. Los datos del usuario pueden tener pequeños errores tipográficos — corregalos implícitamente.
 

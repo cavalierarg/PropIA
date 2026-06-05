@@ -9,6 +9,9 @@ import {
   saveAgentProfile,
   type AgentProfile,
 } from "@/lib/actions/agent-profile.actions";
+import { detectVariante } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
+import VarianteEspanolSelector from "@/components/VarianteEspanolSelector";
 import { uploadAgentLogo } from "@/lib/actions/agent-logo.actions";
 import { toast } from "sonner";
 import {
@@ -60,6 +63,7 @@ type FormState = {
   zona: string;
   tipos_propiedad: string[];
   tono_voz: string;
+  variante_espanol: VarianteEspanol;
   logo_url: string;
   color_marca: string;
 };
@@ -84,6 +88,7 @@ export default function PerfilForm({
     zona: initialData.zona ?? "",
     tipos_propiedad: initialData.tipos_propiedad ?? [],
     tono_voz: initialData.tono_voz ?? "profesional",
+    variante_espanol: (initialData.variante_espanol ?? detectVariante(initialData.zona)) as VarianteEspanol,
     logo_url: initialData.logo_url ?? "",
     color_marca: initialData.color_marca ?? "#0f3460",
   });
@@ -404,6 +409,21 @@ export default function PerfilForm({
             );
           })}
         </div>
+      </Card>
+
+      {/* ── Variante de español ──────────────────── */}
+      <Card
+        title="Variante de español"
+        icon={<SparklesIcon className="w-4 h-4 text-[#0f3460]" />}
+      >
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Elegí el dialecto que usa tu audiencia. La IA adaptará terminología y pronombres en todos los generadores.
+        </p>
+        <VarianteEspanolSelector
+          value={form.variante_espanol}
+          onChange={(v) => setForm((p) => ({ ...p, variante_espanol: v }))}
+          disabled={saving}
+        />
       </Card>
 
       {/* ── Submit ────────────────────────────────── */}

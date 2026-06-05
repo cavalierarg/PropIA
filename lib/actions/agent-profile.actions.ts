@@ -16,11 +16,13 @@ import { createSupabaseClient, createSupabaseAdminClient } from "@/lib/supabase"
 //   zona TEXT,
 //   tipos_propiedad TEXT[] DEFAULT '{}',
 //   tono_voz TEXT DEFAULT 'profesional',
+//   variante_espanol TEXT DEFAULT 'neutro',
 //   logo_url TEXT,
 //   color_marca TEXT DEFAULT '#0f3460',
 //   perfil_completado BOOLEAN DEFAULT FALSE,
 //   updated_at TIMESTAMPTZ DEFAULT NOW()
 // );
+// ALTER TABLE public.agent_profiles ADD COLUMN IF NOT EXISTS variante_espanol TEXT DEFAULT 'neutro';
 // ALTER TABLE public.agent_profiles ENABLE ROW LEVEL SECURITY;
 // CREATE POLICY "agent_own_profile" ON public.agent_profiles USING (true) WITH CHECK (true);
 
@@ -34,6 +36,7 @@ export type AgentProfile = {
   zona?: string;
   tipos_propiedad?: string[];
   tono_voz?: string;
+  variante_espanol?: "ar" | "es" | "mx" | "neutro";
   logo_url?: string;
   color_marca?: string;
   perfil_completado?: boolean;
@@ -49,6 +52,7 @@ const schema = z.object({
   zona: z.string().max(200).optional(),
   tipos_propiedad: z.array(z.string()).optional(),
   tono_voz: z.enum(["profesional", "amigable", "dinamico"]).optional(),
+  variante_espanol: z.enum(["ar", "es", "mx", "neutro"]).optional(),
   logo_url: z.string().optional(),
   color_marca: z.string().max(20).optional(),
 });

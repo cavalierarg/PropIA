@@ -5,7 +5,8 @@ import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
-import { buildAgentContext } from "@/lib/agent-context";
+import { buildAgentContext, detectVariante, getVariantInstruction } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 export type CalendarDay = {
@@ -38,14 +39,16 @@ function buildPrompt(
   diasAGenerar: number,
   offsetDia: number,
   contextBlock: string,
-  toneInstruction: string
+  toneInstruction: string,
+  variantInstruction: string
 ): string {
   const fechaActual = new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
   return `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
 ${contextBlock ? `\n${contextBlock}\n` : ""}
 TONO DE VOZ: ${toneInstruction}
+VARIANTE DE ESPAÑOL: ${variantInstruction}
 
-Sos un experto en marketing inmobiliario digital con 10 años de experiencia generando contenido que convierte en Latinoamérica.
+Sos un experto en marketing inmobiliario digital con 10 años de experiencia generando contenido que convierte.
 
 CORRECCIÓN OBLIGATORIA: Todo el contenido generado debe estar completamente libre de errores ortográficos, gramaticales y de puntuación. Revisá y corregí automáticamente antes de responder.
 
@@ -67,7 +70,7 @@ TIPOS DE CONTENIDO a rotar: ${TIPOS_CONTENIDO.join(", ")}
 
 IMPORTANTE:
 - Cada copy listo para pegar y publicar
-- Español neutro (válido para Argentina, México, España)
+- Usá la variante de español indicada arriba
 - Numerá los días desde ${offsetDia + 1} hasta ${offsetDia + diasAGenerar}
 - Calculá fechas reales consecutivas a partir de ${startDateStr}
 
@@ -93,7 +96,8 @@ async function generarBatch(
   diasAGenerar: number,
   offsetDia: number,
   contextBlock: string,
-  toneInstruction: string
+  toneInstruction: string,
+  variantInstruction: string
 ): Promise<CalendarDay[]> {
   const fecha = new Date(startDate);
   fecha.setDate(fecha.getDate() + offsetDia);
@@ -104,7 +108,7 @@ async function generarBatch(
     year: "numeric",
   });
 
-  const prompt = buildPrompt(nicho, zona, startDateStr, diasAGenerar, offsetDia, contextBlock, toneInstruction);
+  const prompt = buildPrompt(nicho, zona, startDateStr, diasAGenerar, offsetDia, contextBlock, toneInstruction, variantInstruction);
 
   let message;
   try {
@@ -139,6 +143,7 @@ async function generarBatch(
 export async function generarCalendario(data: {
   nicho: string;
   zona: string;
+  variante_espanol?: VarianteEspanol;
 }): Promise<{ dias: CalendarDay[]; isPro: boolean; remaining: number }> {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
@@ -157,6 +162,12 @@ export async function generarCalendario(data: {
   const profile: AgentProfile = profileRow ?? {};
   const { contextBlock, toneInstruction } = buildAgentContext(profile);
 
+  const variante: VarianteEspanol =
+    data.variante_espanol ??
+    profile.variante_espanol ??
+    detectVariante(data.zona || profile.zona);
+  const variantInstruction = getVariantInstruction(variante);
+
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   const startDate = new Date();
@@ -166,12 +177,12 @@ export async function generarCalendario(data: {
 
   if (!isPro) {
     // Free: 3 días en una sola llamada
-    dias = await generarBatch(client, data.nicho, data.zona, startDate, 3, 0, contextBlock, toneInstruction);
+    dias = await generarBatch(client, data.nicho, data.zona, startDate, 3, 0, contextBlock, toneInstruction, variantInstruction);
   } else {
     // Pro: 30 días en dos batches de 15 para no exceder el límite de tokens
     const [batch1, batch2] = await Promise.all([
-      generarBatch(client, data.nicho, data.zona, startDate, 15, 0, contextBlock, toneInstruction),
-      generarBatch(client, data.nicho, data.zona, startDate, 15, 15, contextBlock, toneInstruction),
+      generarBatch(client, data.nicho, data.zona, startDate, 15, 0, contextBlock, toneInstruction, variantInstruction),
+      generarBatch(client, data.nicho, data.zona, startDate, 15, 15, contextBlock, toneInstruction, variantInstruction),
     ]);
     dias = [...batch1, ...batch2];
   }

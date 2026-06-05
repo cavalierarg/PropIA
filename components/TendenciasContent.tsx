@@ -11,6 +11,10 @@ import {
   type RecomendacionHoy,
 } from "@/lib/actions/tendencias.actions";
 import { getUserPlan } from "@/lib/actions/subscription.actions";
+import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
+import { detectVariante } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
+import VarianteEspanolSelector from "@/components/VarianteEspanolSelector";
 import { Button } from "@/components/ui/button";
 import {
   CalendarIcon,
@@ -51,6 +55,7 @@ export default function TendenciasContent() {
   const [planChecked, setPlanChecked] = useState(false);
   const [copiedHashtags, setCopiedHashtags] = useState<string | null>(null);
   const [copiedHoy, setCopiedHoy] = useState(false);
+  const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>("neutro");
 
   const checkoutUrl = user
     ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][plan]=pro&checkout[custom][user_id]=${user.id}`
@@ -60,6 +65,11 @@ export default function TendenciasContent() {
     getUserPlan().then((plan) => {
       setIsPro(plan === "pro" || plan === "pro_max");
       setPlanChecked(true);
+    });
+    getAgentProfile().then((profile) => {
+      setVarianteEspanol(
+        profile.variante_espanol ?? detectVariante(profile.zona) ?? "neutro"
+      );
     });
   }, []);
 
@@ -77,7 +87,7 @@ export default function TendenciasContent() {
     setLoading(true);
     setLoadingTip(0);
     try {
-      const res = await buscarTendencias();
+      const res = await buscarTendencias(varianteEspanol);
       setResultado(res);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -212,15 +222,22 @@ export default function TendenciasContent() {
           ) : loading ? (
             <LoadingState tip={LOADING_TIPS[loadingTip]} />
           ) : (
-            <Button
-              onClick={handleAnalizar}
-              className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm bg-[#0f3460] hover:bg-[#0f3460]/90 text-white"
-            >
-              <span className="flex items-center gap-2">
-                <GlobeIcon className="w-4 h-4" />
-                Analizar tendencias ahora
-              </span>
-            </Button>
+            <>
+              <VarianteEspanolSelector
+                value={varianteEspanol}
+                onChange={setVarianteEspanol}
+                disabled={loading}
+              />
+              <Button
+                onClick={handleAnalizar}
+                className="w-full sm:w-auto sm:self-start h-12 sm:h-10 px-8 text-base sm:text-sm bg-[#0f3460] hover:bg-[#0f3460]/90 text-white"
+              >
+                <span className="flex items-center gap-2">
+                  <GlobeIcon className="w-4 h-4" />
+                  Analizar tendencias ahora
+                </span>
+              </Button>
+            </>
           )}
         </div>
       )}

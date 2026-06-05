@@ -5,7 +5,8 @@ import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
-import { buildAgentContext } from "@/lib/agent-context";
+import { buildAgentContext, detectVariante, getVariantInstruction } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
 
 export type PropertyInput = {
@@ -26,6 +27,7 @@ export type PropertyInput = {
   agenteWhatsapp?: string;
   agenteInstagram?: string;
   agenteSitioWeb?: string;
+  variante_espanol?: VarianteEspanol;
 };
 
 export type TrendingFormat = {
@@ -121,6 +123,12 @@ export async function buscarFormatosTrending(
   const profile: AgentProfile = profileRow ?? {};
   const { contextBlock, toneInstruction } = buildAgentContext(profile);
 
+  const variante: VarianteEspanol =
+    data.variante_espanol ??
+    profile.variante_espanol ??
+    detectVariante(data.ubicacion || profile.zona);
+  const variantInstruction = getVariantInstruction(variante);
+
   const contactoWhatsapp = data.agenteWhatsapp || profile.whatsapp || "";
   const contactoInstagram = data.agenteInstagram || profile.instagram || "";
   const contactoSitioWeb = data.agenteSitioWeb || profile.sitio_web || "";
@@ -133,6 +141,7 @@ export async function buscarFormatosTrending(
   const prompt = `La fecha actual es ${fechaActual}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
 ${contextBlock ? `\n${contextBlock}\n` : ""}
 TONO DE VOZ: ${toneInstruction}
+VARIANTE DE ESPAÑOL: ${variantInstruction}
 
 Sos un experto en marketing inmobiliario y video content para Instagram Reels y TikTok. Investigá con web search cuáles son los formatos de video que están generando más engagement para el sector inmobiliario en Instagram y TikTok en este momento.
 
@@ -225,6 +234,12 @@ export async function generarGuion(
   const profile: AgentProfile = profileRow ?? {};
   const { contextBlock, toneInstruction } = buildAgentContext(profile);
 
+  const varianteGuion: VarianteEspanol =
+    data.variante_espanol ??
+    profile.variante_espanol ??
+    detectVariante(data.ubicacion || profile.zona);
+  const variantInstructionGuion = getVariantInstruction(varianteGuion);
+
   const contactoWhatsapp = data.agenteWhatsapp || profile.whatsapp || "";
   const contactoInstagram = data.agenteInstagram || profile.instagram || "";
   const contactoSitioWeb = data.agenteSitioWeb || profile.sitio_web || "";
@@ -237,6 +252,7 @@ export async function generarGuion(
   const prompt = `La fecha actual es ${fechaActualGuion}. Usá únicamente información actualizada a esta fecha. Ignorá cualquier dato de años anteriores.
 ${contextBlock ? `\n${contextBlock}\n` : ""}
 TONO DE VOZ: ${toneInstruction}
+VARIANTE DE ESPAÑOL: ${variantInstructionGuion}
 
 Sos un director de contenido especialista en video marketing inmobiliario. Generá un guion completo y detallado para un Reel de Instagram usando el siguiente formato trending.
 

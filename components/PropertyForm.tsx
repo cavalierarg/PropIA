@@ -5,6 +5,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { generarPosts, PostResult, RecomendacionesResult } from "@/lib/actions/posts.actions";
 import type { ErrorGeneracion } from "@/lib/actions/posts.actions";
+import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
+import { detectVariante } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
+import VarianteEspanolSelector from "@/components/VarianteEspanolSelector";
 import { saveProperty } from "@/lib/actions/properties.actions";
 import { useUsage } from "@/lib/context/usage-context";
 import UsageBar from "@/components/UsageBar";
@@ -53,6 +57,7 @@ export default function PropertyForm() {
   const [unauthenticated, setUnauthenticated] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
+  const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>("neutro");
   const hasTrackedLead = useRef(false);
 
   const checkoutUrl = user
@@ -60,13 +65,16 @@ export default function PropertyForm() {
     : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
 
   useEffect(() => {
-    getUserProfile().then((profile) => {
+    Promise.all([getUserProfile(), getAgentProfile()]).then(([userProf, agentProf]) => {
       setForm((prev) => ({
         ...prev,
-        agenteWhatsapp: profile.whatsapp ?? "",
-        agenteInstagram: profile.instagram ?? "",
-        agenteSitioWeb: profile.sitio_web ?? "",
+        agenteWhatsapp: userProf.whatsapp ?? "",
+        agenteInstagram: userProf.instagram ?? "",
+        agenteSitioWeb: userProf.sitio_web ?? "",
       }));
+      setVarianteEspanol(
+        agentProf.variante_espanol ?? detectVariante(agentProf.zona) ?? "neutro"
+      );
     });
     const tipo = searchParams.get("tipoPropiedad");
     const ubicacion = searchParams.get("ubicacion");
@@ -93,7 +101,7 @@ export default function PropertyForm() {
     }
 
     startTransition(async () => {
-      const result = await generarPosts({ ...form, amenities: [] });
+      const result = await generarPosts({ ...form, amenities: [], variante_espanol: varianteEspanol });
 
       if (!result.ok) {
         if (result.error === "LIMIT_REACHED") {
@@ -236,6 +244,14 @@ export default function PropertyForm() {
                 ? "Clave de API no configurada. Contactá al soporte."
                 : "Ocurrió un error al generar los posts. Intentá de nuevo."}
             </p>
+          )}
+
+          {loadedProperty && (
+            <VarianteEspanolSelector
+              value={varianteEspanol}
+              onChange={setVarianteEspanol}
+              disabled={isPending}
+            />
           )}
 
           {loadedProperty && (

@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { generarCalendario, CalendarDay } from "@/lib/actions/calendario.actions";
 import { useUsage } from "@/lib/context/usage-context";
+import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
+import { detectVariante } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
+import VarianteEspanolSelector from "@/components/VarianteEspanolSelector";
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -54,6 +58,7 @@ export default function CalendarioContent({ initialIsPro }: { initialIsPro: bool
   const [isPro, setIsPro] = useState(initialIsPro);
   const [planChecked] = useState(true);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>("neutro");
 
   const checkoutUrl = user
     ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][plan]=pro&checkout[custom][user_id]=${user.id}`
@@ -68,6 +73,11 @@ export default function CalendarioContent({ initialIsPro }: { initialIsPro: bool
         if (p.ubicacion) { setZona(p.ubicacion); setLoadedProperty({ tipo: p.tipoPropiedad ?? "", ubicacion: p.ubicacion }); }
       }
     } catch {}
+    getAgentProfile().then((profile) => {
+      setVarianteEspanol(
+        profile.variante_espanol ?? detectVariante(profile.zona) ?? "neutro"
+      );
+    });
   }, []);
 
   const handleGenerar = async () => {
@@ -77,7 +87,7 @@ export default function CalendarioContent({ initialIsPro }: { initialIsPro: bool
     setLoading(true);
 
     try {
-      const result = await generarCalendario({ nicho, zona });
+      const result = await generarCalendario({ nicho, zona, variante_espanol: varianteEspanol });
       setDias(result.dias);
       setIsPro(result.isPro);
       if (!result.isPro) {
@@ -183,6 +193,12 @@ export default function CalendarioContent({ initialIsPro }: { initialIsPro: bool
         )}
 
         {error && <p className="text-destructive text-sm">{error}</p>}
+
+        <VarianteEspanolSelector
+          value={varianteEspanol}
+          onChange={setVarianteEspanol}
+          disabled={loading}
+        />
 
         <Button
           onClick={handleGenerar}
