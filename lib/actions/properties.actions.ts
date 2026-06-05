@@ -36,6 +36,12 @@ export type SavedProperty = {
   amenities?: string[] | null;
   descripcion_libre?: string | null;
   foto_urls?: string[] | null;
+  banios?: string | null;
+  plantas?: string | null;
+  antiguedad?: string | null;
+  orientacion?: string | null;
+  apto_credito?: boolean | null;
+  apto_profesional?: boolean | null;
 };
 
 export type PropertyManualData = {
@@ -55,6 +61,12 @@ export type PropertyManualData = {
   descripcion_libre?: string;
   estado?: PropertyEstado;
   foto_urls?: string[];
+  banios?: string;
+  plantas?: string;
+  antiguedad?: string;
+  orientacion?: string;
+  apto_credito?: boolean;
+  apto_profesional?: boolean;
 };
 
 /* ── Guardar desde herramientas (con posts generados) — con deduplicación ── */

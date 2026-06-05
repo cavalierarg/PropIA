@@ -55,6 +55,12 @@ const EMPTY_FORM: PropertyManualData = {
   descripcion_libre: "",
   estado: "disponible",
   foto_urls: [],
+  banios: "",
+  plantas: "",
+  antiguedad: "",
+  orientacion: "",
+  apto_credito: false,
+  apto_profesional: false,
 };
 
 export default function PropertySaveModal({
@@ -92,6 +98,12 @@ export default function PropertySaveModal({
         descripcion_libre: editProperty.descripcion_libre ?? "",
         estado: editProperty.estado ?? "disponible",
         foto_urls: editProperty.foto_urls ?? [],
+        banios: editProperty.banios ?? "",
+        plantas: editProperty.plantas ?? "",
+        antiguedad: editProperty.antiguedad ?? "",
+        orientacion: editProperty.orientacion ?? "",
+        apto_credito: editProperty.apto_credito ?? false,
+        apto_profesional: editProperty.apto_profesional ?? false,
       });
       setFotoPreviews(editProperty.foto_urls ?? []);
     } else {
@@ -360,6 +372,35 @@ export default function PropertySaveModal({
             </div>
           </div>
 
+          {/* Baños + Plantas + Antigüedad + Orientación */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-sm font-medium">Baños</Label>
+              <select value={form.banios ?? ""} onChange={(e) => set("banios", e.target.value)} className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none">
+                <option value="">—</option>
+                {["1", "2", "3", "4", "5+"].map((v) => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-sm font-medium">Plantas/Piso</Label>
+              <select value={form.plantas ?? ""} onChange={(e) => set("plantas", e.target.value)} className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none">
+                <option value="">—</option>
+                {["1", "2", "3", "4", "5+"].map((v) => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-sm font-medium">Antigüedad (años)</Label>
+              <Input type="number" min={0} placeholder="Ej: 5" value={form.antiguedad ?? ""} onChange={(e) => set("antiguedad", e.target.value)} className="h-10 text-sm" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label className="text-sm font-medium">Orientación</Label>
+              <select value={form.orientacion ?? ""} onChange={(e) => set("orientacion", e.target.value)} className="w-full border border-input bg-background rounded-md px-3 h-10 text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none">
+                <option value="">—</option>
+                {["N", "NE", "E", "SE", "S", "SO", "O", "NO"].map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+          </div>
+
           {/* Características */}
           <div className="flex flex-col gap-1.5">
             <Label className="text-sm font-medium">Características destacadas</Label>
@@ -388,6 +429,26 @@ export default function PropertySaveModal({
                   </label>
                 );
               })}
+            </div>
+            <div className="flex gap-6 pt-1">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={form.apto_credito ?? false}
+                  onChange={(e) => set("apto_credito", e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-[#0f3460] cursor-pointer"
+                />
+                <span className="text-sm text-slate-700 group-hover:text-[#0f3460] transition-colors">Apto crédito</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={form.apto_profesional ?? false}
+                  onChange={(e) => set("apto_profesional", e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-[#0f3460] cursor-pointer"
+                />
+                <span className="text-sm text-slate-700 group-hover:text-[#0f3460] transition-colors">Apto profesional</span>
+              </label>
             </div>
           </div>
 
