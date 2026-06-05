@@ -25,9 +25,8 @@ export async function uploadPropertyImage(formData: FormData): Promise<string> {
 
   if (error) throw new Error(`Upload failed: ${error.message}`);
 
-  const { data } = supabase.storage
-    .from("property-images")
-    .getPublicUrl(fileName);
-
-  return data.publicUrl;
+  // Use Supabase image render endpoint — converts HEIC/PNG/WebP to JPEG
+  // and resizes to 1200px max (required for Satori/ImageResponse compatibility)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  return `${supabaseUrl}/storage/v1/render/image/public/property-images/${fileName}?width=1200&quality=85`;
 }
