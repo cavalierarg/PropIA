@@ -78,8 +78,15 @@ export async function POST(req: NextRequest) {
   const dims = { feed: [1080,1080], story: [1080,1920], banner: [1200,628] };
   const [width, height] = dims[type] ?? dims.feed;
 
-  // Pass URLs directly — ImageResponse/Satori fetches them internally
-  // (avoids base64 conversion that causes memory issues in Vercel)
+  // Verify image URL is accessible before passing to Satori
+  console.log("[ads] imageUrl recibida:", imageUrl);
+  try {
+    const probe = await fetch(imageUrl, { method: "HEAD", cache: "no-store" });
+    console.log("[ads] HEAD probe →", probe.status, probe.headers.get("content-type"));
+  } catch (e) {
+    console.error("[ads] HEAD probe failed:", String(e));
+  }
+
   const imageData = imageUrl;
   const agentLogoData: string | null = agentLogoUrl ?? null;
 
@@ -448,7 +455,10 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (err) {
-    console.error("[generate-ad] ImageResponse error:", err);
+    const e = err as Error;
+    console.error("[generate-ad] ImageResponse error — message:", e?.message);
+    console.error("[generate-ad] ImageResponse error — stack:", e?.stack?.slice(0, 500));
+    console.error("[generate-ad] imageUrl was:", imageUrl);
     return NextResponse.json({ error: "Image generation failed", detail: String(err) }, { status: 500 });
   }
   void logFeatureUsage("ads");
