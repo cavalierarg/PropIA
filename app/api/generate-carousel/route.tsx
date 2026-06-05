@@ -30,9 +30,13 @@ function formatPrecio(precio: string): string {
 async function toDataUrl(url: string): Promise<string> {
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-  const buf = Buffer.from(await res.arrayBuffer());
-  const mime = res.headers.get("content-type") || "image/jpeg";
-  return `data:${mime};base64,${buf.toString("base64")}`;
+  const raw = Buffer.from(await res.arrayBuffer());
+  // Resize to max 1200px and convert to JPEG to avoid OOM in ImageResponse
+  const resized = await sharp(raw)
+    .resize(1200, 1200, { fit: "inside", withoutEnlargement: true })
+    .jpeg({ quality: 85 })
+    .toBuffer();
+  return `data:image/jpeg;base64,${resized.toString("base64")}`;
 }
 
 async function processLogo(url: string): Promise<string | null> {
