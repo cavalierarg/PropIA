@@ -24,6 +24,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { LockIcon } from "lucide-react";
 import PropertyLoadedCard from "@/components/PropertyLoadedCard";
+import { THEME_PRESETS, type Theme as ThemeId } from "@/lib/themes";
 
 type AdType  = "feed" | "story" | "banner";
 type Phase   = "idle" | "generating" | "complete";
@@ -125,6 +126,7 @@ export default function AdsGeneratorContent({
 
   const [phase,      setPhase]      = useState<Phase>("idle");
   const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
+  const [selectedAdTheme, setSelectedAdTheme] = useState<ThemeId | null>(null);
   const [loadingTip, setLoadingTip] = useState(0);
   const [error,      setError]      = useState("");
   const [ads,        setAds]        = useState<GeneratedAd[]>([]);
@@ -277,8 +279,10 @@ export default function AdsGeneratorContent({
             body: JSON.stringify({
               type, imageUrl: url, precio, zona, metros, car1, car2, agente,
               dormitorios, banios, cocheras, amenities, agenteWhatsapp,
+              agenteInstagram: agenteInstagram || undefined,
               estilo, colorMarca: colorFondo, colorAcento, colorTexto, moneda, badge,
               agentLogoUrl: agentLogoUrl ?? undefined,
+              ...(selectedAdTheme ? { theme: selectedAdTheme } : {}),
             }),
           });
           if (!res.ok) {
@@ -588,6 +592,41 @@ export default function AdsGeneratorContent({
               </div>
               <p className="text-[11px] text-muted-foreground">Badge de estado que aparece en el ad</p>
             </div>
+          </div>
+        </div>
+
+        {/* Selector de tema visual — opcional, sobreescribe colores si se elige */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-[#0f3460]">Tema visual <span className="text-xs font-normal text-slate-400 ml-1">(opcional · sobreescribe colores)</span></span>
+            {selectedAdTheme && (
+              <button onClick={() => setSelectedAdTheme(null)} className="text-xs text-slate-400 hover:text-red-400 transition-colors">Quitar tema</button>
+            )}
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {THEME_PRESETS.map((theme) => (
+              <button
+                key={theme.id}
+                type="button"
+                onClick={() => setSelectedAdTheme(selectedAdTheme === theme.id ? null : theme.id)}
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all ${
+                  selectedAdTheme === theme.id
+                    ? "border-[#00c9c9] bg-[#00c9c9]/5"
+                    : "border-[#e2e8f0] hover:border-[#00c9c9]/40"
+                }`}
+              >
+                <div style={{ width:"100%", height:52, background:theme.bg, borderRadius:6, overflow:"hidden", padding:"6px 8px", display:"flex", flexDirection:"column", gap:3, border:theme.previewBorder ?? "none" }}>
+                  <div style={{ color:theme.accent, fontSize:10, fontWeight:900 }}>USD 250.000</div>
+                  <div style={{ color:theme.text, fontSize:8, opacity:0.75 }}>Palermo · 3 dorm</div>
+                  <div style={{ display:"flex", marginTop:"auto" }}>
+                    <div style={{ backgroundColor:theme.accent, borderRadius:3, padding:"1px 5px" }}>
+                      <span style={{ color:"#000", fontSize:7, fontWeight:700 }}>CTA</span>
+                    </div>
+                  </div>
+                </div>
+                <span className="text-[9px] font-medium text-slate-500 text-center leading-tight">{theme.label}</span>
+              </button>
+            ))}
           </div>
         </div>
 

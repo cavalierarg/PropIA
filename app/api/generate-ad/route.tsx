@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import sharp from "sharp";
+import { buildTheme, hexRgba, type Theme } from "@/lib/themes";
 
 export const runtime = "nodejs";
 
@@ -59,9 +60,10 @@ export async function POST(req: NextRequest) {
     precio: string; zona: string; metros: string;
     car1?: string; car2?: string; agente?: string;
     dormitorios?: string; banios?: string; cocheras?: string;
-    amenities?: string[]; agenteWhatsapp?: string;
-    colorMarca: string; moneda: string; badge: string;
+    amenities?: string[]; agenteWhatsapp?: string; agenteInstagram?: string;
+    colorMarca: string; colorAcento?: string; moneda: string; badge: string;
     agentLogoUrl?: string;
+    theme?: Theme;
   };
   try { body = await req.json(); }
   catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
@@ -71,13 +73,26 @@ export async function POST(req: NextRequest) {
     precio, zona, metros,
     car1 = "", car2 = "", agente = "",
     dormitorios = "", banios = "",
-    amenities = [] as string[], agenteWhatsapp = "",
-    colorMarca = "#0f3460", moneda = "USD", badge = "En Venta",
+    amenities = [] as string[], agenteWhatsapp = "", agenteInstagram = "",
+    colorMarca = "#0f3460", colorAcento = "#00c9c9",
+    moneda = "USD", badge = "En Venta",
     agentLogoUrl,
+    theme: adTheme,
   } = body;
 
   const dims = { feed: [1080,1080], story: [1080,1920], banner: [1200,628] };
   const [width, height] = dims[type] ?? dims.feed;
+
+  // Fetch logo as base64 JPEG for themed ads (lightweight — no pixel processing)
+  async function fetchLogoSmall(url: string): Promise<string | null> {
+    try {
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) return null;
+      const raw = Buffer.from(await r.arrayBuffer());
+      const buf = await sharp(raw).resize(300, 100, { fit: "inside", withoutEnlargement: true }).jpeg({ quality: 88 }).toBuffer();
+      return `data:image/jpeg;base64,${buf.toString("base64")}`;
+    } catch { return null; }
+  }
 
   // Fetch + resize image server-side → base64 JPEG (avoids Satori remote fetch issues)
   let imageData: string;
@@ -109,7 +124,142 @@ export async function POST(req: NextRequest) {
   const amenitiesStr = amenities.length > 0 ? amenities.slice(0, 3).join(" · ") : "";
   const imgOpts = { width, height };
 
+  const igHandleAd = agenteInstagram ? `@${agenteInstagram.replace(/^@/, "")}` : "";
+
   try {
+    // ── THEMED LAYOUTS (7 temas visuales) ────────────────────────────────
+    if (adTheme) {
+      const t = buildTheme(adTheme, colorAcento);
+      const logoB64 = agentLogoUrl ? await fetchLogoSmall(agentLogoUrl) : null;
+      const FF_AD = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+      // Feed 1080×1080 — 60% foto / 40% datos
+      if (type === "feed") {
+        const photoH = 648, dataH = 432;
+        return new ImageResponse(
+          <div style={{ display:"flex", flexDirection:"column", width:1080, height:1080, fontFamily:FF_AD, overflow:"hidden" }}>
+            {/* Foto zona superior */}
+            <div style={{ display:"flex", position:"relative", width:1080, height:photoH, flexShrink:0 }}>
+              <img src={imageData} alt="" style={{ width:1080, height:photoH, objectFit:"cover" }} />
+              <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:180, background:"linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)" }} />
+              {/* Badge con acento del tema */}
+              <div style={{ display:"flex", position:"absolute", top:30, left:30, backgroundColor:t.accent, padding:"10px 24px", borderRadius:10 }}>
+                <span style={{ color:t.btnText, fontSize:24, fontWeight:700 }}>{badge}</span>
+              </div>
+              {/* Logo arriba derecha en recuadro blanco */}
+              {logoB64 ? (
+                <div style={{ display:"flex", position:"absolute", top:26, right:26, backgroundColor:"#ffffff", borderRadius:10, padding:"6px 12px", alignItems:"center" }}>
+                  <img src={logoB64} alt="" style={{ height:44, width:130, objectFit:"contain" }} />
+                </div>
+              ) : null}
+            </div>
+            {/* Zona de datos */}
+            <div style={{ display:"flex", flexDirection:"column", background:t.bgStyle, padding:"26px 44px 22px", height:dataH, flexShrink:0 }}>
+              <span style={{ fontSize:70, fontWeight:900, color:t.accent, lineHeight:1, letterSpacing:"-1px" }}>{price}</span>
+              <span style={{ fontSize:24, color:t.textSub, marginTop:6 }}>{zona}</span>
+              {/* Pills compactos */}
+              <div style={{ display:"flex", gap:10, marginTop:14, flexWrap:"wrap" }}>
+                {metros ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"7px 16px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:21, fontWeight:600 }}>{metros} m²</span></div> : null}
+                {dormitorios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"7px 16px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:21, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
+                {banios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"7px 16px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:21, fontWeight:600 }}>{banios} baños</span></div> : null}
+              </div>
+              {/* Contacto y CTA */}
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto" }}>
+                <div style={{ display:"flex", gap:16 }}>
+                  {agenteWhatsapp ? <span style={{ fontSize:19, color:t.ftext }}>WA {agenteWhatsapp}</span> : null}
+                  {igHandleAd ? <span style={{ fontSize:19, color:t.ftext }}>{igHandleAd}</span> : null}
+                </div>
+                <div style={{ display:"flex", backgroundColor:t.accent, padding:"14px 32px", borderRadius:12 }}>
+                  <span style={{ color:t.btnText, fontSize:24, fontWeight:800 }}>Consultá ahora</span>
+                </div>
+              </div>
+            </div>
+          </div>, { width:1080, height:1080 }
+        );
+      }
+
+      // Story 1080×1920 — 55% foto / 45% datos
+      if (type === "story") {
+        const photoH = 1056, dataH = 864;
+        return new ImageResponse(
+          <div style={{ display:"flex", flexDirection:"column", width:1080, height:1920, fontFamily:FF_AD, overflow:"hidden" }}>
+            <div style={{ display:"flex", position:"relative", width:1080, height:photoH, flexShrink:0 }}>
+              <img src={imageData} alt="" style={{ width:1080, height:photoH, objectFit:"cover" }} />
+              <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:240, background:"linear-gradient(to top, rgba(0,0,0,0.60) 0%, transparent 100%)" }} />
+              <div style={{ display:"flex", position:"absolute", top:50, left:50, backgroundColor:t.accent, padding:"14px 32px", borderRadius:12 }}>
+                <span style={{ color:t.btnText, fontSize:30, fontWeight:700 }}>{badge}</span>
+              </div>
+              {logoB64 ? (
+                <div style={{ display:"flex", position:"absolute", top:44, right:44, backgroundColor:"#ffffff", borderRadius:12, padding:"8px 16px", alignItems:"center" }}>
+                  <img src={logoB64} alt="" style={{ height:54, width:160, objectFit:"contain" }} />
+                </div>
+              ) : null}
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", background:t.bgStyle, padding:"48px 70px 44px", height:dataH, flexShrink:0 }}>
+              <span style={{ fontSize:96, fontWeight:900, color:t.accent, lineHeight:1, letterSpacing:"-2px" }}>{price}</span>
+              <span style={{ fontSize:34, color:t.textSub, marginTop:10 }}>{zona}</span>
+              <div style={{ display:"flex", gap:14, marginTop:24, flexWrap:"wrap" }}>
+                {metros ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"10px 24px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:30, fontWeight:600 }}>{metros} m²</span></div> : null}
+                {dormitorios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"10px 24px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:30, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
+                {banios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"10px 24px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:30, fontWeight:600 }}>{banios} baños</span></div> : null}
+              </div>
+              {(agenteWhatsapp || igHandleAd) ? (
+                <div style={{ display:"flex", gap:24, marginTop:28 }}>
+                  {agenteWhatsapp ? <span style={{ fontSize:26, color:t.ftext }}>WA {agenteWhatsapp}</span> : null}
+                  {igHandleAd ? <span style={{ fontSize:26, color:t.ftext }}>{igHandleAd}</span> : null}
+                </div>
+              ) : null}
+              <div style={{ display:"flex", marginTop:"auto", justifyContent:"center" }}>
+                <div style={{ display:"flex", backgroundColor:t.accent, padding:"26px 80px", borderRadius:18 }}>
+                  <span style={{ color:t.btnText, fontSize:40, fontWeight:800 }}>Consultá ahora</span>
+                </div>
+              </div>
+            </div>
+          </div>, { width:1080, height:1920 }
+        );
+      }
+
+      // Banner 1200×628 — 50% foto izquierda / 50% datos derecha
+      return new ImageResponse(
+        <div style={{ display:"flex", position:"relative", width:1200, height:628, fontFamily:FF_AD, overflow:"hidden" }}>
+          {/* Foto lado izquierdo */}
+          <div style={{ display:"flex", position:"relative", width:600, height:628, flexShrink:0 }}>
+            <img src={imageData} alt="" style={{ width:600, height:628, objectFit:"cover" }} />
+            <div style={{ display:"flex", position:"absolute", top:0, right:0, bottom:0, width:80, background:"linear-gradient(to right, transparent, rgba(0,0,0,0.28))" }} />
+            <div style={{ display:"flex", position:"absolute", bottom:22, left:22, backgroundColor:t.accent, padding:"8px 20px", borderRadius:8 }}>
+              <span style={{ color:t.btnText, fontSize:20, fontWeight:700 }}>{badge}</span>
+            </div>
+          </div>
+          {/* Datos lado derecho */}
+          <div style={{ display:"flex", flexDirection:"column", flex:1, background:t.bgStyle, padding:"32px 38px" }}>
+            {logoB64 ? (
+              <div style={{ display:"flex", backgroundColor:"#ffffff", borderRadius:8, padding:"5px 10px", alignSelf:"flex-end", marginBottom:14 }}>
+                <img src={logoB64} alt="" style={{ height:34, width:100, objectFit:"contain" }} />
+              </div>
+            ) : null}
+            <span style={{ fontSize:52, fontWeight:900, color:t.accent, lineHeight:1, letterSpacing:"-1px" }}>{price}</span>
+            <span style={{ fontSize:20, color:t.textSub, marginTop:6 }}>{zona}</span>
+            <div style={{ display:"flex", gap:8, marginTop:14, flexWrap:"wrap" }}>
+              {metros ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"6px 14px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:18, fontWeight:600 }}>{metros} m²</span></div> : null}
+              {dormitorios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"6px 14px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:18, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
+              {banios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"6px 14px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:18, fontWeight:600 }}>{banios} baños</span></div> : null}
+            </div>
+            {(agenteWhatsapp || igHandleAd) ? (
+              <div style={{ display:"flex", gap:16, marginTop:12 }}>
+                {agenteWhatsapp ? <span style={{ fontSize:17, color:t.ftext }}>WA {agenteWhatsapp}</span> : null}
+                {igHandleAd ? <span style={{ fontSize:17, color:t.ftext }}>{igHandleAd}</span> : null}
+              </div>
+            ) : null}
+            <div style={{ display:"flex", marginTop:"auto" }}>
+              <div style={{ display:"flex", backgroundColor:t.accent, padding:"13px 28px", borderRadius:10 }}>
+                <span style={{ color:t.btnText, fontSize:20, fontWeight:700 }}>Consultá ahora</span>
+              </div>
+            </div>
+          </div>
+        </div>, { width:1200, height:628 }
+      );
+    }
+
     // ── LUXURY ────────────────────────────────────────────────────────────
     if (estilo === "luxury") {
       const GOLD = colorMarca; const BG = "#0a0a0a"; const W = "#ffffff";

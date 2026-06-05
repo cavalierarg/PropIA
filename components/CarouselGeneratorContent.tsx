@@ -19,37 +19,13 @@ import {
 import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 import { uploadCarouselPhoto } from "@/lib/actions/carousel-photo.actions";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
+import { THEME_PRESETS, type Theme as ThemeId } from "@/lib/themes";
 
 interface Props {
   profile: AgentProfile;
 }
 
-type ThemeId = "dark" | "light" | "premium";
-
-const THEMES: { id: ThemeId; label: string; bg: string; accent: string; text: string; previewBorder?: string }[] = [
-  {
-    id: "dark",
-    label: "Moderno oscuro",
-    bg: "linear-gradient(135deg, #0a1628 0%, #0f3460 100%)",
-    accent: "#00c9c9",
-    text: "#ffffff",
-  },
-  {
-    id: "light",
-    label: "Minimalista claro",
-    bg: "#FFFFFF",
-    accent: "#00c9c9",
-    text: "#1a1a2e",
-    previewBorder: "1px solid #e2e8f0",
-  },
-  {
-    id: "premium",
-    label: "Premium negro",
-    bg: "#000000",
-    accent: "#C9A84C",
-    text: "#ffffff",
-  },
-];
+const THEMES = THEME_PRESETS;
 
 const SLIDE_LABELS = [
   "Slide 1 — Foto + precio",
@@ -97,6 +73,12 @@ export default function CarouselGeneratorContent({ profile }: Props) {
         if (p.metrosCuadrados) setMetros(p.metrosCuadrados);
         if (p.tipoPropiedad && p.ubicacion) {
           setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
+        }
+        // Precargar características (máx 3 desde el prefill de la propiedad)
+        const chars = [p.caracteristica1, p.caracteristica2, p.caracteristica3]
+          .filter((c): c is string => typeof c === "string" && c.trim().length > 0);
+        if (chars.length > 0) {
+          setCaracteristicas(chars.length >= 3 ? chars : [...chars, ...Array(3 - chars.length).fill("")]);
         }
         if (Array.isArray(p.foto_urls) && p.foto_urls[0]) {
           setUploadedUrl(p.foto_urls[0]);
@@ -432,13 +414,13 @@ export default function CarouselGeneratorContent({ profile }: Props) {
         <div className="bg-white rounded-xl border border-[#e2e8f0] p-5">
           <h2 className="text-sm font-semibold text-[#0f3460] mb-1">Tema visual</h2>
           <p className="text-xs text-slate-400 mb-4">Elegí el estilo para todos los slides del carrusel</p>
-          <div className="flex gap-3">
+          <div className="grid grid-cols-4 gap-2">
             {THEMES.map((theme) => (
               <button
                 key={theme.id}
                 type="button"
                 onClick={() => setSelectedTheme(theme.id)}
-                className={`flex flex-col items-center gap-2 flex-1 p-2 rounded-xl border-2 transition-all ${
+                className={`flex flex-col items-center gap-2 p-2 rounded-xl border-2 transition-all ${
                   selectedTheme === theme.id
                     ? "border-[#00c9c9] bg-[#00c9c9]/5"
                     : "border-[#e2e8f0] hover:border-[#00c9c9]/40"
