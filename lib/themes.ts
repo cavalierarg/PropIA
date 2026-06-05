@@ -19,6 +19,7 @@ export interface TC {
   fborder: string;
   ftext: string;
   dark: boolean;
+  isLight: boolean;  // true = fondo claro, usar texto oscuro y botones oscuros
   accent: string;
   btnText: string;
 }
@@ -41,7 +42,7 @@ export function buildTheme(theme: Theme, agentAccent = "#00c9c9"): TC {
       cellBg: hexRgba(agentAccent, 0.07),
       cellBorder: hexRgba(agentAccent, 0.22),
       fborder: "#e2e8f0", ftext: "#94a3b8",
-      dark: false, accent: agentAccent, btnText: "#1a1a2e",
+      dark: false, isLight: true, accent: agentAccent, btnText: "#1a1a2e",
     };
     case "premium": return {
       bgStyle: "#000000",
@@ -51,7 +52,7 @@ export function buildTheme(theme: Theme, agentAccent = "#00c9c9"): TC {
       cellBg: "rgba(255,255,255,0.05)",
       cellBorder: hexRgba("#C9A84C", 0.30),
       fborder: "rgba(255,255,255,0.10)", ftext: "rgba(255,255,255,0.25)",
-      dark: true, accent: "#C9A84C", btnText: "#000000",
+      dark: true, isLight: false, accent: "#C9A84C", btnText: "#000000",
     };
     case "sunset": return {
       bgStyle: "linear-gradient(135deg, #FF6B35 0%, #F7C59F 100%)",
@@ -61,17 +62,17 @@ export function buildTheme(theme: Theme, agentAccent = "#00c9c9"): TC {
       cellBg: "rgba(45,45,45,0.10)",
       cellBorder: hexRgba("#FF6B35", 0.50),
       fborder: "rgba(45,45,45,0.18)", ftext: "rgba(45,45,45,0.55)",
-      dark: false, accent: "#FF6B35", btnText: "#2D2D2D",
+      dark: false, isLight: true, accent: "#FF6B35", btnText: "#2D2D2D",
     };
     case "ocean": return {
       bgStyle: "linear-gradient(135deg, #0077B6 0%, #00B4D8 60%, #90E0EF 100%)",
       bg: "#0077B6", bgGrad: "#00B4D8",
-      text: "#ffffff", textSub: "rgba(255,255,255,0.65)",
+      text: "#1a1a2e", textSub: "rgba(26,26,46,0.65)",
       overlay: "rgba(0,119,182,0.82)",
-      cellBg: "rgba(255,255,255,0.10)",
-      cellBorder: hexRgba("#00B4D8", 0.40),
-      fborder: "rgba(255,255,255,0.15)", ftext: "rgba(255,255,255,0.38)",
-      dark: true, accent: "#00B4D8", btnText: "#0077B6",
+      cellBg: "rgba(255,255,255,0.15)",
+      cellBorder: "rgba(26,26,46,0.25)",
+      fborder: "rgba(26,26,46,0.18)", ftext: "rgba(26,26,46,0.55)",
+      dark: false, isLight: true, accent: "#00B4D8", btnText: "#0077B6",
     };
     case "forest": return {
       bgStyle: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #52B788 100%)",
@@ -81,7 +82,7 @@ export function buildTheme(theme: Theme, agentAccent = "#00c9c9"): TC {
       cellBg: "rgba(255,255,255,0.07)",
       cellBorder: hexRgba("#52B788", 0.35),
       fborder: "rgba(255,255,255,0.12)", ftext: "rgba(255,255,255,0.32)",
-      dark: true, accent: "#52B788", btnText: "#1B4332",
+      dark: true, isLight: false, accent: "#52B788", btnText: "#1B4332",
     };
     case "urban": return {
       bgStyle: "linear-gradient(135deg, #2D3436 0%, #636E72 100%)",
@@ -91,7 +92,7 @@ export function buildTheme(theme: Theme, agentAccent = "#00c9c9"): TC {
       cellBg: "rgba(255,255,255,0.06)",
       cellBorder: "rgba(255,255,255,0.22)",
       fborder: "rgba(255,255,255,0.12)", ftext: "#B2BEC3",
-      dark: true, accent: "#FFFFFF", btnText: "#2D3436",
+      dark: true, isLight: false, accent: "#FFFFFF", btnText: "#2D3436",
     };
     default: // "dark"
       return {
@@ -102,7 +103,7 @@ export function buildTheme(theme: Theme, agentAccent = "#00c9c9"): TC {
         cellBg: "rgba(255,255,255,0.07)",
         cellBorder: hexRgba(agentAccent, 0.22),
         fborder: "rgba(255,255,255,0.10)", ftext: "rgba(255,255,255,0.28)",
-        dark: true, accent: agentAccent, btnText: "#0a1628",
+        dark: true, isLight: false, accent: agentAccent, btnText: "#0a1628",
       };
   }
 }

@@ -122,6 +122,18 @@ export async function POST(req: NextRequest) {
   const priceFontSize = precioFmt.length > 16 ? 66 : precioFmt.length > 12 ? 80 : 94;
   const igHandle = instagram ? `@${instagram.replace(/^@/, "")}` : "";
 
+  // Vars de contraste: en temas con fondo claro se usa oscuro, no el acento
+  const C = {
+    strong:     t.isLight ? "#1a1a2e" : t.text,
+    emBg:       t.isLight ? "#1a1a2e" : t.accent,
+    emFg:       t.isLight ? "#ffffff" : t.btnText,
+    pillBg:     t.isLight ? "rgba(26,26,46,0.10)" : hexRgba(t.accent, 0.15),
+    pillBorder: t.isLight ? "#1a1a2e"              : t.accent,
+    pillTxt:    t.isLight ? "#1a1a2e"              : t.accent,
+    footTxt:    t.isLight ? "rgba(26,26,46,0.50)"  : t.ftext,
+    divider:    t.isLight ? "rgba(26,26,46,0.20)"  : hexRgba(t.accent, 0.35),
+  };
+
   try {
     // ── SLIDE 1 — Portada ─────────────────────────────────────────
     if (slide === 1) {
@@ -218,15 +230,15 @@ export async function POST(req: NextRequest) {
           <div style={{ display:"flex", position:"relative", flexDirection:"column", width:"100%", height:"100%", padding:"80px" }}>
             {/* Título */}
             <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:48, marginTop:16 }}>
-              <span style={{ fontSize:46, fontWeight:800, color:t.text, lineHeight:1 }}>QUÉ INCLUYE</span>
-              <div style={{ display:"flex", width:80, height:6, backgroundColor:t.accent, borderRadius:3 }} />
+              <span style={{ fontSize:46, fontWeight:800, color:C.strong, lineHeight:1 }}>QUÉ INCLUYE</span>
+              <div style={{ display:"flex", width:80, height:6, backgroundColor:C.emBg, borderRadius:3 }} />
             </div>
             {/* Pills — centrados verticalmente con wrapper */}
             <div style={{ display:"flex", flex:1, alignItems:"center" }}>
               <div style={{ display:"flex", flexWrap:"wrap", gap:18, width:"100%" }}>
                 {safeItems.map((c, idx) => (
-                  <div key={idx} style={{ display:"flex", alignItems:"center", backgroundColor:hexRgba(t.accent, 0.15), border:`1px solid ${t.accent}`, borderRadius:50, padding:"18px 32px" }}>
-                    <span style={{ color:t.accent, fontSize:34, fontWeight:600 }}>{c}</span>
+                  <div key={idx} style={{ display:"flex", alignItems:"center", backgroundColor:C.pillBg, border:`1.5px solid ${C.pillBorder}`, borderRadius:50, padding:"18px 32px" }}>
+                    <span style={{ color:C.pillTxt, fontSize:34, fontWeight:600 }}>{c}</span>
                   </div>
                 ))}
               </div>
@@ -234,10 +246,10 @@ export async function POST(req: NextRequest) {
             {/* Footer */}
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", paddingTop:24, marginTop:16, borderTop:`1px solid ${t.fborder}` }}>
               <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                <div style={{ display:"flex", width:5, height:26, backgroundColor:t.accent, borderRadius:3 }} />
-                <span style={{ fontSize:26, color:t.ftext }}>{zona}</span>
+                <div style={{ display:"flex", width:5, height:26, backgroundColor:C.emBg, borderRadius:3 }} />
+                <span style={{ fontSize:26, color:C.footTxt }}>{zona}</span>
               </div>
-              <span style={{ fontSize:26, color:t.ftext }}>3 / {N}</span>
+              <span style={{ fontSize:26, color:C.footTxt }}>3 / {N}</span>
             </div>
           </div>
         </div>, OPTS
@@ -250,13 +262,13 @@ export async function POST(req: NextRequest) {
       return new ImageResponse(
         <div style={{ display:"flex", position:"relative", flexDirection:"column", width:W, height:H, fontFamily:FF, background:t.bgStyle, alignItems:"center", justifyContent:"center", padding:"80px", overflow:"hidden" }}>
           <div style={{ display:"flex", position:"relative", flexDirection:"column", alignItems:"center", gap:22, width:"100%" }}>
-            <span style={{ fontSize:24, fontWeight:700, color:t.accent, letterSpacing:"0.30em" }}>UBICACIÓN</span>
-            <span style={{ fontSize:zonaFontSize, fontWeight:900, color:t.text, textAlign:"center", lineHeight:1.15 }}>{zona}</span>
-            <div style={{ display:"flex", width:120, height:3, backgroundColor:hexRgba(t.accent, 0.35), borderRadius:2 }} />
-            <span style={{ fontSize:priceFontSize, fontWeight:900, color:t.accent, letterSpacing:"-0.02em" }}>{precioFmt}</span>
-            {/* Badge con acento del tema, texto #000 para máximo contraste */}
-            <div style={{ display:"flex", backgroundColor:t.accent, padding:"16px 52px", borderRadius:48 }}>
-              <span style={{ color:"#000000", fontSize:32, fontWeight:700 }}>{operacion}</span>
+            <span style={{ fontSize:24, fontWeight:700, color:C.strong, letterSpacing:"0.30em" }}>UBICACIÓN</span>
+            <span style={{ fontSize:zonaFontSize, fontWeight:900, color:C.strong, textAlign:"center", lineHeight:1.15 }}>{zona}</span>
+            <div style={{ display:"flex", width:120, height:3, backgroundColor:C.divider, borderRadius:2 }} />
+            <span style={{ fontSize:priceFontSize, fontWeight:900, color:C.strong, letterSpacing:"-0.02em" }}>{precioFmt}</span>
+            {/* Badge con contraste: fondo oscuro/acento, texto legible */}
+            <div style={{ display:"flex", backgroundColor:C.emBg, padding:"16px 52px", borderRadius:48 }}>
+              <span style={{ color:C.emFg, fontSize:32, fontWeight:700 }}>{operacion}</span>
             </div>
           </div>
           <span style={{ position:"absolute", bottom:52, right:56, fontSize:28, color:t.ftext, fontWeight:500 }}>4 / {N}</span>
@@ -285,16 +297,16 @@ export async function POST(req: NextRequest) {
               <span style={{ color:t.btnText, fontSize:44, fontWeight:900 }}>A</span>
             </div>
           )}
-          {nombreAgencia ? <span style={{ fontSize:30, fontWeight:700, color:t.accent, marginBottom:6 }}>{nombreAgencia}</span> : null}
-          <span style={{ fontSize:52, fontWeight:800, color:t.text, marginBottom:38, textAlign:"center", lineHeight:1.2 }}>{nombreAgente}</span>
-          <div style={{ display:"flex", width:100, height:3, backgroundColor:t.accent, borderRadius:2, marginBottom:38 }} />
+          {nombreAgencia ? <span style={{ fontSize:30, fontWeight:700, color:C.strong, marginBottom:6 }}>{nombreAgencia}</span> : null}
+          <span style={{ fontSize:52, fontWeight:800, color:C.strong, marginBottom:38, textAlign:"center", lineHeight:1.2 }}>{nombreAgente}</span>
+          <div style={{ display:"flex", width:100, height:3, backgroundColor:C.emBg, borderRadius:2, marginBottom:38 }} />
           <div style={{ display:"flex", flexDirection:"column", gap:22, alignItems:"center", marginBottom:46 }}>
             {whatsapp ? (
               <div style={{ display:"flex", alignItems:"center", gap:18 }}>
                 <div style={{ display:"flex", width:52, height:52, borderRadius:14, backgroundColor:"#25D366", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                   <span style={{ color:"#fff", fontSize:20, fontWeight:900 }}>WA</span>
                 </div>
-                <span style={{ fontSize:40, fontWeight:500, color:t.dark ? "rgba(255,255,255,0.90)" : t.text }}>{whatsapp}</span>
+                <span style={{ fontSize:40, fontWeight:500, color:C.strong }}>{whatsapp}</span>
               </div>
             ) : null}
             {igHandle ? (
@@ -302,13 +314,13 @@ export async function POST(req: NextRequest) {
                 <div style={{ display:"flex", width:52, height:52, borderRadius:14, alignItems:"center", justifyContent:"center", flexShrink:0, background:"linear-gradient(135deg, #f9a825 0%, #e1306c 50%, #7c3aed 100%)" }}>
                   <span style={{ color:"#fff", fontSize:20, fontWeight:900 }}>IG</span>
                 </div>
-                <span style={{ fontSize:40, fontWeight:500, color:t.dark ? "rgba(255,255,255,0.90)" : t.text }}>{igHandle}</span>
+                <span style={{ fontSize:40, fontWeight:500, color:C.strong }}>{igHandle}</span>
               </div>
             ) : null}
           </div>
-          {/* CTA — 70% del ancho = 756px */}
-          <div style={{ display:"flex", backgroundColor:t.accent, padding:"22px 0", borderRadius:18, width:756, alignItems:"center", justifyContent:"center" }}>
-            <span style={{ color:t.btnText, fontSize:42, fontWeight:800 }}>Consultá ahora</span>
+          {/* CTA — 70% del ancho = 756px, contraste garantizado */}
+          <div style={{ display:"flex", backgroundColor:C.emBg, padding:"22px 0", borderRadius:18, width:756, alignItems:"center", justifyContent:"center" }}>
+            <span style={{ color:C.emFg, fontSize:42, fontWeight:800 }}>Consultá ahora</span>
           </div>
           <span style={{ position:"absolute", bottom:48, right:56, fontSize:28, color:t.ftext, fontWeight:500 }}>5 / {N}</span>
           <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:8, backgroundColor:t.accent }} />

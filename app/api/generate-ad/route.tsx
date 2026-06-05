@@ -132,6 +132,17 @@ export async function POST(req: NextRequest) {
       const t = buildTheme(adTheme, colorAcento);
       const logoB64 = agentLogoUrl ? await fetchLogoSmall(agentLogoUrl) : null;
       const FF_AD = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      // Contraste: temas claros usan oscuro para texto/botones, no el acento
+      const C = {
+        strong:     t.isLight ? "#1a1a2e" : t.text,
+        emBg:       t.isLight ? "#1a1a2e" : t.accent,
+        emFg:       t.isLight ? "#ffffff" : t.btnText,
+        pillBg:     t.isLight ? "rgba(26,26,46,0.10)" : hexRgba(t.accent, 0.14),
+        pillBorder: t.isLight ? "#1a1a2e"              : t.accent,
+        pillTxt:    t.isLight ? "#1a1a2e"              : t.accent,
+        subTxt:     t.isLight ? "rgba(26,26,46,0.60)"  : t.textSub,
+        footTxt:    t.isLight ? "rgba(26,26,46,0.50)"  : t.ftext,
+      };
 
       // Feed 1080×1080 — 60% foto / 40% datos
       if (type === "feed") {
@@ -142,9 +153,9 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", position:"relative", width:1080, height:photoH, flexShrink:0 }}>
               <img src={imageData} alt="" style={{ width:1080, height:photoH, objectFit:"cover" }} />
               <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:180, background:"linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)" }} />
-              {/* Badge con acento del tema */}
-              <div style={{ display:"flex", position:"absolute", top:30, left:30, backgroundColor:t.accent, padding:"10px 24px", borderRadius:10 }}>
-                <span style={{ color:t.btnText, fontSize:24, fontWeight:700 }}>{badge}</span>
+              {/* Badge con contraste garantizado */}
+              <div style={{ display:"flex", position:"absolute", top:30, left:30, backgroundColor:C.emBg, padding:"10px 24px", borderRadius:10 }}>
+                <span style={{ color:C.emFg, fontSize:24, fontWeight:700 }}>{badge}</span>
               </div>
               {/* Logo arriba derecha en recuadro blanco */}
               {logoB64 ? (
@@ -155,22 +166,22 @@ export async function POST(req: NextRequest) {
             </div>
             {/* Zona de datos */}
             <div style={{ display:"flex", flexDirection:"column", background:t.bgStyle, padding:"26px 44px 22px", height:dataH, flexShrink:0 }}>
-              <span style={{ fontSize:70, fontWeight:900, color:t.accent, lineHeight:1, letterSpacing:"-1px" }}>{price}</span>
-              <span style={{ fontSize:24, color:t.textSub, marginTop:6 }}>{zona}</span>
+              <span style={{ fontSize:70, fontWeight:900, color:C.strong, lineHeight:1, letterSpacing:"-1px" }}>{price}</span>
+              <span style={{ fontSize:24, color:C.subTxt, marginTop:6 }}>{zona}</span>
               {/* Pills compactos */}
               <div style={{ display:"flex", gap:10, marginTop:14, flexWrap:"wrap" }}>
-                {metros ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"7px 16px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:21, fontWeight:600 }}>{metros} m²</span></div> : null}
-                {dormitorios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"7px 16px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:21, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
-                {banios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"7px 16px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:21, fontWeight:600 }}>{banios} baños</span></div> : null}
+                {metros ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"7px 16px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:21, fontWeight:600 }}>{metros} m²</span></div> : null}
+                {dormitorios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"7px 16px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:21, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
+                {banios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"7px 16px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:21, fontWeight:600 }}>{banios} baños</span></div> : null}
               </div>
               {/* Contacto y CTA */}
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto" }}>
                 <div style={{ display:"flex", gap:16 }}>
-                  {agenteWhatsapp ? <span style={{ fontSize:19, color:t.ftext }}>WA {agenteWhatsapp}</span> : null}
-                  {igHandleAd ? <span style={{ fontSize:19, color:t.ftext }}>{igHandleAd}</span> : null}
+                  {agenteWhatsapp ? <span style={{ fontSize:19, color:C.footTxt }}>WA {agenteWhatsapp}</span> : null}
+                  {igHandleAd ? <span style={{ fontSize:19, color:C.footTxt }}>{igHandleAd}</span> : null}
                 </div>
-                <div style={{ display:"flex", backgroundColor:t.accent, padding:"14px 32px", borderRadius:12 }}>
-                  <span style={{ color:t.btnText, fontSize:24, fontWeight:800 }}>Consultá ahora</span>
+                <div style={{ display:"flex", backgroundColor:C.emBg, padding:"14px 32px", borderRadius:12 }}>
+                  <span style={{ color:C.emFg, fontSize:24, fontWeight:800 }}>Consultá ahora</span>
                 </div>
               </div>
             </div>
@@ -186,8 +197,8 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", position:"relative", width:1080, height:photoH, flexShrink:0 }}>
               <img src={imageData} alt="" style={{ width:1080, height:photoH, objectFit:"cover" }} />
               <div style={{ display:"flex", position:"absolute", bottom:0, left:0, right:0, height:240, background:"linear-gradient(to top, rgba(0,0,0,0.60) 0%, transparent 100%)" }} />
-              <div style={{ display:"flex", position:"absolute", top:50, left:50, backgroundColor:t.accent, padding:"14px 32px", borderRadius:12 }}>
-                <span style={{ color:t.btnText, fontSize:30, fontWeight:700 }}>{badge}</span>
+              <div style={{ display:"flex", position:"absolute", top:50, left:50, backgroundColor:C.emBg, padding:"14px 32px", borderRadius:12 }}>
+                <span style={{ color:C.emFg, fontSize:30, fontWeight:700 }}>{badge}</span>
               </div>
               {logoB64 ? (
                 <div style={{ display:"flex", position:"absolute", top:44, right:44, backgroundColor:"#ffffff", borderRadius:12, padding:"8px 16px", alignItems:"center" }}>
@@ -196,22 +207,22 @@ export async function POST(req: NextRequest) {
               ) : null}
             </div>
             <div style={{ display:"flex", flexDirection:"column", background:t.bgStyle, padding:"48px 70px 44px", height:dataH, flexShrink:0 }}>
-              <span style={{ fontSize:96, fontWeight:900, color:t.accent, lineHeight:1, letterSpacing:"-2px" }}>{price}</span>
-              <span style={{ fontSize:34, color:t.textSub, marginTop:10 }}>{zona}</span>
+              <span style={{ fontSize:96, fontWeight:900, color:C.strong, lineHeight:1, letterSpacing:"-2px" }}>{price}</span>
+              <span style={{ fontSize:34, color:C.subTxt, marginTop:10 }}>{zona}</span>
               <div style={{ display:"flex", gap:14, marginTop:24, flexWrap:"wrap" }}>
-                {metros ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"10px 24px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:30, fontWeight:600 }}>{metros} m²</span></div> : null}
-                {dormitorios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"10px 24px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:30, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
-                {banios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"10px 24px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:30, fontWeight:600 }}>{banios} baños</span></div> : null}
+                {metros ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"10px 24px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:30, fontWeight:600 }}>{metros} m²</span></div> : null}
+                {dormitorios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"10px 24px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:30, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
+                {banios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"10px 24px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:30, fontWeight:600 }}>{banios} baños</span></div> : null}
               </div>
               {(agenteWhatsapp || igHandleAd) ? (
                 <div style={{ display:"flex", gap:24, marginTop:28 }}>
-                  {agenteWhatsapp ? <span style={{ fontSize:26, color:t.ftext }}>WA {agenteWhatsapp}</span> : null}
-                  {igHandleAd ? <span style={{ fontSize:26, color:t.ftext }}>{igHandleAd}</span> : null}
+                  {agenteWhatsapp ? <span style={{ fontSize:26, color:C.footTxt }}>WA {agenteWhatsapp}</span> : null}
+                  {igHandleAd ? <span style={{ fontSize:26, color:C.footTxt }}>{igHandleAd}</span> : null}
                 </div>
               ) : null}
               <div style={{ display:"flex", marginTop:"auto", justifyContent:"center" }}>
-                <div style={{ display:"flex", backgroundColor:t.accent, padding:"26px 80px", borderRadius:18 }}>
-                  <span style={{ color:t.btnText, fontSize:40, fontWeight:800 }}>Consultá ahora</span>
+                <div style={{ display:"flex", backgroundColor:C.emBg, padding:"26px 80px", borderRadius:18 }}>
+                  <span style={{ color:C.emFg, fontSize:40, fontWeight:800 }}>Consultá ahora</span>
                 </div>
               </div>
             </div>
@@ -226,8 +237,8 @@ export async function POST(req: NextRequest) {
           <div style={{ display:"flex", position:"relative", width:600, height:628, flexShrink:0 }}>
             <img src={imageData} alt="" style={{ width:600, height:628, objectFit:"cover" }} />
             <div style={{ display:"flex", position:"absolute", top:0, right:0, bottom:0, width:80, background:"linear-gradient(to right, transparent, rgba(0,0,0,0.28))" }} />
-            <div style={{ display:"flex", position:"absolute", bottom:22, left:22, backgroundColor:t.accent, padding:"8px 20px", borderRadius:8 }}>
-              <span style={{ color:t.btnText, fontSize:20, fontWeight:700 }}>{badge}</span>
+            <div style={{ display:"flex", position:"absolute", bottom:22, left:22, backgroundColor:C.emBg, padding:"8px 20px", borderRadius:8 }}>
+              <span style={{ color:C.emFg, fontSize:20, fontWeight:700 }}>{badge}</span>
             </div>
           </div>
           {/* Datos lado derecho */}
@@ -237,22 +248,22 @@ export async function POST(req: NextRequest) {
                 <img src={logoB64} alt="" style={{ height:34, width:100, objectFit:"contain" }} />
               </div>
             ) : null}
-            <span style={{ fontSize:52, fontWeight:900, color:t.accent, lineHeight:1, letterSpacing:"-1px" }}>{price}</span>
-            <span style={{ fontSize:20, color:t.textSub, marginTop:6 }}>{zona}</span>
+            <span style={{ fontSize:52, fontWeight:900, color:C.strong, lineHeight:1, letterSpacing:"-1px" }}>{price}</span>
+            <span style={{ fontSize:20, color:C.subTxt, marginTop:6 }}>{zona}</span>
             <div style={{ display:"flex", gap:8, marginTop:14, flexWrap:"wrap" }}>
-              {metros ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"6px 14px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:18, fontWeight:600 }}>{metros} m²</span></div> : null}
-              {dormitorios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"6px 14px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:18, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
-              {banios ? <div style={{ display:"flex", border:`1px solid ${t.accent}`, borderRadius:50, padding:"6px 14px", backgroundColor:hexRgba(t.accent, 0.14) }}><span style={{ color:t.accent, fontSize:18, fontWeight:600 }}>{banios} baños</span></div> : null}
+              {metros ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"6px 14px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:18, fontWeight:600 }}>{metros} m²</span></div> : null}
+              {dormitorios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"6px 14px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:18, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
+              {banios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"6px 14px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:18, fontWeight:600 }}>{banios} baños</span></div> : null}
             </div>
             {(agenteWhatsapp || igHandleAd) ? (
               <div style={{ display:"flex", gap:16, marginTop:12 }}>
-                {agenteWhatsapp ? <span style={{ fontSize:17, color:t.ftext }}>WA {agenteWhatsapp}</span> : null}
-                {igHandleAd ? <span style={{ fontSize:17, color:t.ftext }}>{igHandleAd}</span> : null}
+                {agenteWhatsapp ? <span style={{ fontSize:17, color:C.footTxt }}>WA {agenteWhatsapp}</span> : null}
+                {igHandleAd ? <span style={{ fontSize:17, color:C.footTxt }}>{igHandleAd}</span> : null}
               </div>
             ) : null}
             <div style={{ display:"flex", marginTop:"auto" }}>
-              <div style={{ display:"flex", backgroundColor:t.accent, padding:"13px 28px", borderRadius:10 }}>
-                <span style={{ color:t.btnText, fontSize:20, fontWeight:700 }}>Consultá ahora</span>
+              <div style={{ display:"flex", backgroundColor:C.emBg, padding:"13px 28px", borderRadius:10 }}>
+                <span style={{ color:C.emFg, fontSize:20, fontWeight:700 }}>Consultá ahora</span>
               </div>
             </div>
           </div>
