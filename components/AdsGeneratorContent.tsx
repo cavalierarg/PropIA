@@ -89,8 +89,10 @@ export default function AdsGeneratorContent({
   const router = useRouter();
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([null, null, null]);
 
-  const [images,   setImages]   = useState<(File | null)[]>([null, null, null]);
-  const [previews, setPreviews] = useState<(string | null)[]>([null, null, null]);
+  const [images,        setImages]        = useState<(File | null)[]>([null, null, null]);
+  const [previews,      setPreviews]      = useState<(string | null)[]>([null, null, null]);
+  const [preloadedUrls, setPreloadedUrls] = useState<(string | null)[]>([null, null, null]);
+  const [autoPhotosLoaded, setAutoPhotosLoaded] = useState(false);
 
   const [precio,  setPrecio]  = useState("");
   const [zona,    setZona]    = useState("");
@@ -127,7 +129,7 @@ export default function AdsGeneratorContent({
   const [error,      setError]      = useState("");
   const [ads,        setAds]        = useState<GeneratedAd[]>([]);
 
-  const activeCount = images.filter(Boolean).length;
+  const activeCount = previews.filter(Boolean).length;
   const isLoading   = phase === "generating";
   const canGenerate = !!loadedProperty && activeCount > 0;
 
@@ -151,6 +153,14 @@ export default function AdsGeneratorContent({
         if (p.caracteristica2) setCar2(p.caracteristica2);
         if (p.tipoPropiedad && p.ubicacion) {
           setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
+        }
+        if (Array.isArray(p.foto_urls) && p.foto_urls.length > 0) {
+          const urls: (string | null)[] = [null, null, null];
+          const prevs: (string | null)[] = [null, null, null];
+          (p.foto_urls as string[]).slice(0, 3).forEach((url, i) => { urls[i] = url; prevs[i] = url; });
+          setPreloadedUrls(urls);
+          setPreviews(prevs);
+          setAutoPhotosLoaded(true);
         }
       }
     } catch {}
@@ -212,20 +222,23 @@ export default function AdsGeneratorContent({
   /* ── Image handlers ── */
   const applyFile = (index: number, file: File) => {
     if (!file.type.startsWith("image/")) return;
-    const ni = [...images];   ni[index] = file;  setImages(ni);
+    const ni = [...images]; ni[index] = file; setImages(ni);
     const np = [...previews];
-    if (np[index]) URL.revokeObjectURL(np[index]!);
+    if (np[index]?.startsWith("blob:")) URL.revokeObjectURL(np[index]!);
     np[index] = URL.createObjectURL(file);
     setPreviews(np);
+    // Si había URL preloaded para este slot, la reemplazamos
+    const pu = [...preloadedUrls]; pu[index] = null; setPreloadedUrls(pu);
     setAds([]);
     if (phase === "complete") setPhase("idle");
   };
 
   const removeImage = (index: number) => {
-    const ni = [...images];   ni[index] = null; setImages(ni);
+    const ni = [...images]; ni[index] = null; setImages(ni);
     const np = [...previews];
-    if (np[index]) URL.revokeObjectURL(np[index]!);
+    if (np[index]?.startsWith("blob:")) URL.revokeObjectURL(np[index]!);
     np[index] = null; setPreviews(np);
+    const pu = [...preloadedUrls]; pu[index] = null; setPreloadedUrls(pu);
   };
 
   const handleDrop = (index: number, e: React.DragEvent) => {
@@ -241,11 +254,15 @@ export default function AdsGeneratorContent({
       const uploaded: { photoIndex: number; url: string }[] = [];
       for (let i = 0; i < 3; i++) {
         const img = images[i];
-        if (!img) continue;
-        const fd = new FormData();
-        fd.append("image", img);
-        const url = await uploadPropertyImage(fd);
-        uploaded.push({ photoIndex: i, url });
+        if (img) {
+          const fd = new FormData();
+          fd.append("image", img);
+          const url = await uploadPropertyImage(fd);
+          uploaded.push({ photoIndex: i, url });
+        } else if (preloadedUrls[i]) {
+          // Foto ya está en Supabase Storage — usarla directamente sin re-subir
+          uploaded.push({ photoIndex: i, url: preloadedUrls[i]! });
+        }
       }
 
       const tasks = uploaded.flatMap(({ photoIndex, url }) =>
@@ -341,6 +358,12 @@ export default function AdsGeneratorContent({
             Fotos de la propiedad
             <span className="text-muted-foreground ml-1.5 font-normal">(hasta 3 · la 1ra es obligatoria)</span>
           </Label>
+          {autoPhotosLoaded && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <span className="text-emerald-600 text-xs font-semibold">✓ Fotos de tu propiedad cargadas automáticamente</span>
+              <span className="text-emerald-500 text-xs ml-auto">Podés cambiar cualquier foto haciendo clic en ella</span>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[0, 1, 2].map((i) => {
               const locked = !isProMax && i > 0;

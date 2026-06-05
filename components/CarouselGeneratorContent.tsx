@@ -82,6 +82,8 @@ export default function CarouselGeneratorContent({ profile }: Props) {
 
   // Tema visual seleccionado
   const [selectedTheme, setSelectedTheme] = useState<ThemeId>("dark");
+  // Fotos autocargadas desde la propiedad
+  const [autoPhotosLoaded, setAutoPhotosLoaded] = useState(false);
 
   useEffect(() => {
     // Pre-fill desde "Usar en..." en Mis Propiedades
@@ -95,6 +97,11 @@ export default function CarouselGeneratorContent({ profile }: Props) {
         if (p.metrosCuadrados) setMetros(p.metrosCuadrados);
         if (p.tipoPropiedad && p.ubicacion) {
           setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
+        }
+        if (Array.isArray(p.foto_urls) && p.foto_urls[0]) {
+          setUploadedUrl(p.foto_urls[0]);
+          setLocalPreview(p.foto_urls[0]);
+          setAutoPhotosLoaded(true);
         }
       }
     } catch {}
@@ -119,6 +126,7 @@ export default function CarouselGeneratorContent({ profile }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadError(null);
+    setAutoPhotosLoaded(false);
     setLocalPreview(URL.createObjectURL(file));
     setUploadedUrl(null);
     setUploading(true);
@@ -309,6 +317,11 @@ export default function CarouselGeneratorContent({ profile }: Props) {
               </>
             )}
           </div>
+          {autoPhotosLoaded && !uploading && (
+            <div className="flex items-center gap-2 mt-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <span className="text-emerald-600 text-xs font-semibold">✓ Foto de tu propiedad cargada automáticamente</span>
+            </div>
+          )}
           {uploadError && <p className="text-xs text-red-500 mt-2">{uploadError}</p>}
           {localPreview && !uploading && (
             <button onClick={() => fileInputRef.current?.click()} className="text-xs text-[#00c9c9] hover:underline mt-2">

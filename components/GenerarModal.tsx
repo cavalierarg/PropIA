@@ -90,6 +90,7 @@ function savePrefill(property: SavedProperty) {
         caracteristica1: property.caracteristica1 ?? "",
         caracteristica2: property.caracteristica2 ?? "",
         caracteristica3: property.caracteristica3 ?? "",
+        foto_urls: property.foto_urls ?? [],
       })
     );
   } catch {}
