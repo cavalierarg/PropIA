@@ -6,6 +6,7 @@ import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import sharp from "sharp";
 import { type Theme, buildTheme, hexRgba } from "@/lib/themes";
+import { getSocialIconSrcs } from "@/lib/social-icons";
 
 export const runtime = "nodejs";
 
@@ -280,6 +281,7 @@ export async function POST(req: NextRequest) {
     if (slide === 5) {
       let logoData: string | null = null;
       if (logoUrl) logoData = await processLogo(logoUrl);
+      const { wa: waIcon, ig: igIcon } = await getSocialIconSrcs();
 
       const slide5Bg = t.dark
         ? `linear-gradient(155deg, ${t.bg} 0%, ${t.bgGrad} 60%, ${hexRgba(t.accent, 0.08)} 100%)`
@@ -303,17 +305,25 @@ export async function POST(req: NextRequest) {
           <div style={{ display:"flex", flexDirection:"column", gap:22, alignItems:"center", marginBottom:46 }}>
             {whatsapp ? (
               <div style={{ display:"flex", alignItems:"center", gap:18 }}>
-                <div style={{ display:"flex", width:52, height:52, borderRadius:14, backgroundColor:"#25D366", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                  <span style={{ color:"#fff", fontSize:20, fontWeight:900 }}>WA</span>
-                </div>
+                {waIcon ? (
+                  <img src={waIcon} alt="" style={{ width:52, height:52, flexShrink:0 }} />
+                ) : (
+                  <div style={{ display:"flex", width:52, height:52, borderRadius:26, backgroundColor:"#25D366", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <span style={{ color:"#fff", fontSize:20, fontWeight:900 }}>WA</span>
+                  </div>
+                )}
                 <span style={{ fontSize:40, fontWeight:500, color:C.strong }}>{whatsapp}</span>
               </div>
             ) : null}
             {igHandle ? (
               <div style={{ display:"flex", alignItems:"center", gap:18 }}>
-                <div style={{ display:"flex", width:52, height:52, borderRadius:14, alignItems:"center", justifyContent:"center", flexShrink:0, background:"linear-gradient(135deg, #f9a825 0%, #e1306c 50%, #7c3aed 100%)" }}>
-                  <span style={{ color:"#fff", fontSize:20, fontWeight:900 }}>IG</span>
-                </div>
+                {igIcon ? (
+                  <img src={igIcon} alt="" style={{ width:52, height:52, flexShrink:0 }} />
+                ) : (
+                  <div style={{ display:"flex", width:52, height:52, borderRadius:14, alignItems:"center", justifyContent:"center", flexShrink:0, background:"linear-gradient(135deg, #f9a825 0%, #e1306c 50%, #7c3aed 100%)" }}>
+                    <span style={{ color:"#fff", fontSize:20, fontWeight:900 }}>IG</span>
+                  </div>
+                )}
                 <span style={{ fontSize:40, fontWeight:500, color:C.strong }}>{igHandle}</span>
               </div>
             ) : null}

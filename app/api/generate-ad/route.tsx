@@ -5,6 +5,7 @@ import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import sharp from "sharp";
 import { buildTheme, hexRgba, type Theme } from "@/lib/themes";
+import { getSocialIconSrcs } from "@/lib/social-icons";
 
 export const runtime = "nodejs";
 
@@ -131,6 +132,7 @@ export async function POST(req: NextRequest) {
     if (adTheme) {
       const t = buildTheme(adTheme, colorAcento);
       const logoB64 = agentLogoUrl ? await fetchLogoSmall(agentLogoUrl) : null;
+      const { wa: waIcon, ig: igIcon } = await getSocialIconSrcs();
       const FF_AD = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
       // Contraste: temas claros usan oscuro para texto/botones, no el acento
       const C = {
@@ -176,9 +178,19 @@ export async function POST(req: NextRequest) {
               </div>
               {/* Contacto y CTA */}
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"auto" }}>
-                <div style={{ display:"flex", gap:16 }}>
-                  {agenteWhatsapp ? <span style={{ fontSize:19, color:C.footTxt }}>WA {agenteWhatsapp}</span> : null}
-                  {igHandleAd ? <span style={{ fontSize:19, color:C.footTxt }}>{igHandleAd}</span> : null}
+                <div style={{ display:"flex", gap:14 }}>
+                  {agenteWhatsapp ? (
+                    <div style={{ display:"flex", alignItems:"center", gap:7 }}>
+                      {waIcon ? <img src={waIcon} alt="" style={{ width:32, height:32, flexShrink:0 }} /> : <span style={{ fontSize:18, color:C.footTxt }}>WA</span>}
+                      <span style={{ fontSize:18, color:C.footTxt }}>{agenteWhatsapp}</span>
+                    </div>
+                  ) : null}
+                  {igHandleAd ? (
+                    <div style={{ display:"flex", alignItems:"center", gap:7 }}>
+                      {igIcon ? <img src={igIcon} alt="" style={{ width:32, height:32, flexShrink:0 }} /> : <span style={{ fontSize:18, color:C.footTxt }}>IG</span>}
+                      <span style={{ fontSize:18, color:C.footTxt }}>{igHandleAd}</span>
+                    </div>
+                  ) : null}
                 </div>
                 <div style={{ display:"flex", backgroundColor:C.emBg, padding:"14px 32px", borderRadius:12 }}>
                   <span style={{ color:C.emFg, fontSize:24, fontWeight:800 }}>Consultá ahora</span>
@@ -215,9 +227,19 @@ export async function POST(req: NextRequest) {
                 {banios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"10px 24px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:30, fontWeight:600 }}>{banios} baños</span></div> : null}
               </div>
               {(agenteWhatsapp || igHandleAd) ? (
-                <div style={{ display:"flex", gap:24, marginTop:28 }}>
-                  {agenteWhatsapp ? <span style={{ fontSize:26, color:C.footTxt }}>WA {agenteWhatsapp}</span> : null}
-                  {igHandleAd ? <span style={{ fontSize:26, color:C.footTxt }}>{igHandleAd}</span> : null}
+                <div style={{ display:"flex", gap:22, marginTop:28, flexWrap:"wrap" }}>
+                  {agenteWhatsapp ? (
+                    <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                      {waIcon ? <img src={waIcon} alt="" style={{ width:40, height:40, flexShrink:0 }} /> : <span style={{ fontSize:24, color:C.footTxt }}>WA</span>}
+                      <span style={{ fontSize:26, color:C.footTxt }}>{agenteWhatsapp}</span>
+                    </div>
+                  ) : null}
+                  {igHandleAd ? (
+                    <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                      {igIcon ? <img src={igIcon} alt="" style={{ width:40, height:40, flexShrink:0 }} /> : <span style={{ fontSize:24, color:C.footTxt }}>IG</span>}
+                      <span style={{ fontSize:26, color:C.footTxt }}>{igHandleAd}</span>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
               <div style={{ display:"flex", marginTop:"auto", justifyContent:"center" }}>
@@ -256,9 +278,19 @@ export async function POST(req: NextRequest) {
               {banios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"6px 14px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:18, fontWeight:600 }}>{banios} baños</span></div> : null}
             </div>
             {(agenteWhatsapp || igHandleAd) ? (
-              <div style={{ display:"flex", gap:16, marginTop:12 }}>
-                {agenteWhatsapp ? <span style={{ fontSize:17, color:C.footTxt }}>WA {agenteWhatsapp}</span> : null}
-                {igHandleAd ? <span style={{ fontSize:17, color:C.footTxt }}>{igHandleAd}</span> : null}
+              <div style={{ display:"flex", gap:12, marginTop:12, flexWrap:"wrap" }}>
+                {agenteWhatsapp ? (
+                  <div style={{ display:"flex", alignItems:"center", gap:7 }}>
+                    {waIcon ? <img src={waIcon} alt="" style={{ width:28, height:28, flexShrink:0 }} /> : <span style={{ fontSize:16, color:C.footTxt }}>WA</span>}
+                    <span style={{ fontSize:17, color:C.footTxt }}>{agenteWhatsapp}</span>
+                  </div>
+                ) : null}
+                {igHandleAd ? (
+                  <div style={{ display:"flex", alignItems:"center", gap:7 }}>
+                    {igIcon ? <img src={igIcon} alt="" style={{ width:28, height:28, flexShrink:0 }} /> : <span style={{ fontSize:16, color:C.footTxt }}>IG</span>}
+                    <span style={{ fontSize:17, color:C.footTxt }}>{igHandleAd}</span>
+                  </div>
+                ) : null}
               </div>
             ) : null}
             <div style={{ display:"flex", marginTop:"auto" }}>
