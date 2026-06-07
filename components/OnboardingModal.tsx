@@ -53,9 +53,11 @@ const STEPS_PREVIEW = [
 export default function OnboardingModal({ firstName, plan }: OnboardingModalProps) {
   const router = useRouter();
   const [visible, setVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     trackEvent("CompleteRegistration");
+    setIsMobile(window.innerWidth < 1024);
   }, []);
 
   const handleSkip = useCallback(async () => {
@@ -181,7 +183,7 @@ export default function OnboardingModal({ firstName, plan }: OnboardingModalProp
             onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#00b3b3")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#00c9c9")}
           >
-            Empezar tour <ArrowRight className="w-4 h-4" />
+            {isMobile ? "Empezar" : "Empezar tour"} <ArrowRight className="w-4 h-4" />
           </button>
 
           <button

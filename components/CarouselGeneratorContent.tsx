@@ -19,6 +19,9 @@ import {
 import PropertyLoadedCard from "@/components/PropertyLoadedCard";
 import { uploadCarouselPhoto } from "@/lib/actions/carousel-photo.actions";
 import type { AgentProfile } from "@/lib/actions/agent-profile.actions";
+import { detectVariante } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
+import VarianteEspanolSelector from "@/components/VarianteEspanolSelector";
 import { THEME_PRESETS, type Theme as ThemeId } from "@/lib/themes";
 
 interface Props {
@@ -72,7 +75,8 @@ export default function CarouselGeneratorContent({ profile }: Props) {
         if (p.ubicacion) setZona(p.ubicacion);
         if (p.precio) setPrecio(p.precio);
         if (p.metrosCuadrados) setMetros(p.metrosCuadrados);
-        if (p.ambientes) setDormitorios(p.ambientes); // ambientes como proxy de dormitorios
+        if (p.ambientes) setDormitorios(p.ambientes);
+        if (p.banios) setBanios(p.banios);
         if (p.tipoPropiedad && p.ubicacion) {
           setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
         }
@@ -105,6 +109,9 @@ export default function CarouselGeneratorContent({ profile }: Props) {
   const [slideUrls, setSlideUrls] = useState<string[]>([]);
   const [slideBlobs, setSlideBlobs] = useState<Blob[]>([]);
   const [zipping, setZipping] = useState(false);
+  const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>(
+    profile.variante_espanol ?? detectVariante(profile.zona) ?? "neutro"
+  );
 
   async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -170,6 +177,7 @@ export default function CarouselGeneratorContent({ profile }: Props) {
       whatsapp,
       instagram,
       logoUrl,
+      varianteEspanol,
     };
 
     try {
@@ -517,6 +525,11 @@ export default function CarouselGeneratorContent({ profile }: Props) {
             {error}
           </div>
         )}
+        <VarianteEspanolSelector
+          value={varianteEspanol}
+          onChange={setVarianteEspanol}
+          disabled={generating}
+        />
         <button
           onClick={handleGenerate}
           disabled={generating || uploading || !uploadedUrl}

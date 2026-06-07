@@ -58,6 +58,7 @@ export default function PropertyForm() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>("neutro");
+  const [amenities, setAmenities] = useState<string[]>([]);
   const hasTrackedLead = useRef(false);
 
   const checkoutUrl = user
@@ -86,6 +87,21 @@ export default function PropertyForm() {
         metros: searchParams.get("metrosCuadrados") ?? "",
       });
     }
+    // Leer campos adicionales desde localStorage (los URL params no alcanzan para todos)
+    try {
+      const raw = localStorage.getItem("propia_property_prefill");
+      if (raw) {
+        const p = JSON.parse(raw);
+        localStorage.removeItem("propia_property_prefill");
+        setForm((prev) => ({
+          ...prev,
+          dormitorios: p.ambientes || prev.dormitorios,
+          banios: p.banios || prev.banios,
+          antiguedad: p.antiguedad || prev.antiguedad,
+        }));
+        if (Array.isArray(p.amenities) && p.amenities.length > 0) setAmenities(p.amenities);
+      }
+    } catch {}
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -101,7 +117,7 @@ export default function PropertyForm() {
     }
 
     startTransition(async () => {
-      const result = await generarPosts({ ...form, amenities: [], variante_espanol: varianteEspanol });
+      const result = await generarPosts({ ...form, amenities, variante_espanol: varianteEspanol });
 
       if (!result.ok) {
         if (result.error === "LIMIT_REACHED") {

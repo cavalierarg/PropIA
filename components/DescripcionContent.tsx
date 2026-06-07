@@ -49,6 +49,7 @@ export default function DescripcionContent({ initialIsPro }: { initialIsPro: boo
   const [copiedShort, setCopiedShort] = useState(false);
   const [copiedLong, setCopiedLong] = useState(false);
   const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>("neutro");
+  const [amenities, setAmenities] = useState<string[]>([]);
 
   const checkoutUrl = user
     ? `${process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL}?checkout[custom][plan]=pro&checkout[custom][user_id]=${user.id}`
@@ -69,7 +70,11 @@ export default function DescripcionContent({ initialIsPro }: { initialIsPro: boo
           caracteristica1: p.caracteristica1 || prev.caracteristica1,
           caracteristica2: p.caracteristica2 || prev.caracteristica2,
           caracteristica3: p.caracteristica3 || prev.caracteristica3,
+          dormitorios: p.ambientes || prev.dormitorios,
+          banios: p.banios || prev.banios,
+          antiguedad: p.antiguedad || prev.antiguedad,
         }));
+        if (Array.isArray(p.amenities) && p.amenities.length > 0) setAmenities(p.amenities);
         if (p.tipoPropiedad && p.ubicacion) {
           setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
         }
@@ -95,7 +100,7 @@ export default function DescripcionContent({ initialIsPro }: { initialIsPro: boo
     setResult(null);
     setLoading(true);
     try {
-      const res = await generarDescripcion({ ...form, amenities: [], variante_espanol: varianteEspanol });
+      const res = await generarDescripcion({ ...form, amenities, variante_espanol: varianteEspanol });
       setResult(res);
       setIsPro(res.isPro);
       if (!res.isPro) {

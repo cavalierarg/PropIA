@@ -45,14 +45,14 @@ const LOADING_TIPS = [
   "Elaborando recomendación para hoy...",
 ];
 
-export default function TendenciasContent() {
+export default function TendenciasContent({ initialIsPro }: { initialIsPro?: boolean }) {
   const { user } = useUser();
   const [resultado, setResultado] = useState<TendenciasResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingTip, setLoadingTip] = useState(0);
   const [error, setError] = useState("");
-  const [isPro, setIsPro] = useState(false);
-  const [planChecked, setPlanChecked] = useState(false);
+  const [isPro, setIsPro] = useState(initialIsPro ?? false);
+  const [planChecked, setPlanChecked] = useState(initialIsPro !== undefined);
   const [copiedHashtags, setCopiedHashtags] = useState<string | null>(null);
   const [copiedHoy, setCopiedHoy] = useState(false);
   const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>("neutro");
@@ -62,10 +62,12 @@ export default function TendenciasContent() {
     : (process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL ?? "#");
 
   useEffect(() => {
-    getUserPlan().then((plan) => {
-      setIsPro(plan === "pro" || plan === "pro_max");
-      setPlanChecked(true);
-    });
+    if (initialIsPro === undefined) {
+      getUserPlan().then((plan) => {
+        setIsPro(plan === "pro" || plan === "pro_max");
+        setPlanChecked(true);
+      });
+    }
     getAgentProfile().then((profile) => {
       setVarianteEspanol(
         profile.variante_espanol ?? detectVariante(profile.zona) ?? "neutro"

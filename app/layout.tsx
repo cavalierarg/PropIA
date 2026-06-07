@@ -14,6 +14,7 @@ import { getUsage } from "@/lib/actions/usage.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import OnboardingModal from "@/components/OnboardingModal";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { UsageProvider } from "@/lib/context/usage-context";
 import MetaPixelScript from "@/components/MetaPixelScript";
 
@@ -101,6 +102,7 @@ export default async function RootLayout({
               {children}
             </>
           )}
+          {userId && sidebarProps && <WhatsAppButton />}
           {userId && sidebarProps && !sidebarProps.onboardingCompleted && (
             <OnboardingModal
               firstName={sidebarProps.firstName}

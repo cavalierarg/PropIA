@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { uploadPropertyImage } from "@/lib/actions/flyers.actions";
 import { uploadAgentLogo, getAgentLogoUrl } from "@/lib/actions/agent-logo.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
+import { detectVariante } from "@/lib/agent-context";
+import type { VarianteEspanol } from "@/lib/agent-context";
+import VarianteEspanolSelector from "@/components/VarianteEspanolSelector";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -127,6 +130,7 @@ export default function AdsGeneratorContent({
   const [phase,      setPhase]      = useState<Phase>("idle");
   const [loadedProperty, setLoadedProperty] = useState<{ tipo: string; ubicacion: string; precio: string; metros: string } | null>(null);
   const [selectedAdTheme, setSelectedAdTheme] = useState<ThemeId | null>(null);
+  const [varianteEspanol, setVarianteEspanol] = useState<VarianteEspanol>("neutro");
   const [loadingTip, setLoadingTip] = useState(0);
   const [error,      setError]      = useState("");
   const [ads,        setAds]        = useState<GeneratedAd[]>([]);
@@ -156,6 +160,9 @@ export default function AdsGeneratorContent({
         if (p.tipoPropiedad && p.ubicacion) {
           setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });
         }
+        if (p.banios) setBanios(p.banios);
+        if (p.ambientes) setDormitorios(p.ambientes);
+        if (Array.isArray(p.amenities) && p.amenities.length > 0) setAmenities(p.amenities);
         if (Array.isArray(p.foto_urls) && p.foto_urls.length > 0) {
           const urls: (string | null)[] = [null, null, null];
           const prevs: (string | null)[] = [null, null, null];
@@ -186,6 +193,7 @@ export default function AdsGeneratorContent({
       if (profile.whatsapp) setAgenteWhatsapp(profile.whatsapp);
       if (profile.instagram) setAgenteInstagram(profile.instagram);
       if (profile.sitio_web) setAgenteSitioWeb(profile.sitio_web);
+      setVarianteEspanol(profile.variante_espanol ?? detectVariante(profile.zona) ?? "neutro");
       try {
         if (!localStorage.getItem("propia_brand_colors") && profile.color_marca) setColorFondo(profile.color_marca);
       } catch {
@@ -282,6 +290,7 @@ export default function AdsGeneratorContent({
               agenteInstagram: agenteInstagram || undefined,
               estilo, colorMarca: colorFondo, colorAcento, colorTexto, moneda, badge,
               agentLogoUrl: agentLogoUrl ?? undefined,
+              varianteEspanol,
               ...(selectedAdTheme ? { theme: selectedAdTheme } : {}),
             }),
           });
@@ -636,6 +645,12 @@ export default function AdsGeneratorContent({
         </div>
 
         {error && <p className="text-destructive text-sm">{error}</p>}
+
+        <VarianteEspanolSelector
+          value={varianteEspanol}
+          onChange={setVarianteEspanol}
+          disabled={isLoading}
+        />
 
         <Button
           onClick={handleGenerate}

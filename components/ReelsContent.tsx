@@ -94,6 +94,9 @@ export default function ReelsContent({ initialIsPro }: { initialIsPro: boolean }
           caracteristica1: p.caracteristica1 || prev.caracteristica1,
           caracteristica2: p.caracteristica2 || prev.caracteristica2,
           caracteristica3: p.caracteristica3 || prev.caracteristica3,
+          dormitorios: p.ambientes || prev.dormitorios,
+          banios: p.banios || prev.banios,
+          antiguedad: p.antiguedad || prev.antiguedad,
         }));
         if (p.tipoPropiedad && p.ubicacion) {
           setLoadedProperty({ tipo: p.tipoPropiedad, ubicacion: p.ubicacion, precio: p.precio ?? "", metros: p.metrosCuadrados ?? "" });

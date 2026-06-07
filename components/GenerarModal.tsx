@@ -87,11 +87,22 @@ function savePrefill(property: SavedProperty) {
         ubicacion: property.ubicacion,
         precio: property.precio,
         metrosCuadrados: property.metros_cuadrados,
+        moneda: property.moneda ?? "USD",
         ambientes: property.ambientes ?? "",
+        barrio: property.barrio ?? "",
+        ciudad: property.ciudad ?? "",
         caracteristica1: property.caracteristica1 ?? "",
         caracteristica2: property.caracteristica2 ?? "",
         caracteristica3: property.caracteristica3 ?? "",
         foto_urls: property.foto_urls ?? [],
+        amenities: property.amenities ?? [],
+        banios: property.banios ?? "",
+        plantas: property.plantas ?? "",
+        antiguedad: property.antiguedad ?? "",
+        orientacion: property.orientacion ?? "",
+        apto_credito: property.apto_credito ?? false,
+        apto_profesional: property.apto_profesional ?? false,
+        descripcion_libre: property.descripcion_libre ?? "",
       })
     );
   } catch {}
