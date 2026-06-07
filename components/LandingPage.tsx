@@ -955,8 +955,6 @@ export default function LandingPage() {
                 {[
                   { label: 'cavalierarg@gmail.com', href: 'mailto:cavalierarg@gmail.com' },
                   { label: '@propia.app', href: 'https://instagram.com/propia.app' },
-                  { label: 'Privacidad', href: 'mailto:cavalierarg@gmail.com?subject=Política de privacidad' },
-                  { label: 'Términos de uso', href: 'mailto:cavalierarg@gmail.com?subject=Términos de uso' },
                 ].map((l) => (
                   <li key={l.label}>
                     <a
@@ -967,6 +965,16 @@ export default function LandingPage() {
                     </a>
                   </li>
                 ))}
+                <li>
+                  <Link href="/privacidad" className="text-white/40 hover:text-white text-sm transition-colors">
+                    Privacidad
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terminos" className="text-white/40 hover:text-white text-sm transition-colors">
+                    Términos de uso
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
