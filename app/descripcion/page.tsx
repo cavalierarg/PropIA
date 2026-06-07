@@ -104,7 +104,7 @@ export default async function DescripcionPage() {
         <div className="h-1 w-16 bg-[#00d4d4] rounded-full sm:w-20" />
       </section>
 
-      <DescripcionContent initialIsPro={true} />
+      <DescripcionContent initialIsPro={plan === "pro" || plan === "pro_max"} />
     </main>
   );
 }

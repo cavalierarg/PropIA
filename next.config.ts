@@ -19,7 +19,7 @@ const securityHeaders = [
   // Bloquea que tu app se cargue dentro de un iframe de otro sitio (anti-clickjacking)
   {
     key: "X-Frame-Options",
-    value: "SAMEORIGIN",
+    value: "DENY",
   },
   // Controla qué información del usuario se envía al navegar a otros sitios
   {

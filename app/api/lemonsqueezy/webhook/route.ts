@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { createSupabaseAdminClient } from "@/lib/supabase";
 
@@ -16,12 +16,13 @@ export async function POST(req: NextRequest) {
   const rawBody = await req.text();
   const signature = req.headers.get("x-signature") ?? "";
   const webhookSecret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
-
-  if (webhookSecret && signature) {
-    if (!verifySignature(rawBody, signature, webhookSecret)) {
-      console.error("[webhook] Firma inválida");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
+  if (!webhookSecret) {
+    console.error("[webhook] LEMONSQUEEZY_WEBHOOK_SECRET no esta configurado");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+  if (!signature || !verifySignature(rawBody, signature, webhookSecret)) {
+    console.error("[webhook] Firma invalida o ausente");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   let event: Record<string, unknown>;
