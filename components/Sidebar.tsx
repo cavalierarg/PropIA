@@ -29,13 +29,13 @@ import UsageBar from "@/components/UsageBar";
 type Plan = "free" | "pro" | "pro_max";
 
 const TOOL_ITEMS = [
-  { href: "/",           label: "Generar Posts",      icon: Zap,          badge: null       },
-  { href: "/calendario", label: "Calendario",          icon: CalendarDays, badge: "pro"      },
-  { href: "/descripcion",label: "Portal",              icon: FileText,     badge: "pro"      },
-  { href: "/reels",      label: "Guiones Reels",       icon: Video,        badge: "pro"      },
-  { href: "/tendencias", label: "Tendencias",          icon: TrendingUp,   badge: "pro"      },
-  { href: "/ads",        label: "Generador de Ads",    icon: Megaphone,    badge: "pro_max"  },
-  { href: "/carrusel",   label: "Carruseles IG",       icon: Images,       badge: "pro_max"  },
+  { href: "/posts",         label: "Generar Posts",    icon: Zap,          badge: null       },
+  { href: "/calendario",    label: "Calendario",       icon: CalendarDays, badge: "pro"      },
+  { href: "/descripcion",   label: "Portal",           icon: FileText,     badge: "pro"      },
+  { href: "/reels",         label: "Guiones Reels",    icon: Video,        badge: "pro"      },
+  { href: "/tendencias",    label: "Tendencias",       icon: TrendingUp,   badge: "pro"      },
+  { href: "/ads-generator", label: "Generador de Ads", icon: Megaphone,    badge: "pro"      },
+  { href: "/carousels",     label: "Carruseles IG",    icon: Images,       badge: "pro_max"  },
 ] as const;
 
 const TOOL_PATHS = TOOL_ITEMS.map((t) => t.href);
@@ -60,7 +60,7 @@ export default function Sidebar({ plan, firstName, checkoutUrl }: SidebarProps) 
   const pathname = usePathname();
 
   const isOnToolPage = TOOL_PATHS.some((p) =>
-    p === "/" ? pathname === "/" : pathname === p || pathname.startsWith(p + "/")
+    pathname === p || pathname.startsWith(p + "/")
   ) || pathname === "/mis-propiedades" || pathname.startsWith("/mis-propiedades/");
 
   const [isToolsOpen, setIsToolsOpen] = useState(isOnToolPage);
@@ -183,9 +183,7 @@ export default function Sidebar({ plan, firstName, checkoutUrl }: SidebarProps) 
           {isToolsOpen && (
             <div className="mt-0.5 ml-4 pl-3 border-l border-[#e2e8f0] space-y-0.5">
               {TOOL_ITEMS.map((item) => {
-                const isActive = item.href === "/"
-                  ? pathname === "/"
-                  : pathname === item.href || pathname.startsWith(item.href + "/");
+                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
                 return (
                   <Link
