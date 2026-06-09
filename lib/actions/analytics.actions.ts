@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseClient, createSupabaseAdminClient } from "@/lib/supabase";
 
 export type FeatureName =
   | "posts"
@@ -16,7 +16,7 @@ export async function logFeatureUsage(feature: FeatureName): Promise<void> {
   try {
     const { userId } = await auth();
     if (!userId) return;
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseAdminClient();
     await supabase.from("feature_usage_log").insert({ user_id: userId, feature });
   } catch {
     // fire-and-forget — never throw

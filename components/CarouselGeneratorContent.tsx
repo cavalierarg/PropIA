@@ -72,7 +72,8 @@ export default function CarouselGeneratorContent({ profile }: Props) {
       if (raw) {
         const p = JSON.parse(raw);
         localStorage.removeItem("propia_property_prefill");
-        if (p.ubicacion) setZona(p.ubicacion);
+        const fullLocation = [p.ubicacion, p.ciudad].filter(Boolean).join(", ");
+        if (fullLocation) setZona(fullLocation);
         if (p.precio) setPrecio(p.precio);
         if (p.metrosCuadrados) setMetros(p.metrosCuadrados);
         if (p.ambientes) setDormitorios(p.ambientes);

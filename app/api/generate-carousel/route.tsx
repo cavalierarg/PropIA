@@ -23,6 +23,10 @@ const BADGE_BG: Record<string, string> = {
   "Alquiler temporal": "#0891b2",
 };
 
+function toTitleCase(str: string): string {
+  return str.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 function formatPrecio(precio: string): string {
   return precio.replace(/\d+/g, (n) =>
     n.length > 3 ? n.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : n
@@ -173,7 +177,7 @@ export async function POST(req: NextRequest) {
             <span style={{ fontSize:priceFontSize, fontWeight:900, color:"#ffffff", lineHeight:1, letterSpacing:"-0.02em" }}>{precioFmt}</span>
             <div style={{ display:"flex", alignItems:"center", gap:16 }}>
               <div style={{ display:"flex", width:6, height:36, backgroundColor:t.accent, borderRadius:3, flexShrink:0 }} />
-              <span style={{ fontSize:36, color:"rgba(255,255,255,0.90)", fontWeight:500 }}>{balanceTitle(zona)}</span>
+              <span style={{ fontSize:36, color:"rgba(255,255,255,0.90)", fontWeight:500 }}>{balanceTitle(toTitleCase(zona))}</span>
             </div>
           </div>
           {logoResult ? (
@@ -261,7 +265,7 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", paddingTop:24, marginTop:16, borderTop:`1px solid ${t.fborder}` }}>
               <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                 <div style={{ display:"flex", width:5, height:26, backgroundColor:C.emBg, borderRadius:3 }} />
-                <span style={{ fontSize:26, color:C.footTxt }}>{zona}</span>
+                <span style={{ fontSize:26, color:C.footTxt }}>{toTitleCase(zona)}</span>
               </div>
               <span style={{ fontSize:26, color:C.footTxt }}>3 / {N}</span>
             </div>
@@ -277,7 +281,7 @@ export async function POST(req: NextRequest) {
         <div style={{ display:"flex", position:"relative", flexDirection:"column", width:W, height:H, fontFamily:FF, background:t.bgStyle, alignItems:"center", justifyContent:"center", padding:"80px", overflow:"hidden" }}>
           <div style={{ display:"flex", position:"relative", flexDirection:"column", alignItems:"center", gap:22, width:"100%" }}>
             <span style={{ fontSize:24, fontWeight:700, color:C.strong, letterSpacing:"0.30em" }}>UBICACIÓN</span>
-            <span style={{ fontSize:zonaFontSize, fontWeight:900, color:C.strong, textAlign:"center", lineHeight:1.15 }}>{balanceTitle(zona)}</span>
+            <span style={{ fontSize:zonaFontSize, fontWeight:900, color:C.strong, textAlign:"center", lineHeight:1.15 }}>{balanceTitle(toTitleCase(zona))}</span>
             <div style={{ display:"flex", width:120, height:3, backgroundColor:C.divider, borderRadius:2 }} />
             <span style={{ fontSize:priceFontSize, fontWeight:900, color:C.strong, letterSpacing:"-0.02em" }}>{precioFmt}</span>
             {/* Badge con contraste: fondo oscuro/acento, texto legible */}

@@ -43,12 +43,23 @@ export async function getHasEverGenerated(): Promise<boolean> {
   const { userId } = await auth();
   if (!userId) return false;
   const supabase = createSupabaseAdminClient();
-  const { count } = await supabase
+
+  // Primary: feature_usage_log is inserted for ALL plans (free + pro)
+  const { count: featureCount } = await supabase
+    .from("feature_usage_log")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+  console.log("[getHasEverGenerated] userId:", userId, "featureCount:", featureCount);
+  if ((featureCount ?? 0) > 0) return true;
+
+  // Fallback: usage table (free plan only — pro users skip it)
+  const { count: usageCount } = await supabase
     .from("usage")
     .select("*", { count: "exact", head: true })
     .eq("user_id", userId)
     .gt("count", 0);
-  return (count ?? 0) > 0;
+  console.log("[getHasEverGenerated] usageCount:", usageCount);
+  return (usageCount ?? 0) > 0;
 }
 
 export async function checkAndIncrementUsage(userId: string): Promise<{
