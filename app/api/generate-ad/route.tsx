@@ -6,6 +6,7 @@ import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import sharp from "sharp";
 import { buildTheme, hexRgba, type Theme } from "@/lib/themes";
 import { getSocialIconSrcs } from "@/lib/social-icons";
+import { balanceTitle } from "@/lib/balance-title";
 
 export const runtime = "nodejs";
 
@@ -85,13 +86,14 @@ export async function POST(req: NextRequest) {
   const [width, height] = dims[type] ?? dims.feed;
 
   // Fetch logo as base64 JPEG for themed ads (lightweight — no pixel processing)
-  async function fetchLogoSmall(url: string): Promise<string | null> {
+  async function fetchLogoSmall(url: string): Promise<{ data: string; hasAlpha: boolean } | null> {
     try {
       const r = await fetch(url, { cache: "no-store" });
       if (!r.ok) return null;
       const raw = Buffer.from(await r.arrayBuffer());
-      const buf = await sharp(raw).resize(300, 100, { fit: "inside", withoutEnlargement: true }).jpeg({ quality: 88 }).toBuffer();
-      return `data:image/jpeg;base64,${buf.toString("base64")}`;
+      const pngBuf = await sharp(raw).resize(300, 100, { fit: "inside", withoutEnlargement: true }).png().toBuffer();
+      const stats = await sharp(pngBuf).stats();
+      return { data: `data:image/png;base64,${pngBuf.toString("base64")}`, hasAlpha: !stats.isOpaque };
     } catch { return null; }
   }
 
@@ -131,7 +133,7 @@ export async function POST(req: NextRequest) {
     // ── THEMED LAYOUTS (7 temas visuales) ────────────────────────────────
     if (adTheme) {
       const t = buildTheme(adTheme, colorAcento);
-      const logoB64 = agentLogoUrl ? await fetchLogoSmall(agentLogoUrl) : null;
+      const logoResult = agentLogoUrl ? await fetchLogoSmall(agentLogoUrl) : null;
       const { wa: waIcon, ig: igIcon } = await getSocialIconSrcs();
       const FF_AD = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
       // Contraste: temas claros usan oscuro para texto/botones, no el acento
@@ -160,16 +162,16 @@ export async function POST(req: NextRequest) {
                 <span style={{ color:C.emFg, fontSize:24, fontWeight:700 }}>{badge}</span>
               </div>
               {/* Logo arriba derecha en recuadro blanco */}
-              {logoB64 ? (
-                <div style={{ display:"flex", position:"absolute", top:26, right:26, backgroundColor:"#ffffff", borderRadius:10, padding:"6px 12px", alignItems:"center" }}>
-                  <img src={logoB64} alt="" style={{ height:44, width:130, objectFit:"contain" }} />
+              {logoResult ? (
+                <div style={{ display:"flex", position:"absolute", top:26, right:26, backgroundColor: logoResult.hasAlpha ? "transparent" : "#ffffff", borderRadius: logoResult.hasAlpha ? 0 : 10, padding:"6px 12px", alignItems:"center" }}>
+                  <img src={logoResult.data} alt="" style={{ height:44, width:130, objectFit:"contain" }} />
                 </div>
               ) : null}
             </div>
             {/* Zona de datos */}
             <div style={{ display:"flex", flexDirection:"column", background:t.bgStyle, padding:"26px 44px 22px", height:dataH, flexShrink:0 }}>
               <span style={{ fontSize:70, fontWeight:900, color:C.strong, lineHeight:1, letterSpacing:"-1px" }}>{price}</span>
-              <span style={{ fontSize:24, color:C.subTxt, marginTop:6 }}>{zona}</span>
+              <span style={{ fontSize:24, color:C.subTxt, marginTop:6 }}>{balanceTitle(zona)}</span>
               {/* Pills compactos */}
               <div style={{ display:"flex", gap:10, marginTop:14, flexWrap:"wrap" }}>
                 {metros ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"7px 16px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:21, fontWeight:600 }}>{metros} m²</span></div> : null}
@@ -212,15 +214,15 @@ export async function POST(req: NextRequest) {
               <div style={{ display:"flex", position:"absolute", top:50, left:50, backgroundColor:C.emBg, padding:"14px 32px", borderRadius:12 }}>
                 <span style={{ color:C.emFg, fontSize:30, fontWeight:700 }}>{badge}</span>
               </div>
-              {logoB64 ? (
-                <div style={{ display:"flex", position:"absolute", top:44, right:44, backgroundColor:"#ffffff", borderRadius:12, padding:"8px 16px", alignItems:"center" }}>
-                  <img src={logoB64} alt="" style={{ height:54, width:160, objectFit:"contain" }} />
+              {logoResult ? (
+                <div style={{ display:"flex", position:"absolute", top:44, right:44, backgroundColor: logoResult.hasAlpha ? "transparent" : "#ffffff", borderRadius: logoResult.hasAlpha ? 0 : 12, padding:"8px 16px", alignItems:"center" }}>
+                  <img src={logoResult.data} alt="" style={{ height:54, width:160, objectFit:"contain" }} />
                 </div>
               ) : null}
             </div>
             <div style={{ display:"flex", flexDirection:"column", background:t.bgStyle, padding:"48px 70px 44px", height:dataH, flexShrink:0 }}>
               <span style={{ fontSize:96, fontWeight:900, color:C.strong, lineHeight:1, letterSpacing:"-2px" }}>{price}</span>
-              <span style={{ fontSize:34, color:C.subTxt, marginTop:10 }}>{zona}</span>
+              <span style={{ fontSize:34, color:C.subTxt, marginTop:10 }}>{balanceTitle(zona)}</span>
               <div style={{ display:"flex", gap:14, marginTop:24, flexWrap:"wrap" }}>
                 {metros ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"10px 24px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:30, fontWeight:600 }}>{metros} m²</span></div> : null}
                 {dormitorios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"10px 24px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:30, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
@@ -265,13 +267,13 @@ export async function POST(req: NextRequest) {
           </div>
           {/* Datos lado derecho */}
           <div style={{ display:"flex", flexDirection:"column", flex:1, background:t.bgStyle, padding:"32px 38px" }}>
-            {logoB64 ? (
-              <div style={{ display:"flex", backgroundColor:"#ffffff", borderRadius:8, padding:"5px 10px", alignSelf:"flex-end", marginBottom:14 }}>
-                <img src={logoB64} alt="" style={{ height:34, width:100, objectFit:"contain" }} />
+            {logoResult ? (
+              <div style={{ display:"flex", backgroundColor: logoResult.hasAlpha ? "transparent" : "#ffffff", borderRadius: logoResult.hasAlpha ? 0 : 8, padding:"5px 10px", alignSelf:"flex-end", marginBottom:14 }}>
+                <img src={logoResult.data} alt="" style={{ height:34, width:100, objectFit:"contain" }} />
               </div>
             ) : null}
             <span style={{ fontSize:52, fontWeight:900, color:C.strong, lineHeight:1, letterSpacing:"-1px" }}>{price}</span>
-            <span style={{ fontSize:20, color:C.subTxt, marginTop:6 }}>{zona}</span>
+            <span style={{ fontSize:20, color:C.subTxt, marginTop:6 }}>{balanceTitle(zona)}</span>
             <div style={{ display:"flex", gap:8, marginTop:14, flexWrap:"wrap" }}>
               {metros ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"6px 14px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:18, fontWeight:600 }}>{metros} m²</span></div> : null}
               {dormitorios ? <div style={{ display:"flex", border:`1px solid ${C.pillBorder}`, borderRadius:50, padding:"6px 14px", backgroundColor:C.pillBg }}><span style={{ color:C.pillTxt, fontSize:18, fontWeight:600 }}>{dormitorios} dorm</span></div> : null}
@@ -443,7 +445,7 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:100, fontWeight:900, color:TEXT, lineHeight:1, letterSpacing:"-3px" }}>{price}</div>
             <div style={{ display:"flex", alignItems:"center", gap:16, marginTop:22 }}>
               <div style={{ display:"flex", width:10, height:10, borderRadius:"50%", backgroundColor:A }} />
-              <div style={{ display:"flex", fontSize:38, color:"#555555" }}>{zona}</div>
+              <div style={{ display:"flex", fontSize:38, color:"#555555" }}>{balanceTitle(zona)}</div>
             </div>
             <div style={{ display:"flex", fontSize:32, color:"#888888", marginTop:10 }}>{specs}</div>
             {car1 ? (
@@ -536,7 +538,7 @@ export async function POST(req: NextRequest) {
           {agente ? <div style={{ display:"flex", position:"absolute", top:124, right:60, color:W, fontSize:26, fontWeight:700 }}>{agente}</div> : null}
           <div style={{ display:"flex", position:"absolute", bottom:120, left:70, right:70, flexDirection:"column" }}>
             <div style={{ display:"flex", fontSize:118, fontWeight:900, color:W, lineHeight:1, letterSpacing:"-3px" }}>{price}</div>
-            <div style={{ display:"flex", fontSize:44, color:W, opacity:0.85, marginTop:22 }}>{zona}</div>
+            <div style={{ display:"flex", fontSize:44, color:W, opacity:0.85, marginTop:22 }}>{balanceTitle(zona)}</div>
             <div style={{ display:"flex", fontSize:36, color:W, opacity:0.65, marginTop:8 }}>{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8, marginTop:28 }}>✓ {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:30, color:W, opacity:0.8, marginTop:14 }}>✓ {car2}</div> : null}
@@ -584,7 +586,7 @@ export async function POST(req: NextRequest) {
             <div style={{ display:"flex", fontSize:14, opacity:0.6, letterSpacing:"0.12em", fontWeight:600, marginBottom:6 }}>PRECIO</div>
             <div style={{ display:"flex", fontSize:72, fontWeight:900, lineHeight:1, letterSpacing:"-1px" }}>{price}</div>
             <div style={{ display:"flex", width:56, height:3, backgroundColor:"rgba(255,255,255,0.45)", marginTop:26, marginBottom:26, borderRadius:2 }} />
-            <div style={{ display:"flex", fontSize:26, opacity:0.88, marginBottom:8 }}>{zona}</div>
+            <div style={{ display:"flex", fontSize:26, opacity:0.88, marginBottom:8 }}>{balanceTitle(zona)}</div>
             <div style={{ display:"flex", fontSize:22, opacity:0.6 }}>{specs}</div>
             {car1 ? <div style={{ display:"flex", fontSize:20, opacity:0.78, marginTop:22 }}>· {car1}</div> : null}
             {car2 ? <div style={{ display:"flex", fontSize:20, opacity:0.78, marginTop:10 }}>· {car2}</div> : null}

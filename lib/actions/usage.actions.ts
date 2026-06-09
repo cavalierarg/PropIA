@@ -42,7 +42,7 @@ export async function getUsage(): Promise<{
 export async function getHasEverGenerated(): Promise<boolean> {
   const { userId } = await auth();
   if (!userId) return false;
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const { count } = await supabase
     .from("usage")
     .select("*", { count: "exact", head: true })

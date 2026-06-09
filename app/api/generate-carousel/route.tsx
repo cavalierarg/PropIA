@@ -7,6 +7,7 @@ import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import sharp from "sharp";
 import { type Theme, buildTheme, hexRgba } from "@/lib/themes";
 import { getSocialIconSrcs } from "@/lib/social-icons";
+import { balanceTitle } from "@/lib/balance-title";
 
 export const runtime = "nodejs";
 
@@ -47,11 +48,18 @@ async function toDataUrl(url: string): Promise<string> {
   return `data:image/jpeg;base64,${resized.toString("base64")}`;
 }
 
-async function processLogo(url: string): Promise<string | null> {
+async function processLogo(url: string): Promise<{ data: string; hasAlpha: boolean } | null> {
   try {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return null;
     const inputBuf = Buffer.from(await res.arrayBuffer());
+    // Fast path: logo already has transparency (e.g. processed by remove.bg)
+    const initStats = await sharp(inputBuf).ensureAlpha().stats();
+    if (!initStats.isOpaque) {
+      const pngBuf = await sharp(inputBuf).ensureAlpha().png().toBuffer();
+      return { data: `data:image/png;base64,${pngBuf.toString("base64")}`, hasAlpha: true };
+    }
+    // Solid background: corner-pixel removal
     const { data, info } = await sharp(inputBuf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     const pixels = new Uint8ClampedArray(data.buffer);
     const { width, height } = info;
@@ -62,12 +70,17 @@ async function processLogo(url: string): Promise<string | null> {
       sumR += pixels[i]; sumG += pixels[i+1]; sumB += pixels[i+2];
     }
     const bgR = Math.round(sumR/4), bgG = Math.round(sumG/4), bgB = Math.round(sumB/4);
+    let removed = 0;
     for (let i = 0; i < pixels.length; i += 4) {
-      if (Math.abs(pixels[i]-bgR)<30 && Math.abs(pixels[i+1]-bgG)<30 && Math.abs(pixels[i+2]-bgB)<30)
+      if (Math.abs(pixels[i]-bgR)<30 && Math.abs(pixels[i+1]-bgG)<30 && Math.abs(pixels[i+2]-bgB)<30) {
         pixels[i+3] = 0;
+        removed++;
+      }
     }
     const pngBuf = await sharp(Buffer.from(pixels.buffer), { raw: { width, height, channels: 4 } }).png().toBuffer();
-    return `data:image/png;base64,${pngBuf.toString("base64")}`;
+    // hasAlpha only if meaningful background was removed (>5% of pixels)
+    const hasAlpha = removed / (width * height) > 0.05;
+    return { data: `data:image/png;base64,${pngBuf.toString("base64")}`, hasAlpha };
   } catch { return null; }
 }
 
@@ -142,8 +155,8 @@ export async function POST(req: NextRequest) {
       let imgData: string;
       try { imgData = await toDataUrl(imageUrl); }
       catch { return NextResponse.json({ error: "Could not fetch image" }, { status: 400 }); }
-      let logoData: string | null = null;
-      if (logoUrl) logoData = await processLogo(logoUrl);
+      let logoResult: { data: string; hasAlpha: boolean } | null = null;
+      if (logoUrl) logoResult = await processLogo(logoUrl);
       void logFeatureUsage("carrusel");
       return new ImageResponse(
         <div style={{ display:"flex", position:"relative", width:W, height:H, fontFamily:FF, overflow:"hidden" }}>
@@ -156,16 +169,16 @@ export async function POST(req: NextRequest) {
           <div style={{ display:"flex", position:"absolute", top:52, right:52, backgroundColor:"rgba(0,0,0,0.40)", padding:"12px 26px", borderRadius:10, border:"1px solid rgba(255,255,255,0.18)" }}>
             <span style={{ color:"rgba(255,255,255,0.85)", fontSize:28, fontWeight:600 }}>1 / {N}</span>
           </div>
-          <div style={{ display:"flex", position:"absolute", bottom:72, left:60, right:logoData ? 310 : 80, flexDirection:"column", gap:16 }}>
+          <div style={{ display:"flex", position:"absolute", bottom:72, left:60, right:logoResult ? 310 : 80, flexDirection:"column", gap:16 }}>
             <span style={{ fontSize:priceFontSize, fontWeight:900, color:"#ffffff", lineHeight:1, letterSpacing:"-0.02em" }}>{precioFmt}</span>
             <div style={{ display:"flex", alignItems:"center", gap:16 }}>
               <div style={{ display:"flex", width:6, height:36, backgroundColor:t.accent, borderRadius:3, flexShrink:0 }} />
-              <span style={{ fontSize:36, color:"rgba(255,255,255,0.90)", fontWeight:500 }}>{zona}</span>
+              <span style={{ fontSize:36, color:"rgba(255,255,255,0.90)", fontWeight:500 }}>{balanceTitle(zona)}</span>
             </div>
           </div>
-          {logoData ? (
-            <div style={{ display:"flex", position:"absolute", bottom:72, right:60, backgroundColor:"rgba(255,255,255,0.96)", borderRadius:14, padding:"10px 18px", alignItems:"center", justifyContent:"center" }}>
-              <img src={logoData} alt="" style={{ height:60, width:160, objectFit:"contain" }} />
+          {logoResult ? (
+            <div style={{ display:"flex", position:"absolute", bottom:72, right:60, backgroundColor: logoResult.hasAlpha ? "transparent" : "rgba(255,255,255,0.96)", borderRadius: logoResult.hasAlpha ? 0 : 14, padding:"10px 18px", alignItems:"center", justifyContent:"center" }}>
+              <img src={logoResult.data} alt="" style={{ height:60, width:160, objectFit:"contain" }} />
             </div>
           ) : null}
         </div>, OPTS
@@ -264,7 +277,7 @@ export async function POST(req: NextRequest) {
         <div style={{ display:"flex", position:"relative", flexDirection:"column", width:W, height:H, fontFamily:FF, background:t.bgStyle, alignItems:"center", justifyContent:"center", padding:"80px", overflow:"hidden" }}>
           <div style={{ display:"flex", position:"relative", flexDirection:"column", alignItems:"center", gap:22, width:"100%" }}>
             <span style={{ fontSize:24, fontWeight:700, color:C.strong, letterSpacing:"0.30em" }}>UBICACIÓN</span>
-            <span style={{ fontSize:zonaFontSize, fontWeight:900, color:C.strong, textAlign:"center", lineHeight:1.15 }}>{zona}</span>
+            <span style={{ fontSize:zonaFontSize, fontWeight:900, color:C.strong, textAlign:"center", lineHeight:1.15 }}>{balanceTitle(zona)}</span>
             <div style={{ display:"flex", width:120, height:3, backgroundColor:C.divider, borderRadius:2 }} />
             <span style={{ fontSize:priceFontSize, fontWeight:900, color:C.strong, letterSpacing:"-0.02em" }}>{precioFmt}</span>
             {/* Badge con contraste: fondo oscuro/acento, texto legible */}
@@ -279,8 +292,8 @@ export async function POST(req: NextRequest) {
 
     // ── SLIDE 5 — Contacto ────────────────────────────────────────
     if (slide === 5) {
-      let logoData: string | null = null;
-      if (logoUrl) logoData = await processLogo(logoUrl);
+      let logoResult: { data: string; hasAlpha: boolean } | null = null;
+      if (logoUrl) logoResult = await processLogo(logoUrl);
       const { wa: waIcon, ig: igIcon } = await getSocialIconSrcs();
 
       const slide5Bg = t.dark
@@ -290,9 +303,9 @@ export async function POST(req: NextRequest) {
       return new ImageResponse(
         <div style={{ display:"flex", position:"relative", flexDirection:"column", width:W, height:H, fontFamily:FF, background:slide5Bg, alignItems:"center", justifyContent:"center", padding:"80px", overflow:"hidden" }}>
           <div style={{ display:"flex", position:"absolute", top:0, left:0, right:0, height:8, backgroundColor:t.accent }} />
-          {logoData ? (
-            <div style={{ display:"flex", backgroundColor:"#ffffff", borderRadius:16, padding:"12px 22px", marginBottom:28, alignItems:"center", justifyContent:"center" }}>
-              <img src={logoData} alt="" style={{ height:72, width:220, objectFit:"contain" }} />
+          {logoResult ? (
+            <div style={{ display:"flex", backgroundColor: logoResult.hasAlpha ? "transparent" : "#ffffff", borderRadius: logoResult.hasAlpha ? 0 : 16, padding:"12px 22px", marginBottom:28, alignItems:"center", justifyContent:"center" }}>
+              <img src={logoResult.data} alt="" style={{ height:72, width:220, objectFit:"contain" }} />
             </div>
           ) : (
             <div style={{ display:"flex", width:96, height:96, borderRadius:"50%", backgroundColor:t.accent, alignItems:"center", justifyContent:"center", marginBottom:28 }}>
@@ -300,7 +313,7 @@ export async function POST(req: NextRequest) {
             </div>
           )}
           {nombreAgencia ? <span style={{ fontSize:30, fontWeight:700, color:C.strong, marginBottom:6 }}>{nombreAgencia}</span> : null}
-          <span style={{ fontSize:52, fontWeight:800, color:C.strong, marginBottom:38, textAlign:"center", lineHeight:1.2 }}>{nombreAgente}</span>
+          <span style={{ fontSize:52, fontWeight:800, color:C.strong, marginBottom:38, textAlign:"center", lineHeight:1.2 }}>{balanceTitle(nombreAgente)}</span>
           <div style={{ display:"flex", width:100, height:3, backgroundColor:C.emBg, borderRadius:2, marginBottom:38 }} />
           <div style={{ display:"flex", flexDirection:"column", gap:22, alignItems:"center", marginBottom:46 }}>
             {whatsapp ? (

@@ -560,42 +560,52 @@ export default function CarouselGeneratorContent({ profile }: Props) {
           )}
         </div>
 
-        <div className="flex flex-col gap-4">
-          {SLIDE_LABELS.map((label, i) => (
-            <div key={i} className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden">
-              {/* Slide header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e8f0]">
-                <span className="text-xs font-semibold text-slate-600">{label}</span>
-                {slideUrls[i] && (
-                  <button
-                    onClick={() => downloadSlide(slideUrls[i], i)}
-                    className="flex items-center gap-1 text-xs text-[#00c9c9] font-semibold hover:underline"
-                  >
-                    <Download className="w-3.5 h-3.5" /> PNG
-                  </button>
-                )}
-              </div>
-              {/* Slide image */}
-              <div className="aspect-square bg-slate-50 flex items-center justify-center">
-                {generating && !slideUrls[i] ? (
-                  <div className="flex flex-col items-center gap-2 text-slate-400">
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-xs">Generando…</span>
-                  </div>
-                ) : slideUrls[i] ? (
-                  <div className="relative w-full h-full">
-                    <Image src={slideUrls[i]} alt={label} fill className="object-contain" unoptimized />
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-2 text-slate-300">
-                    <ImageIcon className="w-8 h-8" />
-                    <span className="text-xs">Slide {i + 1}</span>
-                  </div>
-                )}
-              </div>
+        {slideUrls.length === 0 && !generating ? (
+          <div className="bg-white rounded-xl border border-[#e2e8f0] p-12 flex flex-col items-center gap-4 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center">
+              <ImageIcon className="w-7 h-7 text-slate-300" />
             </div>
-          ))}
-        </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-500">El carrusel aparecerá aquí</p>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                Completá el formulario y hacé clic en{" "}
+                <span className="font-semibold text-[#f59e0b]">Generar carrusel</span>
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {SLIDE_LABELS.map((label, i) => (
+              <div key={i} className="bg-white rounded-xl border border-[#e2e8f0] overflow-hidden">
+                {/* Slide header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[#e2e8f0]">
+                  <span className="text-xs font-semibold text-slate-600">{label}</span>
+                  {slideUrls[i] && (
+                    <button
+                      onClick={() => downloadSlide(slideUrls[i], i)}
+                      className="flex items-center gap-1 text-xs text-[#00c9c9] font-semibold hover:underline"
+                    >
+                      <Download className="w-3.5 h-3.5" /> PNG
+                    </button>
+                  )}
+                </div>
+                {/* Slide image */}
+                <div className="aspect-square bg-slate-50 flex items-center justify-center">
+                  {generating && !slideUrls[i] ? (
+                    <div className="flex flex-col items-center gap-2 text-slate-400">
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                      <span className="text-xs">Generando…</span>
+                    </div>
+                  ) : slideUrls[i] ? (
+                    <div className="relative w-full h-full">
+                      <Image src={slideUrls[i]} alt={label} fill className="object-contain" unoptimized />
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
