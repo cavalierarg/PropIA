@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseClient, createSupabaseAdminClient } from "@/lib/supabase";
 
 export type UserProfile = {
   whatsapp?: string;
@@ -45,18 +45,20 @@ export async function getUserProfile(): Promise<UserProfile> {
   }
 }
 
-export async function saveUserProfile(profile: UserProfile): Promise<void> {
+export async function saveUserProfile(profile: UserProfile): Promise<{ success: boolean; error?: string }> {
   const { userId } = await auth();
-  if (!userId) return;
+  if (!userId) return { success: false, error: "No autenticado" };
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseAdminClient();
     await supabase
       .from("user_profiles")
       .upsert(
         { user_id: userId, ...profile, updated_at: new Date().toISOString() },
         { onConflict: "user_id" }
       );
-  } catch {
-    // table may not exist yet — fail silently
+    return { success: true };
+  } catch (error) {
+    console.error("Error guardando user_profile:", error);
+    return { success: false, error: "No se pudo guardar" };
   }
 }
