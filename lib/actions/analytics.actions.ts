@@ -15,12 +15,13 @@ export type FeatureName =
 export async function logFeatureUsage(feature: FeatureName): Promise<void> {
   try {
     const { userId } = await auth();
-    if (!userId) return;
+    if (!userId) { console.log("[DEBUG-INSERT] No userId — abortando"); return; }
+    console.log("[DEBUG-INSERT] Insertando para userId:", userId, "feature:", feature);
     const supabase = createSupabaseAdminClient();
-    const { error } = await supabase.from("feature_usage_log").insert({ user_id: userId, feature });
-    if (error) console.error("[logFeatureUsage] Error al insertar:", error);
+    const { error } = await supabase.from("feature_usage_log").insert({ user_id: userId, feature, created_at: new Date() });
+    console.log("[DEBUG-INSERT] Error:", error ?? null);
   } catch (e) {
-    console.error("[logFeatureUsage] Excepción:", e);
+    console.error("[DEBUG-INSERT] Excepción:", e);
   }
 }
 
@@ -40,6 +41,8 @@ export type AnalyticsData = {
 export async function getAnalyticsData(): Promise<AnalyticsData> {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
+
+  console.log("[DEBUG-ANALYTICS] userId:", userId);
 
   const supabase = createSupabaseAdminClient();
 
@@ -78,6 +81,11 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
       .eq("user_id", userId)
       .gte("created_at", sevenDaysAgo.toISOString()),
   ]);
+
+  console.log("[DEBUG-ANALYTICS] plan:", subRes.data?.plan ?? null, "status:", subRes.data?.status ?? null, "error:", subRes.error ?? null);
+  console.log("[DEBUG-ANALYTICS] properties count:", propsRes.count ?? null, "error:", propsRes.error ?? null);
+  console.log("[DEBUG-ANALYTICS] usage rows:", JSON.stringify(usageRes.data), "error:", usageRes.error ?? null);
+  console.log("[DEBUG-ANALYTICS] feature_usage_log rows:", featureRes.data?.length ?? null, "error:", featureRes.error ?? null);
 
   const usageRows: { month: string; count: number }[] = usageRes.data ?? [];
   const postsThisMonth = usageRows.find((r) => r.month === thisMonth)?.count ?? 0;
