@@ -223,3 +223,9 @@ isPro = plan === "pro" || plan === "pro_max"
 isMax = plan === "pro_max"
 Pasar siempre como initialIsPro desde server component.
 NUNCA fetchear el plan desde el cliente en useEffect.
+
+### 🔴 VOID EN SERVERLESS — NUNCA USAR
+En Vercel Serverless, void asyncFunction() 
+abandona la Promise al hacer return.
+SIEMPRE usar await logFeatureUsage() 
+antes del return, nunca void.
