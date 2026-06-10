@@ -187,6 +187,6 @@ export async function generarCalendario(data: {
     dias = [...batch1, ...batch2];
   }
 
-  void logFeatureUsage("calendario");
+  await logFeatureUsage("calendario");
   return { dias, isPro, remaining: usage.remaining };
 }

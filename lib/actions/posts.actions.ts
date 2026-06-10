@@ -244,7 +244,7 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     return { ok: false, error: "ERROR_FORMATO" };
   }
 
-  void logFeatureUsage("posts");
+  await logFeatureUsage("posts");
 
   return {
     ok: true,

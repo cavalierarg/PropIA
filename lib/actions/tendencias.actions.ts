@@ -190,6 +190,6 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     throw new Error("Error al procesar la respuesta de la IA");
   }
 
-  void logFeatureUsage("tendencias");
+  await logFeatureUsage("tendencias");
   return result;
 }

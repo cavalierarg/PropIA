@@ -663,5 +663,5 @@ export async function POST(req: NextRequest) {
     console.error("[generate-ad] imageUrl was:", imageUrl);
     return NextResponse.json({ error: "Image generation failed", detail: String(err) }, { status: 500 });
   }
-  void logFeatureUsage("ads");
+  await logFeatureUsage("ads");
 }

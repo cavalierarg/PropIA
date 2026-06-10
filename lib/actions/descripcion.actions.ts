@@ -178,7 +178,7 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     throw new Error("Error al procesar la respuesta de la IA");
   }
 
-  void logFeatureUsage("descripcion");
+  await logFeatureUsage("descripcion");
   return {
     version_corta: parsed.version_corta,
     version_larga: isPro ? (parsed.version_larga ?? null) : null,

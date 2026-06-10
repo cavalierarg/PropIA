@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
       catch { return NextResponse.json({ error: "Could not fetch image" }, { status: 400 }); }
       let logoResult: { data: string; hasAlpha: boolean } | null = null;
       if (logoUrl) logoResult = await processLogo(logoUrl);
-      void logFeatureUsage("carrusel");
+      await logFeatureUsage("carrusel");
       return new ImageResponse(
         <div style={{ display:"flex", position:"relative", width:W, height:H, fontFamily:FF, overflow:"hidden" }}>
           <img src={imgData} alt="" style={{ position:"absolute", top:0, left:0, width:W, height:H, objectFit:"cover" }} />

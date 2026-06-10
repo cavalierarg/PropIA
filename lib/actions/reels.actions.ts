@@ -327,6 +327,6 @@ Respondé ÚNICAMENTE con este JSON válido, sin texto adicional ni bloques de c
     throw new Error("Error al procesar el guion");
   }
 
-  void logFeatureUsage("reels");
+  await logFeatureUsage("reels");
   return { ...result, remaining: usage.remaining };
 }
