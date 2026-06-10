@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SparklesIcon, CheckIcon } from "lucide-react";
 
+export const maxDuration = 120;
+
 const PRO_CHECKOUT =
   "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2";
 

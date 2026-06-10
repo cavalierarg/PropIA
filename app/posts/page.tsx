@@ -7,6 +7,8 @@ import { getOnboardingStatus } from "@/lib/actions/onboarding.actions";
 import { getUsage } from "@/lib/actions/usage.actions";
 import { getAgentProfile } from "@/lib/actions/agent-profile.actions";
 
+export const maxDuration = 120;
+
 export default async function GenerarPostsPage() {
   const { userId } = await auth();
 

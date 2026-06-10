@@ -10,6 +10,7 @@ const PRO_CHECKOUT =
   "https://propia.lemonsqueezy.com/checkout/buy/4c8591f9-a016-4222-a838-7cf935c84ed2";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 120;
 export const metadata = { title: "Tendencias del Mercado — PropIA" };
 
 export default async function TendenciasPage() {

@@ -117,7 +117,14 @@ export default function PropertyForm() {
     }
 
     startTransition(async () => {
-      const result = await generarPosts({ ...form, amenities, variante_espanol: varianteEspanol });
+      let result;
+      try {
+        result = await generarPosts({ ...form, amenities, variante_espanol: varianteEspanol });
+      } catch (e) {
+        console.error("[PropertyForm] generarPosts lanzó excepción:", e);
+        setError("ERROR_API");
+        return;
+      }
 
       if (!result.ok) {
         if (result.error === "LIMIT_REACHED") {
