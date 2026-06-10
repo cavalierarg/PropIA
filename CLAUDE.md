@@ -184,3 +184,42 @@ Este proyecto usa agentes especializados en `.claude/agents/`. Para activar un a
 | `negocio:`, `precio:`, `conversión:`, `estrategia:` | negocio.md | Producto, conversión, monetización |
 
 Cada agente tiene su propio contexto y reglas optimizadas para su área.
+
+---
+
+## REGLAS CRÍTICAS — APRENDIDAS EN PRODUCCIÓN
+
+### 🔴 SUPABASE + CLERK — LA REGLA MÁS IMPORTANTE
+SIEMPRE usar createSupabaseAdminClient() para:
+- Cualquier escritura (insert, update, upsert, delete)
+- Lecturas que dependan del plan del usuario
+- Lecturas de subscriptions, usage, feature_usage_log
+
+NUNCA usar createSupabaseClient() para writes.
+Este bug apareció 8+ veces y siempre falla silenciosamente.
+El catch vacío oculta el error — siempre loguear.
+
+### 🔴 ESTRUCTURA DE RUTAS
+/ → dashboard (NO /dashboard)
+/analytics → estadísticas (NO /estadisticas)
+/mis-propiedades → hub central de propiedades
+/ads-generator → generador de ads (NO /ads)
+/carousels → carruseles (NO /carrusel)
+
+### 🔴 FLUJO DE PROPIEDADES
+Propiedad primero → herramienta después.
+Las herramientas NO tienen formulario propio.
+Los datos se leen desde localStorage (prefill de GenerarModal).
+Las fotos se auto-cargan desde foto_urls[] de la propiedad.
+
+### 🔴 TEMAS VISUALES
+lib/themes.ts es compartido entre carruseles y ads.
+Cualquier cambio de tema afecta AMBAS herramientas.
+isLight determina contraste automático en temas claros.
+
+### 🔴 PLANES Y GATES
+subscriptions.plan: "free" | "pro" | "pro_max"
+isPro = plan === "pro" || plan === "pro_max"
+isMax = plan === "pro_max"
+Pasar siempre como initialIsPro desde server component.
+NUNCA fetchear el plan desde el cliente en useEffect.
