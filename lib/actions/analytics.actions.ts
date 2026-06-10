@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient, createSupabaseAdminClient } from "@/lib/supabase";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export type FeatureName =
   | "posts"
@@ -17,9 +17,10 @@ export async function logFeatureUsage(feature: FeatureName): Promise<void> {
     const { userId } = await auth();
     if (!userId) return;
     const supabase = createSupabaseAdminClient();
-    await supabase.from("feature_usage_log").insert({ user_id: userId, feature });
-  } catch {
-    // fire-and-forget — never throw
+    const { error } = await supabase.from("feature_usage_log").insert({ user_id: userId, feature });
+    if (error) console.error("[logFeatureUsage] Error al insertar:", error);
+  } catch (e) {
+    console.error("[logFeatureUsage] Excepción:", e);
   }
 }
 
@@ -40,7 +41,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
 
   const now = new Date();
   const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;

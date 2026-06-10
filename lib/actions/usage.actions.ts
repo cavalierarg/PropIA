@@ -1,7 +1,8 @@
 "use server";
 
+import { unstable_noStore as noStore } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient, createSupabaseAdminClient } from "@/lib/supabase";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 
 const MONTHLY_LIMIT = 5;
 
@@ -19,19 +20,30 @@ export async function getUsage(): Promise<{
   const { userId } = await auth();
   if (!userId) return { count: 0, remaining: MONTHLY_LIMIT, limit: MONTHLY_LIMIT, isPro: false };
 
-  // Use admin client to bypass RLS — reads are filtered by userId in the query itself
   const supabase = createSupabaseAdminClient();
+  const month = getCurrentMonth();
 
-  const [{ data: subData }, { data: usageData }] = await Promise.all([
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+
+  const [{ data: subData }, { data: usageData }, { count: featureCount }] = await Promise.all([
     supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
-    supabase.from("usage").select("count").eq("user_id", userId).eq("month", getCurrentMonth()).maybeSingle(),
+    supabase.from("usage").select("count").eq("user_id", userId).eq("month", month).maybeSingle(),
+    supabase
+      .from("feature_usage_log")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("created_at", monthStart)
+      .lt("created_at", nextMonthStart),
   ]);
 
   const isPro =
     (subData?.plan === "pro" || subData?.plan === "pro_max") && subData?.status === "active";
 
   if (isPro) {
-    return { count: 0, remaining: -1, limit: -1, isPro: true };
+    const count = featureCount ?? 0;
+    return { count, remaining: -1, limit: -1, isPro: true };
   }
 
   const count = usageData?.count ?? 0;
@@ -40,6 +52,7 @@ export async function getUsage(): Promise<{
 
 /* ── Verificar límite e incrementar contador (admin client — funciona en API routes) ── */
 export async function getHasEverGenerated(): Promise<boolean> {
+  noStore();
   const { userId } = await auth();
   if (!userId) return false;
   const supabase = createSupabaseAdminClient();

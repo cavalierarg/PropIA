@@ -2,7 +2,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export type AdTrend = {
   numero: number;
@@ -21,7 +21,7 @@ export async function investigarTendenciasAds(): Promise<AdTrendsResult> {
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const { data } = await supabase
     .from("subscriptions")
     .select("plan, status")

@@ -2,7 +2,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { checkAndIncrementUsage } from "@/lib/actions/usage.actions";
 import { buildAgentContext, detectVariante, getVariantInstruction } from "@/lib/agent-context";
@@ -69,7 +69,7 @@ export type GuionResult = {
 };
 
 async function getIsPro(userId: string): Promise<boolean> {
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const { data } = await supabase
     .from("subscriptions")
     .select("plan, status")
@@ -113,7 +113,7 @@ export async function buscarFormatosTrending(
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const [isPro, { data: profileRow }] = await Promise.all([
     getIsPro(userId),
     supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),
@@ -224,7 +224,7 @@ export async function generarGuion(
   const usage = await checkAndIncrementUsage(userId);
   if (!usage.allowed) throw new Error("LIMIT_REACHED");
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const [isPro, { data: profileRow }] = await Promise.all([
     getIsPro(userId),
     supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),

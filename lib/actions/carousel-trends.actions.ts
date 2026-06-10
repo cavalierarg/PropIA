@@ -2,7 +2,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 
 export type CarouselTrend = {
   id: string;
@@ -16,7 +16,7 @@ export type CarouselTrendsResult = {
 };
 
 async function getIsPro(userId: string): Promise<boolean> {
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const { data } = await supabase
     .from("subscriptions")
     .select("plan, status")

@@ -97,11 +97,12 @@ export async function saveProperty(data: {
 
   if (existing) {
     // Actualizar los posts en la propiedad existente en vez de crear un duplicado
-    await supabase
+    const { error: updateError } = await supabase
       .from("properties")
       .update({ posts: data.posts, recomendaciones: data.recomendaciones })
       .eq("id", existing.id)
       .eq("user_id", userId);
+    if (updateError) console.error("[properties.actions] Error al actualizar posts:", updateError);
     return;
   }
 

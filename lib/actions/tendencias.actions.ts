@@ -2,7 +2,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { auth } from "@clerk/nextjs/server";
-import { createSupabaseClient } from "@/lib/supabase";
+import { createSupabaseAdminClient } from "@/lib/supabase";
 import { logFeatureUsage } from "@/lib/actions/analytics.actions";
 import { buildAgentContext, detectVariante, getVariantInstruction } from "@/lib/agent-context";
 import type { VarianteEspanol } from "@/lib/agent-context";
@@ -46,7 +46,7 @@ export async function buscarTendencias(variante_espanol?: VarianteEspanol): Prom
   const { userId } = await auth();
   if (!userId) throw new Error("UNAUTHENTICATED");
 
-  const supabase = createSupabaseClient();
+  const supabase = createSupabaseAdminClient();
   const [{ data }, { data: profileRow }] = await Promise.all([
     supabase.from("subscriptions").select("plan, status").eq("user_id", userId).maybeSingle(),
     supabase.from("agent_profiles").select("*").eq("user_id", userId).maybeSingle(),

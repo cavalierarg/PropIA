@@ -71,6 +71,15 @@ export default function PostsView({ posts, recomendaciones }: PostsViewProps) {
     }
   }
 
+  if (posts.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-[#0f3460]/20 bg-slate-50 p-8 text-center">
+        <p className="text-sm font-semibold text-[#0f3460] mb-1">Sin posts generados todavía</p>
+        <p className="text-xs text-slate-400">Usá el botón &quot;Regenerar posts&quot; para generar contenido para esta propiedad.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4 sm:gap-5">
       <div className="flex justify-end">
