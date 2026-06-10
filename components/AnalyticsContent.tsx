@@ -172,7 +172,7 @@ export default function AnalyticsContent({ data }: Props) {
             </p>
           </div>
           <Link
-            href="/generar-posts"
+            href="/mis-propiedades"
             className="inline-flex items-center gap-2 bg-[#00c9c9] hover:bg-[#00b3b3] text-[#0f3460] font-bold px-5 py-2.5 rounded-xl text-sm transition-colors"
           >
             <Zap className="w-4 h-4" />
