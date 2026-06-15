@@ -385,6 +385,15 @@ export default function PricingPage() {
             </div>
 
           </div>
+
+          {/* ── Link a política de reembolsos ── */}
+          <p className="text-center text-sm text-slate-500 mt-10">
+            Probá sin riesgo: ofrecemos una{" "}
+            <Link href="/refunds" className="font-semibold text-[#0f3460] hover:text-[#00c9c9] underline underline-offset-2 transition-colors">
+              garantía de reembolso de 7 días
+            </Link>
+            .
+          </p>
         </div>
       </section>
 

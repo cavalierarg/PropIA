@@ -975,6 +975,11 @@ export default function LandingPage() {
                     Términos de uso
                   </Link>
                 </li>
+                <li>
+                  <Link href="/refunds" className="text-white/40 hover:text-white text-sm transition-colors">
+                    Reembolsos
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
